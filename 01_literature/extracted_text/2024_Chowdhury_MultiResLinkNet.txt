@@ -1,0 +1,848 @@
+                                                               Computers in Biology and Medicine 176 (2024) 108555
+
+
+                                                                      Contents lists available at ScienceDirect
+
+
+                                                       Computers in Biology and Medicine
+                                                       journal homepage: www.elsevier.com/locate/compbiomed
+
+
+
+
+ECG waveform generation from radar signals: A deep learning perspective
+Farhana Ahmed Chowdhury a, Md Kamal Hosain a, Md Sakib Bin Islam b, Md Shafayet Hossain c,
+Promit Basak d, Sakib Mahmud e, M. Murugappan f, g, *, Muhammad E.H. Chowdhury e, **
+a
+  Department of Electronics and Telecommunication Engineering, Rajshahi University of Engineering and Technology, Rajshahi, 6204, Bangladesh
+b
+   Department of Biomedical Engineering, Military Institute of Science and Technology, Dhaka, Bangladesh
+c
+  Department of Electrical, Electronics and Systems Engineering, Universiti Kebangsaan Malaysia, Bangi, Selangor, 43600, Malaysia
+d
+   Department of Electrical and Electronic Engineering, University of Dhaka, Dhaka, 1000, Bangladesh
+e
+  Department of Electrical Engineering, Qatar University, Doha, 2713, Qatar
+f
+  Intelligent Signal Processing (ISP) Research Lab, Department of Electronics and Communication Engineering, Kuwait College of Science and Technology, Block 4, Doha,
+Kuwait
+g
+  Department of Electronics and Communication Engineering, Vels Institute of Sciences, Technology, and Advanced Studies, Chennai, Tamilnadu, India
+
+
+
+
+A R T I C L E I N F O                                       A B S T R A C T
+
+Keywords:                                                   Cardiovascular diagnostics relies heavily on the ECG (ECG), which reveals significant information about heart
+ECG                                                         rhythm and function. Despite their significance, traditional ECG measures employing electrodes have limitations.
+Raw radar data                                              As a result of extended electrode attachments, patients may experience skin irritation or pain, and motion ar­
+MultiResLinkNet
+                                                            tifacts may interfere with signal accuracy. Additionally, ECG monitoring usually requires highly trained pro­
+CNN
+Deep learning
+                                                            fessionals and specialized equipment, which increases the treatment’s complexity and cost. In critical care
+                                                            scenarios, such as continuous monitoring of hospitalized patients, wearable sensors for collecting ECG data may
+                                                            be difficult to use. Although there are issues with ECG, it remains a valuable tool for diagnosing and monitoring
+                                                            cardiac disorders due to its non-invasive nature and the detailed information it provides about the heart. The goal
+                                                            of this study is to present an innovative method for generating continuous ECG waveforms from non-contact
+                                                            radar data by using Deep Learning. The method can eliminate the need for invasive or wearable biosensors
+                                                            and expensive equipment to collect ECGs. In this paper, we propose the MultiResLinkNet, a one-dimensional
+                                                            convolutional neural network (1D CNN) model for generating ECG signals from radar waveforms. With the
+                                                            help of a publicly accessible radar benchmark dataset, an end-to-end DL architecture is trained and assessed.
+                                                            There are six ports of raw radar data in this dataset, along with ground truth physiological signals collected from
+                                                            30 participants in five distinct scenarios: Resting, Valsalva, Apnea, Tilt-up, and Tilt-down. By using strong
+                                                            temporal and spectral measurements, we assessed our proposed framework’s ability to convert ECG data from
+                                                            Radar signals in three distinct scenarios, namely Resting, Valsalva, and Apnea (RVA). ECG segmentation per­
+                                                            formed better by MultiResLinkNet than by state-of-the-art networks in both combined and individual cases. As a
+                                                            result of the simulations, the resting, valsalva, and RVA scenarios showed the highest average temporal values,
+                                                            respectively: 66.09523 ± 19.33, 60.13625 ± 21.92, and 61.86265 ± 21.37. In addition, it exhibited the highest
+                                                            spectral correlation values (82.4388 ± 18.42 (Resting), 77.05186 ± 23.26 (Valsalva), 74.65785 ± 23.17
+                                                            (Apnea), and 79.96201 ± 20.82 (RVA)), along with minimal temporal and spectral errors in almost every case.
+                                                            The qualitative evaluation revealed strong similarities between generated and actual ECG waveforms. As a result
+                                                            of our method of forecasting ECG patterns from remote radar data, we can monitor high-risk patients, especially
+                                                            those undergoing surgery.
+
+
+
+
+  * Corresponding author. Intelligent Signal Processing (ISP) Research Lab, Department of Electronics and Communication Engineering, Kuwait College of Science
+and Technology, Block 4, Doha, Kuwait.
+ ** Corresponding author.
+    E-mail addresses: m.murugappan@kcst.edu.kw (M. Murugappan), mchowdhury@qu.edu.qa (M.E.H. Chowdhury).
+
+https://doi.org/10.1016/j.compbiomed.2024.108555
+Received 19 April 2024; Received in revised form 1 May 2024; Accepted 5 May 2024
+Available online 11 May 2024
+0010-4825/© 2024 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+F.A. Chowdhury et al.                                                                                               Computers in Biology and Medicine 176 (2024) 108555
+
+
+1. Introduction and related works                                                 sensor’s detection of the heartbeat signal may be distorted. Conse­
+                                                                                  quently, heartbeat signals display a variety of waveforms. While Pet­
+    Heartbeat monitoring plays a crucial role in monitoring human                 rovic et al. [18] addressed the problem from a distinct perspective. They
+health and in detecting various heart disorders. Electrocardiogram                presented a novel method that utilizes a 24-GHz Doppler radar to esti­
+(ECG) signals, which records the heart’s electrical activity and displays         mate heart rate variability (HRV) features. The program effectively
+its characteristics, such as the P-wave, the QRS complex, and the T-              measured beat-to-beat intervals (BBIs) and computed four HRV com­
+wave, it is commonly used to detect heartbeats [1,2]. An ECG signal,              ponents by integrating frequency and temporal domain data. Testing
+displayed in Fig. 1, offers significant knowledge about the activity of the       conducted on actual data revealed mean relative errors ranging from
+heart, including the specific timing and appearance of P-waves, QRS               1.02 % to 2.07 % when compared to ECG readings. The radar-extracted
+complexes, and T-waves [3–5]. These characteristics are crucial for               HRV features showed strong agreement with the ECG-extracted HRV
+detecting different types of cardiac dysfunctions. Traditional techniques         features, indicating that the radar system is well-suited for real-time
+for continuous monitoring of ECG use wet electrodes, but developing               monitoring.
+non-contact technologies employ Doppler sensors to measure chest                      A continuous wave Doppler radar system with a bandpass filter was
+movement generated by the heartbeat. The majority of current tech­                used to extract the harmonic signal of heartbeats from chest surface
+niques [6–8] rely on Doppler sensors to approximate heart rate or                 vibrations. During the harmonic phase of the pulse, breathing is
+beat-to-beat intervals without accurately recording specific pulse char­          assumed to be absent. A gamma filter was used by Saluja et al. [17] to
+acteristics such as P-waves, T-waves, and R-peaks. A variety of cardiac           eliminate the harmonics associated with breathing through machine
+conditions, including arrhythmia, long QT syndrome, and aortic steno­             learning. Bodily movement is not considered in these techniques since
+sis, can be diagnosed using these characteristics.                                they were developed to remove respiratory harmonics. In contrast to
+    In addition to heartbeat detection [6,10,11], respiration rate detec­         breathing, bodily motion occurs at a very wide amplitude and does not
+tion [6,12], and activity identification [13], researchers have explored          occur within a defined frequency range. Therefore, pre-informative
+the use of the Doppler sensor in several other areas. Compared to                 methods such as frequency filters and gamma filters are not suitable
+breathing and minor body movements, cardiac components usually have               for removing body motion. In contrast, a matched filter (MF) can be used
+a much lower Signal-to-Noise Ratio (SNR). As a result, various ap­                to adjust itself depending on body movement. The function of a matched
+proaches for detecting the pulse with Doppler sensors have been pro­              filter is to enhance the desired signal by converging it with the input
+posed [6–16]. Heartbeats can be detected with high accuracy using                 signal, assuming the waveform’s shape has already been determined.
+these traditional techniques for calculating beat-to-beat intervals (BBIs)        The approach is similar to correlation detection in receivers and tem­
+and heart rates (HRs). Even though analyzing the timings of these                 plate matching in machine learning. It is necessary to create a template
+characteristics might help identify different cardiac conditions, the             of the heartbeat to extract heartbeats from chest vibrations using MF.
+P-wave, T-wave, and R-peak have not been detected using traditional                   Based on "Preferred Reporting Items for Systematic Reviews and
+methods. The signal-to-noise ratio (SNR) of the heartbeat components              Meta-Analyses" (PRISMA) principles for scoping reviews, Nocera et al.
+can be reduced by breathing and minor body movements. Detecting the               [22] executed an investigation that explored the progress achieved by
+P-wave, T-wave, and R-peak poses a greater challenge than detecting the           machine learning for detecting physiological signals. The study aimed to
+pulse alone.                                                                      offer a detailed summary of the various machine learning and DL ap­
+    Thus, several methodologies have been proposed for the processing             proaches used in analyzing RADAR recordings. They were primarily
+of more complex signals [9,17–21]. Yamamoto et al. [9] provide a                  interested in investigating the most recent advances and uses in the
+technique for reconstructing the ECG signal using a Doppler sensor to             regression of physiological signals and parameters. A wavelet transform
+identify the P-wave, T-wave, and R-peak. As part of this approach, a              (WT) was used by Bagwe et al. [23] to denoise radar signals. This stage
+hybrid DL model combining a Convolutional Neural Network (CNN) and                removes noisy data using stages such as a power envelope, Hilbert
+a Long Short Term Memory (LSTM) is used. The researchers utilize DL to            Transform, and wavelet transform. In the second step, radar data is used
+synthesize the ECG signal directly from raw radar data, eliminating the           to train an LSTM model to track radar signals. Based on radar emissions,
+need for traditional ECG sensors. To automatically extract features and           Chen et al. [24] present a DL-based method for open-set person identi­
+reconstruct the ECG signal, the proposed method utilizes a hybrid model           fication using radar emissions. The radar signals are preprocessed and
+that combines Convolutional Neural Networks (CNNs) and Long                       separated into fixed-length samples before training. Signal samples are
+Short-Term Memory (LSTMs). Due to noise interference, the Doppler                 represented as points in the suggested feature space to distinguish
+
+
+
+
+                                             Fig. 1. Visualization of an illustrated heart and an ECG signal [9].
+
+                                                                              2
+F.A. Chowdhury et al.                                                                                           Computers in Biology and Medicine 176 (2024) 108555
+
+
+unknown from labeled signals. On the PTB-XL dataset, Smigiel et al. [25]           synthesize/reconstruct ECG signals from radar data for the Resting,
+classified ECG signals using Deep Neural Networks (DNNs). A neural                 Valsalva, and Apnea scenarios. In this way, the ECG can be monitored
+network topology is used to classify ECG signals based on entropy-based            continuously without causing any discomfort to the test subjects. We
+characteristics and QRS complexes extracted from the signals. Xiang                present the MultiResLinkNet model, a novel 1D CNN model that effec­
+et al. [26] developed a "masked phase autoencoder with a vision                    tively generates normalized ECG signals from radar waveforms. In
+transformer network" (MVN) for estimating heart rates from radar sig­              addition, we compared the results with three other popular 1D CNN
+nals. Masked autoencoders (MAEs) are used for self-supervised pre­                 models: Feature Pyramid Network (FPN) [34], UNet [35], and LinkNet
+training, and a vision transformer (ViT) is used for transfer learning.            [36].
+During phase preprocessing, phase diffraction, and interpolation                       As a result of this study, the following key contributions were made.
+smoothing are performed on the input phase signal. A masked
+self-supervised training on the phase signal is done using the MAE                  • This study thoroughly explores the use of non-contact, remote radar
+network during pretraining. In their paper, Choi et al. [27] present                  signals for producing ECG waveforms using DL-based 1D segmen­
+various approaches that can be applied to radar-based people counting                 tation models.
+(RPC) tasks using DL. In the new preprocessing pipelines, raw radar                 • We have developed MultiResLinkNet, a reconstruction network that
+echoes are translated into a better format for deep neural networks.                  generates ECG segments from radar data. Performance comparisons
+Secondly, they create a new backbone architecture that reflects radar                 of MultiResLinkNet and the current leading approaches have been
+signals’ spatiotemporal properties and reduces training load. In                      conducted.
+addressing the issue of ECG signal reconstruction, TODA et al. [28]                 • In our method, raw radar data is used to produce ECG waveforms by
+created an innovative model capable of reconstructing the signal at a                 exploiting only the in-phase (I) and quadrature (Q) components, thus
+stationary state with the same level of accuracy as conventional                      eliminating the need for wearable sensors. Due to this feature, it is
+methods. Their initial investigation was conducted in an environment                  appropriate for extended surveillance of patients in both medical and
+characterized by low signal-to-noise ratio (SNR) and additive sine wave               domestic settings.
+noise. Furthermore, Siuly et al. [29] introduced an innovative approach             • A wide range of performance metrics are utilized to evaluate the
+that employs a Time-Frequency Representation (TFR) based AlexNet                      proposed approach, guaranteeing its resilience and suitability in a
+CNN model for the diagnosis of Parkinson’s disease (PD) using EEG data.               variety of contexts.
+By utilizing the Wavelet Scattering Transform (WST) to capture both
+temporal and spectral characteristics, and the AlexNet CNN to identify                 Here is the structure of this paper: In Section 2, we present our
+spatial patterns, the researchers achieved remarkable accuracies of                method for synthesizing ECG signals from radar data. Moreover, this
+99.84 % and 95.79 % on the San Diego and Iowa datasets respectively.               section provides a comprehensive description of MultiResLinkNet, a 1D
+These results surpassed the performance of existing methods for                    segmentation model based on DL, and a summary of the benchmark
+detecting Parkinson’s Disease (PD) based on electroencephalogram                   dataset and the data preprocessing methods. In Section 3, the experi­
+(EEG) data.                                                                        mental configuration and evaluation measures used to evaluate the DL
+     The effective application of DL in the annotation of protein functions,       models are described. A comparison between our proposed segmenta­
+as demonstrated by AnnoPRO, demonstrates the capacity of sophisti­                 tion network and three other cutting-edge segmentation networks is
+cated computational methods to tackle enduring obstacles in the bio­               presented in Section 4. In Section 5, the limitations of this study are
+logical sciences. AnnoPRO is an innovative strategy for protein function           discussed with future directions, and in Section 6, the paper is
+annotation proposed by Zheng et al. [30]. By combining a hybrid DL                 concluded.
+framework with a sequence-based multi-scale protein representation,
+AnnoPRO effectively tackles the long-tail challenge that is intrinsic to           2. Methods and materials
+current approaches to function annotation. In addition, Mou et al. [31]
+provide EnsemPPIS, an innovative ensemble framework for forecasting                    This section discusses the process of synthesizing ECG from radar
+protein-protein interaction (PPI) sites. EnsemPPIS combines transformer            data. We begin by briefly outlining the framework’s major elements
+and gated convolutional networks to effectively capture both global and            before diving into its details. The next section provides an overview of
+local patterns, as well as residue interactions. This approach achieves            the MultiResLinkNet signal reconstruction model used for ECG estima­
+exceptional performance and has a wider range of applications                      tion. Next, we discuss the benchmark dataset and the data preparation
+compared to other current approaches. The interpretability of                      techniques used in the study.
+EnsemPPIS demonstrates its ability to learn residue interactions only
+from primary sequences, hence improving the accuracy of PPI site pre­              2.1. Overview of the framework: transformation of radar data to ECG
+diction. Expanding on these progressions, Wang et al. [32] provide a               data domain
+specialized encoding approach for RNAs and RNA-associated in­
+teractions. This unique technique successfully encodes a wide range of                 We present a framework for estimating ECG patterns using radar
+RNA features and allows for the integration of interacting partners in a           signals based on several key components (Fig. 2), including the data
+task-specific manner using convolutional autoencoder-directed feature              preprocessing pipeline, 1D–CNN–based segmentation, and post­
+embedding. These results highlight the potential of DL approaches to               processing modules. As shown in Fig. 2(i), the system proposed in
+completely transform our knowledge of biological processes, opening up             Ref. [37] can be seen in its overall layout.
+new possibilities for creative applications in different physiological and             During this study, data were acquired using a six-port interferometry
+pathological situations.                                                           technique, originally developed by Engen and Hoer in the 1970s to
+     The main purpose of this present study is to establish a non-intrusive        measure power. As outlined in Refs. [37,38], this technique was chosen
+and remote method for monitoring ECG signals using radar data. This                for its efficiency in determining distance accurately. The radar system
+technique uses DL models for uninterrupted and extended ECG wave­                  has six ports and operates at 24 GHz in the Industrial, Scientific, and
+form monitoring, resulting in accurate waveform analysis. According to             Medical (ISM) band. This device incorporates a Wilkinson power divider
+Schellenberger et al. [33], they published a dataset with radar vital signs        and three quadrature hybrid couplers to guarantee phase accuracy. It is
+synchronized with physiological waveforms such as ECG, ABP (Arterial               also cost-effective and energy-efficient. A transmitter and a receiver
+Blood Pressure), and ICG (Impedance Cardiography). There are five                  antenna are used in the RF front-end of the radar system (Fig. 2(i)) to
+distinct states of the patient in the dataset: resting, Valsalva, apnea,           transmit and receive, respectively, the transmitting and reflected
+tilt-up, and tilt-down. DL-based 1D-segmentation models are used to                waveforms of the subject being studied. A primary approach to
+
+                                                                               3
+F.A. Chowdhury et al.                                                                                              Computers in Biology and Medicine 176 (2024) 108555
+
+
+
+
+Fig. 2. Diagram illustrating the suggested framework for synthesizing ECG from radar waveforms. (i) The configuration for collecting data from the dataset provided
+by Schellenberger et al. [33]. (ii) The suggested framework for radar-based estimation of ECG patterns.
+
+
+obtaining single-channel radar data from raw radar signal waveforms                  performance metrics and evaluates the effectiveness of the proposed
+(In-phase (I) and Quadrature (Q) components) involves digitization,                  framework using the provided "ground truth" ECG.
+elliptical fitting, and arctangent modulation [37]. A phase signal can be               Preprocessing of radar data and ECG waveforms is necessary in order
+used to determine the relative distance by following these steps. Using              to prepare them for DL. A 5-fold cross-validation is performed on the
+ellipse fitting, we can accurately determine the phase of the radar from             processed data by dividing it into train, test, and validation sets.
+raw data by reducing the interference between the transmitting (Tx) and
+receiving (Rx) antennas and minimizing the gain errors. Distance in­
+formation is derived from a combination of physiological measure­                    2.2. Dataset description
+ments, such as ECG [39], PCG [38], SCG [40], ABP [41], Resp [37], and
+others. Given the wavelength (λ) of the Tx, the change in displacement                   A radar benchmark dataset [33] contains raw radar signals (radar
+Δy is directly related to the change in phase Δφ between the Tx and Rx               In-phase (I) and Quadrature (Q) components) and corresponding
+using Equation (1) [39].                                                             "reference ground truth" ECG signals. In this study, signals were ob­
+                                                                                     tained from 30 test subjects in five different scenarios over 24 h. This
+       Δφ λ
+Δy =     ⋅                                                                 (1)       dataset is used for training and testing the proposed ECG pattern esti­
+       2π 2
+                                                                                     mation framework. A meticulously planned methodology was used by
+    By using elliptical fitting and arctangent modulation, raw radar data            the Department of Palliative Medicine at University Hospital Erlangen to
+(I and Q components) was converted into single-channel radar data,                   collect data. There are 30 healthy individuals in the dataset, 14 of whom
+which was then digitized by a 24-bit Analog to Digital Converter (ADC).              are men and 16 of whom are women. The average age of the participants
+The segmentation network based on 1D-CNN is the core component of                    is 30.7 ± 9.9 years, and their average Body Mass Index (BMI) is 23.2 ±
+the framework presented in Fig. 2(ii). Before using the input data in the            3.3 kg/m2. An ECG is used during the tests to record the heart’s electrical
+segmentation network, the proposed framework incorporates a pre­                     activity [33]. Using the clinical protocol, the four leads are connected as
+processing module that performs cleaning, converting, and normalizing                follows: the right arm lead is coded in red, the left arm lead is coded in
+operations on the input data. A critical step is ensuring that the data are          yellow, the left leg lead is coded in green, and the right leg lead is coded
+formatted in a manner that is compatible with the model and mini­                    in black. A new set of gel electrodes was provided to each individual.
+mizing any outliers or noises. In the next step, the preprocessed data is            Using Einthoven’s triangle [47], the TFM (Task Force Monitor) collected
+fed into the 1D segmentation model, which detects certain properties in              raw information from leads 1 and 2. The software analyzes and gener­
+the radar signal that correspond to different segments and then uses                 ates these additional ECG leads, but it does not record or include the data
+these features to generate ECG waveforms. This network consists of                   for leads 3 and the augmented limb leads in the output file in.mat
+several layers of neural networks that analyze incoming data, identify               format. The ECG channels are converted into digital form at the TFM
+notable characteristics, and provide predictions. As shown by previous               using a sampling rate of 2000Hz and a precision of ±5μV.
+studies [42–46] one-dimensional segmentation is one of the most                          Throughout the Rest scenario, subjects maintained consistent and
+well-established approaches for domain transformation or signal syn­                 regular breathing rhythms while relaxed. Monitoring the combined I/Q
+thesis in the signal processing literature. This output is then fed into a           components of the radar as well as the ECG during the Resting situation
+post-processing module based on the 1D-CNN segmentation network.                     required a minimum of 10 min for each test participant. A Valsalva
+Based on the network’s predictions, this module calculates several                   technique was performed consecutively, which involves forcefully
+
+                                                                                 4
+F.A. Chowdhury et al.                                                                                             Computers in Biology and Medicine 176 (2024) 108555
+
+
+exhaling while keeping the glottis closed for 20 s [48]. In the experi­             parameter selection and signal integrity.
+ment, the Valsalva technique was repeated three times with a 5-min
+break in between. In the sleep Apnea experiment [49], the partici­                  2.3.3. Baseline drift correction
+pants intentionally refrained from breathing for as long as they could                  A baseline drift correction method is used to eliminate undesired
+under two conditions. In the first phase, participants breathed deeply              fluctuations in a signal’s baseline. Several factors can cause baseline
+before holding their breath. In the next phase, participants exhaled                drift in time-series data, such as fluctuations in temperature, humidity,
+thoroughly before holding their breath. The participants in both con­               and equipment. DL models may be adversely affected by baseline drift,
+ditions were voluntarily triggered to perform the intervention by hold­             making it difficult to extract valuable information from signals. Several
+ing their breath while pressing a button. It is important to emphasize              methods are available for correcting baseline drift in one-dimensional
+that not all participants participated in all radar and ECG data collection         signals, including moving average filters, wavelet transforms, and
+situations. Data was collected from all 30 test participants during the             polynomial fitting. Based on segments of radar and ECG data, poly­
+Resting scenario, 27 test subjects during the Valsalva scenario, and 24             nomial fitting is applied to eliminate baseline wander using MATLAB.
+test participants during the Apnea scenario. A combined image of raw                Based on [52,53], a polynomial of order 5 was found to be suitable for
+radar signals (consisting of in-phase and quadrature components), radar             eliminating baseline drift.
+data (obtained from both I and Q components), and corresponding
+ground truth ECGs is shown in Fig. 3.                                               2.3.4. Segmentation or windowing
+                                                                                        The performance of a DL model tends to be improved by using
+2.3. Data preprocessing                                                             shorter segments of raw radar signals and ECG signals. Longer segments
+                                                                                    may contain information that might be missed during training by the
+    The preparation of data is one of the most crucial and essential stages         model. Furthermore, shorter windows would reduce the amount of
+of DL systems. Before using the data in a DL pipeline, the data has to be           processing resources required during the training phase. The radar
+cleansed, aligned, standardized, and segmented. The processes ensure                signal and the ground truth ECG were divided into segments, with each
+that the data is in a format that can be used by the model effectively and          segment containing 1024 sample points, as outlined in previous research
+that any outliers or mistakes, such as NaN or infinite numbers, are                 [45,54]. The model’s performance and segmentation number were
+removed. The performance of a model can be greatly enhanced by                      enhanced by utilizing a 50 % overlap during the segmentation phase of
+organizing and pre-analyzing data optimally. In this research, the signals          the train set specifically. The method is similar to the patching technique
+were resampled, baseline drift corrected, filtered, segmented windowed,             often used in image processing [55]. Using overlapping sections and
+and normalized. The following subsections provide detailed descriptions             segmenting the signals into smaller sections increases the performance
+of each of these concepts.                                                          of the model and reduces training computing resources.
+
+2.3.1. Resampling                                                                   2.3.5. Normalization
+    In the data collection phase, the raw radar signals and the ground                  It is essential to normalize input data in DL to ensure that scaling
+truth ECG signals were sampled at 2000 Hz. In this study, radar data and            doesn’t negatively affect the performance of the model. All input char­
+ECG signals were down-sampled from 2000 to 128 Hz. As long as a                     acteristics are equally important, limiting the dominance of large-scale
+suitable decimation technique is used, followed by low-pass filtering               features during training. Additionally, normalization speeds up the
+[50], down sampling does not significantly affect a signal’s shape.                 convergence of the model by reducing the variability of the input data.
+During this study, linear interpolation was found to be suitable for                As a result, it increases training effectiveness as well as a model’s ability
+reducing the number of data points in the waveforms.                                to apply knowledge to new data and reduces overfitting, which occurs
+                                                                                    when a model learns noise instead of underlying patterns. In general,
+2.3.2. Notch and bandpass filtering                                                 normalization facilitates the training of DL models consistently and
+    The notch filter effectively removes frequencies from signals. Under            efficiently. Data normalization simplifies the input data and prevents
+certain conditions, it helps digest radar signals. In a notch filter, certain       overfitting by lowering its complexity. To process the segments of radar
+frequency bands are suppressed while others are allowed to pass                     signals and ground truth ECG signals, "Z-score" and "range normaliza­
+through. The filter’s intended function is to attenuate the amplitude of            tion" techniques were used (Equation (2)). Through Z-score normaliza­
+frequencies in the range of 50/60 Hz, which are frequently related to               tion, the data was transformed to have a mean of zero and a standard
+power line interference [51]. Higher filter orders reduce notches and               deviation of one. Standardizing signals with large variations is advan­
+attenuate target frequencies more effectively. Considering the impor­               tageous with this approach. A range normalization was used to restrict
+tance of avoiding power line interference, a moderate to high filter order          amplitudes to a zero to one range. DL algorithms benefit from this
+can be used to minimize signal distortion while attenuating unwanted                because it ensures that the model is not influenced by input data scale,
+frequencies. By progressively linking high-pass and low-pass filters,               and that all input characteristics have equal importance [42].
+notch filters eliminate power line noise. Power line frequencies must                                      ((                )        )
+                                                                                                                Signalk − μk
+match the cutoff frequencies of these filters. The use of bandpass filters is       Signalk (norm) = range                     , [0 1]                        (2)
+                                                                                                                   σk
+essential for the analysis of ECGs. Filter order determines the sharpness
+of the transition between passband and stopband in a bandpass filter.
+ECG signal components may be isolated while noise and interference are              2.4. Overview of the proposed MultiResLinkNet
+reduced by using higher filter orders, which may improve selectivity and
+roll-off. Heart rate, breathing rate, and ECG signal components are                     The purpose of this section is to examine the complexities of the
+included in this range. A Halter filter with a passband of 0.5–40 Hz was            proposed MultiResLinkNet, a DL model specifically designed to syn­
+used to process the ground truth ECG data. By reducing powerline                    thesize ECG data from 1D segmentation network using radar signals. The
+interference and targeting ECG and respiration rate frequencies, the                MultiResLinkNet architecture integrates LinkNet [36] and Multi­
+Halter filter tailors data processing to each patient’s needs. A compari­           ResUNet [56] achievements in 2D-segmentation tasks. Unlike UNet
+son between the Halter filter and bandpass filtering techniques will help           [35], LinkNet incorporates residual blocks rather than regular convo­
+determine the quality of the signal and how much distortion it reduces.             lution layers and merges skip connections from the decoder layers using
+Contrary to high-order bandpass filters, the Halter filter balances noise           addition rather than stacking. In each layer, addition does not increase
+reduction and signal preservation. In this present work, Halter filters are         the feature dimension, as opposed to concatenation or stacking. In
+tested visually, statistically, and clinically to ensure appropriate                addition, the feature vectors are altered according to the connections
+
+                                                                                5
+F.A. Chowdhury et al.                                                                                      Computers in Biology and Medicine 176 (2024) 108555
+
+
+
+
+Fig. 3. Illustration of radar signal (I and Q components), radar data (generated from I and Q components) and corresponding ground truth (GT) ECG (ECG)
+waveforms in (a) Resting (b) Valsalva (c) Apnea scenarios.
+
+
+
+
+                                                                           6
+F.A. Chowdhury et al.                                                                                               Computers in Biology and Medicine 176 (2024) 108555
+
+
+made by the encoders. It is, however, essential that the feature maps                Furthermore, 20 % of the training data was utilized for validation. It is
+align precisely in every dimension in order to add them. Modifying the               important to emphasize that separate test subjects were used for
+feature maps in order to precisely align them with one another may                   dividing the train, test, and validation sets, ensuring that no data was
+sometimes be necessary. We replace the convolution blocks of LinkNet                 shared among them. The four networks were trained, validated, and
+with Multi-Residual blocks from MultiResUNet (Fig. 4(b)) along with                  tested independently using the five-fold cross-validation technique
+intra-layer residual connections, as shown in Fig. 4(a). MultiRes blocks             within the Google Colab Pro computing environment. Sub-sections 3.1
+effectively extract characteristics from the dataset in varying levels of            and 3.2 describe the two experiments involved in this study, whereas
+detail. We can also use Residual Paths or ResPaths [56] instead of direct            sub-section 3.3 describes the metrics used for assessing the performance
+skip connections from encoder levels (see Fig. 4(c)). As shown in Fig. 4             of the DL models.
+(a), these ResPaths are added to the deeper decoder layer features. A
+ResPath handles the characteristics from the encoder layers before
+including them, which is absent from direct skip connections. A                      3.1. Experiment A
+bottleneck layer is not present in MultiResLinkNet, as in LinkNet. Using
+auxiliary outputs, we closely monitor each encoder layer and improve                     As part of Experiment A, the following three scenarios were
+the intermediate layers to improve the network’s performance.                        considered separately: resting, Valsalva, and apnea. According to each
+                                                                                     scenario, radar segments were input as predictor signals into the 1D
+3. Experiment setup and performance metrics                                          segmentation model, and ground truth ECG segments, which the model
+                                                                                     needed to synthesize, were provided as target signals. As a result, all
+    In the following part, the experimental approach used in this study is           three models had a single input channel and a solitary output channel. In
+thoroughly described, including all necessary elements employed in this              addition to MultiResLinkNet, we trained and tested three other cutting-
+study. In addition, the evaluation metrics that were used in this work are           edge 1D segmentation networks: FPN, UNet, and LinkNet. All network
+described in a separate section. Based on these metrics, we can objec­               parameters were standardized to maintain integrity. In this context,
+tively evaluate the performance of deep CNN models applied to the                    various parameters are taken into account, including the number of
+synthesis of ECG waveforms from single-channel radar signals. Multi­                 layers, depth, filters, and kernels within each layer, width, etc. There
+ResLinkNet and three other 1D-CNN models (Feature Pyramid Network                    were 5 layers in each model, with an initial layer containing 64 filters,
+(FPN) [56], UNet [35], and LinkNet [36]) underwent extensive                         which were then doubled in subsequent layers. The momentum factor is
+end-to-end training. Normalized radar signals (known as ’x’) and their               determined indirectly by the ’beta_1′ parameter, which signifies the
+matching ground truth ECG segments (known as ’z’) were input into                    exponential decay rate for the initial moment estimates, in the Adam
+neural networks during the training process. This DL model’s primary                 optimizer configuration provided. The default value of ’beta_1′ is
+objective was to gain knowledge of a nonlinear function capable of                   commonly set to 0.9. In MaxPooling2D layer setup, the stride factor,
+efficiently transferring ’x’ to ’z’. As a loss function, the mean square             controlled by the strides parameter, specifies the pooling step size along
+error (MSE) function was used to construct the intended nonlinear                    the input data’s vertical and horizontal dimensions. Strides of (2, 2) shift
+mapping in order to enhance this process of acquiring knowledge. By                  the pooling procedure by 2 steps in both dimensions, altering output
+using gradient descent, we decreased the variation between the syn­                  feature map spatial dimensions and training computing efficiency. The
+thesized and ground-truth segments. In this case, we optimized the loss              Google COLAB Pro platform was used to train each model with 300
+function via the Adam optimizer, at a constant learning rate (α =                    epochs and a specified epoch patience of 20. Across three distinct sce­
+0.0005). The data were divided into a training set, comprising 80 % of               narios, the number of segments created varied due to differences in
+the total data, and a test set, comprising 20 % of the total data.                   recording time and the number of participants. Specifically, the dataset
+                                                                                     includes data from all 30 test participants, totaling 19048.6 s in the
+
+
+
+
+Fig. 4. Illustration of the constructed MultiResLinkNet. The Figure describes three components: (a) the MultiResLinkNet design, (b) the Multi-Residual (MultiRes)
+block, and (c) the enlarged Residual Path or ResPath. MultiResLinkNet differs from MultiResUNet by using feature addition instead of concatenation via the ResPaths,
+resulting in a lighter and computationally less intensive model.
+
+                                                                                 7
+F.A. Chowdhury et al.                                                                                                               Computers in Biology and Medicine 176 (2024) 108555
+
+
+Resting condition. A total of 27 and 24 test participants were available                                 ⎛                    ⎞
+                                                                                                          ∑ N
+for the Valsalva and Apnea situations, respectively. During the Valsalva                              M ⎜
+                                                                                                                            2
+                                                                                                               (zij − z ij ) ⎟
+                                                                                                                      ̂
+                                                                                                     ∑
+scenario, the recording lasted 27968.3 s, while during the Apnea sce­                                    ⎜ j=1
+                                                                                                         ⎜       N
+                                                                                                                              ⎟
+                                                                                                                              ⎟
+                                                                                                         ⎝                    ⎠
+nario, it lasted 4705.2 s. Data from both the train and test sets are pre­                           i=1
+
+sented in Table 1, showing the number of segments acquired from three                 MSE(z) =                                                                                         (4)
+different situations. This experiment aims to determine how well DL                                             M
+models synthesize radar signals (from radar to ECG).
+                                                                                                       Cov(z, ̂      z)
+                                                                                      CCtemporal = √̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅                                                      (5)
+                                                                                                    Var(̂     z )⋅Var(z)
+3.2. Experiment B
+                                                                                                      (                                   )
+                                                                                                           1 − ρ(PSD(̂z ), PSD(GX2C (̂z ))
+    In the second experiment, the emphasis is more on practical appli­                CCspectral = 100 1 −                                                                             (6)
+                                                                                                              1 − ρ(PSD(̂ z ), PSD(z))
+cation than in the previous experiment. It is not possible to completely
+restrict the patient’s mobility because the test subject is likely to assume
+                                                                                                              RMS(̂z − z)
+various positions during prolonged and continuous monitoring. As a                    RRMSEtemporal =                                                                                  (7)
+                                                                                                               RMS(z)
+result, the DL model must have high levels of resilience to generate ECG
+signals precisely under a variety of circumstances. As a result, the                                         RMS(PSD(̂z ) − PSD(z))
+research endeavor is driven primarily by this motivation. Data from all               RRMSEspectral =                                                                                  (8)
+                                                                                                                RMS(PSD(z))
+three scenarios (Resting, Valsalva, Apnea - RVA) were aggregated and a
+1D segmentation network was trained. Using the same approach as in                                                                                    n
+                                                                                                                                                      ∑
+experiment A, subject-wise stratification was used in experiment B,                                                                          (xi − x)(yi − y)
+                                                                                                                                       i=1
+instead of random stratification, to ensure that there was no data leakage            Pearson Correlation Coefficient, ρ(x, y) = √̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅√̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅    (9)
+                                                                                                                                  ∑ n                      ∑ n
+between the train and test sets. A five-fold cross-validation procedure                                                                 (xi − x)2                (yi − y)2
+was again applied and the same four 1D CNN models were deployed. We                                                                                i=1             i=1
+
+carefully created training and test sets in a controlled environment for
+our second experiment. Our training set was created by integrating 80 %               Where, z and ̂  z represent ground truth and estimated ECG segments,
+of the radar data with the ground truth ECG segments for each condition.              respectively. In this research, ’N’ represents the 1024 time-domain data
+Similarly, the test set consisted of the remaining 20 % of radar segments             points per segment. In this research, ’N’ refers to the 1024 time-domain
+and their associated ground truth ECG segments. There were a total of                 data points per segment. In Table 1, ’M’ represents the total number of
+12,794 segments created, with 10,236 segments being the training set                  segments in a scenario. A covariance metric is used (Cov), a variance
+and 2558 segments being the test set. There is a primary difference                   metric is used (Var), and a power spectrum density metric is used (PSD)
+between experiments A and B in the data used. As part of experiment A,                based on the periodogram calculations [57]. Implementing CCSpectral
+we trained and tested our DL models using particular scenarios. It is                 involves employing the Pearson Correlation Coefficient (ρ or PCC) [58],
+important to note that these models may not perform optimally when                    as shown in Equation (9). The MAE and MSE are often used in machine
+tested with data from diverse situations. Comparatively, experiment B                 learning to assess prediction models [42,43,54]. MAE is important
+involved training DL models using data from three different scenarios,                because it provides an interpretable way to measure the correctness of a
+which resulted in improved generalization. It is expected that models                 model. An MAE evaluates the average magnitude of errors in a collection
+trained using this method will exhibit greater resilience when evaluated              of predictions without considering their direction, so it can determine
+using radar segments illustrating multiple stances. In real-world sce­                the average difference between expected and actual values regardless of
+narios, the subject probably being tested will assume different stances,              forecast overestimation or underestimation. MSE provides a clear and
+resulting in different radar signals across different scenarios.                      consistent measure of model accuracy that is sensitive to the size of
+                                                                                      prediction errors. Based on average squares of differences between ex­
+3.3. Performance metrics for quantitative evaluation                                  pected and actual values, MSE gives more weight to larger mistakes and
+                                                                                      shows the total deviation of predictions from actual values. As a result,
+    Several established performance metrics are used to evaluate the                  lower MAE and MSE indicate better performance. Two signals are
+effectiveness of the four DL models in synthesizing ECGs from radar                   compared using the correlation coefficient to determine their linear
+data. In both temporal and spectral domains, these metrics include Mean               similarity in the time domain. Correlation values of − 1 indicate a perfect
+Absolute Error (MAE), Mean Squared Error (MSE), Temporal Correla­                     negative linear connection, 1 indicates a perfect positive linear
+tion Coefficient (CCtemporal), Spectral Correlation Coefficient (CCspectral),         connection, and 0 indicates no linear connection. In the frequency
+and Relative Root Mean Squared Error (RRMSE) (Equations (3)–(8))                      domain, the correlation coefficient measures coherence and linear
+[42,46]:                                                                              connection between two signals. It can be used to find common fre­
+            ⎛                    ⎞                                                    quencies by showing signal frequencies. Correlation coefficients above
+             ∑ N                                                                      0.80 suggest signal similarity, which is always predicted in prediction
+                    z      z
+                           ̂
+         M ⎜      |   ij       |
+                             ij ⎟
+                                                                                      cases. The RRMSE measures the difference between two signals based on
+                         −
+        ∑   ⎜ j=1                ⎟
+            ⎜                    ⎟
+        i=1 ⎝       N            ⎠                                                    their time and frequency domains, respectively. A lower RRMSE in­
+                                                                                      dicates better performance.
+MAE =                                                                       (3)           This study also calculates Accuracy, Precision, Recall, and F1-score
+                   M
+                                                                                      by detecting the ECG peak from the predicted/synthesized and corre­
+                                                                                      sponding ground truth ECGs.
+Table 1
+                                                                                                            TP + TN
+The quantity of segments obtained from radar data and the corresponding               Accuracy =                                                                                      (10)
+ground truth ECG for the train and test sets in experiment A.                                          TP + TN + FP + FN
+
+  Scenario    Total         Total           Train Set (80 %)   Test Set (20 %)                           TP
+              Subjects      Segments                                                  Precision =                                                                                     (11)
+                                                                                                       TP + FP
+  Resting     30            4702            3762               940
+  Valsalva    27            6952            5562               1390                                  TP
+  Apnea       24            1140            912                228
+                                                                                      Recall =                                                                                        (12)
+                                                                                                   TP + FN
+
+                                                                                  8
+F.A. Chowdhury et al.                                                                                                                 Computers in Biology and Medicine 176 (2024) 108555
+
+
+                         Precision ∗ Recall                                                           3.4. Qualitative evaluation
+F1 Score = 2 ∗                                                                             (13)
+                         Precision + Recall
+                                                                                                          In many cases, quantitative metrics are considered adequate for
+    Accuracy is the percentage of True Positives (TP) and True Negatives                              evaluating the performance of a system. Visual comparisons are essen­
+(TN) predicted correctly across all occurrences. The precision of a model                             tial for persuading ordinary readers or non-technical corporate execu­
+measures its accuracy in optimistic predictions. In this calculation, the                             tives. We qualitatively evaluate each experiment by comparing sample
+True Positives are divided by the total number of positive predictions                                ECG waveforms derived from radar data with corresponding ground
+(correct and incorrect). Alternatively, recall can be described as sensi­                             truth ECGs. It is important to point out that generative ECGs were
+tivity or true positive rate as it measures how well a model can recognize                            evaluated by individuals with particular cardiac physiology expertise to
+positive events from all positive ones. In F1 Score, precision and recall                             compare to ground truths. As a result, we made precise correlations
+are balanced. In this way, the harmonic mean of accuracy and recall is                                between the anticipated and authentic electrocardiogram (ECG) seg­
+calculated to calculate a single score, which measures the precision and                              ments using our expertise in the field of electrocardiogram (ECG) sig­
+accuracy of positive predictions.                                                                     nals. To ensure precise alignment, we used a visual representation of the
+    Furthermore, the Mean R–R interval (μRR ), heart rate (μHR ; calculated                           process, focusing on our understanding of ECG signal. The plots in
+as beat per minute), The standard deviation of heart rate (σHR ), and Root                            Section 4 have been created separately for each experiment and DL
+mean square of consecutive RR interval differences (RMSSD) is also                                    model tested.
+calculated for the predicted and ground truth ECG using Equations (14)–
+(16) [59]:                                                                                            4. Results and discussion
+       ∑N− 1
+             T (i + 1) − TRR (i)
+μRR = i=1 RR                                                           (14)                              This section presents the findings of two experiments and conducts a
+                N− 1
+                                                                                                      thorough analysis of the outcomes with qualitative examples (where
+          ∑N                                                                                          applicable).
+              i=1 HR(i) −        μHR
+σHR =                                                                                      (15)
+                   N− 1
+        √̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅                                   4.1. Results of experiment A
+         ∑N
+              i=1 (TRR (i + 1) −                 TRR (i))2
+RMSSD =                                                                                    (16)          In Table 2, the results of experiment A are presented under three
+                                N− 1
+                                                                                                      scenarios of radar data: resting, Valsalva, and apnea. Figs. 5–7 are
+Where, the mean R–R interval (μRR ) is the average time between two                                   qualitative results for the aforementioned scenarios using the models
+consecutive ECG peaks, measured in milliseconds.                                                      FPN, UNet, LinkNet, and MultiResLinkNet.
+    Equation (14) defines μRR by defining R peaks as N and R-peak time                                   A comparison of the proposed MultiResLinkNet model with the other
+as TRR. The heart rate fluctuates within a certain range rather than                                  three DL models reveals that it produces the highest average temporal
+beating at a constant pace. The standard deviation of heart rate (σHR )                               and spectral correlation coefficients in Resting, Valsalva, and Apnea
+quantifies the extent to which heart rate varies from the anticipated                                 scenarios, the lowest MAE in Resting, the lowest MSE in Apnea, and the
+value (Equation (15)). Typically, it is quantified in bits per minute                                 lowest RRMSEtemporal and RRMSEspectral values in all three scenarios
+(bpm). The RMSSD is a widely used measure for heart rate variability                                  (Table 2).
+(HRV) (Equation (16)). It is computed by summing the squared RR in­                                      According to the higher estimated performance metrics, it is
+terval differences and then finding the square root of the result.                                    apparent that our proposed model is capable of generating ECG wave­
+                                                                                                      forms from radar segments in the scenarios mentioned above. The
+                                                                                                      LinkNet has demonstrated the best performance in Resting with a Mean
+
+Table 2
+Performance measurements during Resting, Valsalva, and Apnea scenarios, separately.
+  Scenario          1D Segmentation                   MAE ± STD       MSE ± STD   Average Temporal Correlation   Average Spectral Correlation    Temporal RRMSE       Spectral RRMSE
+                    Model                                                         Coefficient ± STD              Coefficient ± STD               ± STD                ± STDa
+
+  Resting           FPN                               0.14204 ±       0.03170 ±   58.37370 ± 18.21               71.37612 ± 22.80                0.46940 ± 0.22       0.73374 ± 0.26
+                                                      0.06            0.02
+                    UNet                              0.13872 ±       0.03219 ±   63.10263 ± 20.43               74.68087 ± 23.17                0.45760 ± 0.23       0.86096 ± 0.64
+                                                      0.07            0.02
+                    LinkNet                           0.13588 ±       0.03034 ±   64.34710 ± 19.20               74.37377 ± 23.40                0.45116 ± 0.23       0.81111 ± 0.55
+                                                      0.06            0.02
+                    MultiResLinkNet                   0.13258 ±       0.03066 ±   66.09523 ± 19.33               82.43880 ± 18.42                0.43682 ± 0.22       0.71412 ± 0.50
+                                                      0.07            0.02
+  Valsalva          FPN                               0.14985 ±       0.03679 ±   57.53041 ± 21.80               65.96767 ± 26.42                0.46395 ± 0.18       0.87990 ± 0.59
+                                                      0.07            0.03
+                    UNet                              0.15249 ±       0.03928 ±   58.38068 ± 21.77               68.78898 ± 26.31                0.46553 ± 0.19       0.99554 ± 0.88
+                                                      0.08            0.03
+                    LinkNet                           0.15087 ±       0.03869 ±   56.62680 ± 22.58               66.86613 ± 27.02                0.46195 ± 0.18       0.99095 ± 0.85
+                                                      0.08            0.03
+                    MultiResLinkNet                   0.15286 ±       0.04012 ±   60.13625 ± 21.92               77.05186 ± 23.26                0.46083 ± 0.19       0.80660 ± 0.69
+                                                      0.08            0.04
+  Apnea             FPN                               0.15310 ±       0.03853 ±   39.11945 ± 18.67               51.26071 ± 28.35                0.51017 ± 0.22       1.00889 ± 0.48
+                                                      0.06            0.03
+                    UNet                              0.14406 ±       0.03495 ±   56.14069 ± 18.38               69.97450 ± 25.05                0.47825 ± 0.21       0.92034 ± 0.48
+                                                      0.06            0.02
+                    LinkNet                           0.14572 ±       0.03526 ±   56.22281 ± 18.99               70.34953 ± 24.98                0.47944 ± 0.19       0.91749 ± 0.56
+                                                      0.06            0.02
+                    MultiResLinkNet                   0.14474 ±       0.03474 ±   55.33149 ± 18.95               74.65785 ± 23.17                0.47692 ± 0.20       0.82392 ± 0.45
+                                                      0.06            0.02
+  a
+      STD: Standard deviaion.
+
+                                                                                                  9
+F.A. Chowdhury et al.                                                                                          Computers in Biology and Medicine 176 (2024) 108555
+
+
+
+
+Fig. 5. An instance of synthesized ECG segment utilizing (b) FPN, (c) UNet, (d) LinkNet, and (e) Our proposed MultiResLinkNet in the Resting scenario. In the
+uppermost subplot (a), the radar data is illustrated.
+
+
+Squared Error value of 0.03034 ± 0.02. FPN achieved the greatest                      It is evident from Tables 2 and 3 that our MultiResLinkNet model is
+performance in the Valsalva scenario with MAE values of 0.14985 ±                 the most effective method of synthesizing ECG from single-channel
+0.07 and MSE values of 0.03679 ± 0.03. UNet achieved the lowest Mean              radar data, with the highest temporal and spectral correlation co­
+Absolute Error (MAE) of 0.14406 ± 0.06 for Apnea, whereas LinkNet                 efficients, as well as the lowest RRMSE. Accordingly, in comparison to
+showed the greatest average temporal correlation coefficient of                   other established models, our MultiResLinkNet model, in its proposed
+56.22281 ± 18.99. Our proposed MultiResLinkNet model showed the                   form, is more capable of acquiring knowledge about a wide array of
+lowest construction error of 0.03474 ± 0.02. Overall, our proposed                features from the radar data and synthesizing ECGs as effectively as
+MultiResLinkNet model outperformed the other three networks on most               possible.
+performance measures.                                                                 Incorporating DL models into the synthesis of radar-based ECGs
+                                                                                  eliminates any physical contact with the patient; as a result, the process
+4.2. Results of experiment B                                                      is completely non-contact and non-invasive. As a result, this method­
+                                                                                  ology represents a more secure and pleasant option for prolonged pa­
+    As part of Experiment B, we combined data from different scenarios            tient observation, especially in intensive care units catering to surgical
+(RVA combined) to map ECG waveforms in a dynamic context from                     patients. The framework we propose can also be easily modified to
+radar segments. A summary of the quantitative findings from Experi­               provide continuous and real-time data for a prolonged period, a capa­
+ment B can be found in Table 3. As shown in Fig. 8, four different 1D             bility that is beyond the capabilities of traditional intermittent mea­
+CNN models are represented by a segment of radar and a projected ECG.             surement methods. As a result, patients can be monitored for extended
+    All four DL models (FPN, UNet, LinkNet, and MultiResLinkNet)                  periods using ECGs. As radar devices advance, a variety of settings,
+perform similarly on the combined scenario data. MultiResLinkNet, as              including residences and hospitals, are capable of being monitored
+proposed, exhibits superior performance as evidenced by its average               wirelessly and by portable sensors. It is hoped that our radar-based ECG
+temporal correlation coefficient of 61.86265 ± 21.37 and average                  monitoring framework might provide a more affordable solution
+spectral correlation coefficient of 79.96201 ± 20.82. Further, it has the         compared to conventional approaches requiring constant sensor
+highest temporal RMSE of 0.44618 ± 0.17 and the highest spectral                  replacement, invasive procedures, and multiple devices.
+RRMSE of 0.73269 ± 0.56. In contrast, the FPN demonstrated the lowest
+MAE and MSE values of 0.03422 ± 0.03 and 0.014316 ± 0.07, respec­                 4.3. ECG peak detection matrices
+tively. With the lowest average temporal correlation coefficient
+(57.64728 ± 22.17), the lowest average spectral correlation coefficient              In our study, we used a variety of ECG detectors, including Hamilton,
+(68.38843 ± 26.54), and the highest spectral RRMSE (0.94118 ± 0.75),              Pan Tompkins, Stationary Wavelet Transform (SWT), Engzee,
+UNet performed the least well out of the three 1D segmentation net­               Threshold-based, Christov, WQRS, and "Two Average" methods. These
+works examined.                                                                   detectors detect ECG peaks from synthesized ECG signals predicted by
+
+                                                                             10
+F.A. Chowdhury et al.                                                                                               Computers in Biology and Medicine 176 (2024) 108555
+
+
+
+
+Fig. 6. An instance of predicted ECG segment utilizing (b) FPN, (c) UNet, (d) LinkNet, and (e) Our MultiResLinkNet model as proposed in the context of the Valsalva
+scenario. In the uppermost subplot (a), the radar data is illustrated.
+
+
+the MultiResLinkNet model. In terms of the various methods considered,               not a difficult task.
+the "Two Average" approach is selected due to its exceptional perfor­                    In this assessment, the quality and quantity of data used in training
+mance across multiple detection criteria, including Accuracy, Precision,             the model are vitally important. It is necessary to use high-quality and
+Recall, and F1-score, in comparison to the alternative detectors utilized            varied datasets that cover the situations and settings in which the radar
+in the study. In Table 4, we show the performance metrics for detecting              system will be used in order to achieve improved and reliable perfor­
+ECG peaks from synthesized ECGs for four scenarios: resting, Valsalva,               mance. An accurate synthesis requires a large and diverse dataset,
+apnea, and RVA combined. As shown in Table 4, accuracy, precision,                   emphasizing both the importance of quantity and variety. A further
+recall, and F1 scores are highest for the resting scenario and lowest for            study could explore other DL models such as Generative Adversarial
+the apnea scenario.                                                                  Networks (GANs) to improve ECG signal quality. Currently, the pro­
+    Table 5 presents a comprehensive comparison of the predictive and                posed framework provides only an approximation of ECG patterns.
+ground truth ECG where μRR , σRR , μHR , σHR , and RMSSD are computed.               Developing new network designs is essential to further improving per­
+The table provides a comprehensive evaluation of the accuracy of the                 formance parameters. By experimenting with new neural network ar­
+predictions by including both the ground truth and predicted values for              chitectures like RNNs, CNNs, or attention mechanisms, the model may
+each scenario. As evident from Table 5, the predicted values approxi­                be able to recognize complex data patterns and connections. The use of
+mate the actual values with minor deviations. The closely matched                    transfer learning and meta-learning may also be used to enhance the
+values of μRR , σRR , μHR , σHR , and RMSSD computed from synthesized                ability of pre-trained algorithms to predict ECG signals. In the process of
+ECG and ground truth ECG signifies that our proposed segmentation                    data annotation, manual annotations are crucial to generating accurate
+model (MultiResLinkNet) is efficient in synthesizing the ECG.                        signals, emphasizing the need for meticulous attention to detail. Data
+                                                                                     annotation involves categorizing signal properties such as pulse start
+5. Limitations and future directions                                                 and offset or abnormal cardiac rhythms accurately. The annotations
+                                                                                     serve as ground truth labels for training and evaluating the model in
+    We achieved very good results in synthesizing ECG signals from                   order to generate signals that mimic real-world data.
+radar signals. However, it is essential to remember that this technology
+is still in the early stages of development and requires further study to            6. Conclusion
+evaluate its effectiveness, dependability, and accuracy when compared
+to conventional methods. It is apparent from Supplementary Fig. 1S that                 Monitoring an ECG continuously aids in identifying and preventing
+the radar signal has picked up some mechanical signal related to the                 cardiovascular diseases. Electrodes placed on the body are traditionally
+heart’s electrical activity at the moment of the heart’s main electrical             used to assess cardiac electrical activity. In this approach, skin irritation,
+activity (i.e., QRS complex). Therefore, the DL model is learning to                 pain, and motion artifacts and interference may occur. In some cases, the
+convert the mechanical signal to the electrical signal of an ECG, which is           patient’s movement may be limited, which requires proper setup and
+
+
+                                                                                11
+F.A. Chowdhury et al.                                                                                               Computers in Biology and Medicine 176 (2024) 108555
+
+
+
+
+Fig. 7. An instance of estimated ECG segment utilizing (b) FPN, (c) UNet, (d) LinkNet, and (e) Our MultiResLinkNet model as proposed in the context of the Apnea
+scenario. In the uppermost subplot (a), the radar data is illustrated.
+
+
+
+Table 3
+Performance metrics for combined scenarios data.
+  Scenario        1D Segmentation    MAE           MSE            Average Temporal Correlation   Average Spectral Correlation   Temporal            Spectral RRMSE
+                  Model              ± STD         ± STD          Coefficient ± STD              Coefficient ± STD              RRMSE ± STD         ± STDa
+
+  RVA             FPN                0.14316 ±     0.03422 ±      59.63209 ± 20.02               69.53405 ± 24.62               0.44694 ± 0.17      0.83026 ± 0.54
+   combined                          0.07          0.03
+                  UNet               0.14798 ±     0.03741 ±      57.64728 ± 22.17               68.38843 ± 26.54               0.45315 ± 0.17      0.94118 ± 0.75
+                                     0.08          0.03
+                  LinkNet            0.14780 ±     0.03723 ±      58.68552 ± 20.97               70.91253 ± 24.63               0.45487 ± 0.17      0.86909 ± 0.63
+                                     0.08          0.03
+                  MultiResLinkNet    0.14841 ±     0.03793 ±      61.86265 ± 21.37               79.96201 ± 20.82               0.44618 ± 0.17      0.73269 ± 0.56
+                                     0.08          0.03
+ a
+     STD: Standard deviaion.
+
+
+monitoring. A DL algorithm is introduced in this work that reads ECG                 a breakthrough, especially when invasive techniques are unfeasible or
+waveforms directly from radar data without electrodes. This study aims               uncomfortable. It is important to conduct further studies to confirm and
+to present a novel method for reinterpreting ECG waveforms using DL                  improve this method for clinical use, which could lead to more conve­
+models without electrodes directly from radar data. By using Multi­                  nient and reliable cardiovascular monitoring systems.
+ResLinkNet, we present a model that generates ECG signals from raw
+radar I/Q components. As compared to three conventional models (FPN,                 Funding
+UNet, LinkNet), our novel methodology exhibits enhanced performance
+in diverse scenarios (including Resting, Valsalva, Apnea, and their                      This work is supported by a High Impact Grant from Qatar Univer­
+combinations). Our MultiResLinkNet model outperforms these models                    sity# QUHI-CENG-23/24–216. The statements made herein are solely
+on six performance measures, demonstrating its ability to reconstruct                the responsibility of the authors. The open-access publication cost is
+ECG waveforms precisely and non-invasively. A variety of circumstances               covered by the Qatar National Library.
+proved that MultiResLinkNet outperformed previous DL networks,
+demonstrating excellent performance in terms of average temporal and                 Institutional review board statement
+spectral correlation coefficients, mean absolute errors (MAE), mean
+squared errors (MSE), and relative root mean squared errors (RRMSE).                    Not applicable.
+In Resting, Valsalva, and Apnea scenarios, MultiResLinkNet consistently
+outperforms FPN, UNet, and LinkNet. Our research suggests that Mul­                  Informed consent statement
+tiResLinkNet may be a viable method for reconstructing ECG waveforms
+precisely and non-invasively. Continuous ECG monitoring could become                    Not applicable.
+
+                                                                               12
+F.A. Chowdhury et al.                                                                                                         Computers in Biology and Medicine 176 (2024) 108555
+
+
+
+
+Fig. 8. An instance of synthesized ECG segment utilizing (b) FPN, (c) UNet, (d) LinkNet, and (e) Our MultiResLinkNet model as proposed in the context of all three
+scenarios data combined. In the uppermost subplot (a), the corresponding radar segment is illustrated.
+
+
+                                                                                              CRediT authorship contribution statement
+Table 4
+Performance measures in detecting ECG peaks.
+                                                                                                  Farhana Ahmed Chowdhury: Writing – original draft, Software,
+  Parameters                Resting      Valsalva         Apnea           RVA combined        Data curation, Conceptualization. Md Kamal Hosain: Methodology,
+  Accuracy                  0.951        0.895            0.799           0.886               Formal analysis, Conceptualization. Md Sakib Bin Islam: Writing –
+  F1 Score                  0.955        0.944            0.888           0.939               original draft, Visualization, Software, Formal analysis. Md Shafayet
+  Precision                 0.977        0.970            0.939           0.973
+                                                                                              Hossain: Visualization, Validation, Formal analysis. Promit Basak:
+  Recall                    0.934        0.920            0.842           0.908
+  True Positives            17787        26039            4156            17512
+                                                                                              Writing – original draft, Validation, Software. Sakib Mahmud: Writing
+  False Positives           409          799              266             482                 – original draft, Software, Methodology. M. Murugappan: Writing –
+  True Negatives            0            0                0               0                   review & editing, Validation, Supervision, Resources, Conceptualiza­
+  False Negatives           1243         2240             779             1764                tion. Muhammad E.H. Chowdhury: Supervision, Resources, Project
+                                                                                              administration, Funding acquisition.
+
+Table 5                                                                                       Declaration of competing interest
+Compares ground truth and prediction results across physiological scenarios.
+  Scenario     ECG              μRR       σRR       μHR           σHR         RMSSD              Authors have no conflict of interest to declare.
+                                (ms)      (ms)      (bpm)         (bpm)       (ms)
+
+  Resting      Ground           126.49    19.26     62.12         9.638       12.95           Acknowledgment
+               Truth            125.71    22.41     63.34         13.72       23.87
+               Prediction
+                                                                                                  The dataset used in this study is kindly shared by Schellenberger
+  Valsalva     Ground           125.79    20.41     62.70         10.56       13.58
+               Truth            125.42    23.34     63.64         13.96       24.08           et al. [33].
+               Prediction
+  Apnea        Ground           118.25    19.60     66.72         11.17       13.17           Appendix A. Supplementary data
+               Truth            117.81    25.49     68.57         17.05       31.50
+               Prediction
+  RVA          Ground           124.88    21.78     63.79         14.38       14.20
+                                                                                                 Supplementary data to this article can be found online at https://doi.
+               Truth            125.71    22.41     63.34         13.72       23.87           org/10.1016/j.compbiomed.2024.108555.
+               Prediction
+                                                                                              References
+
+                                                                                              [1] A.L. Goldberger, Z.D. Goldberger, A. Shvilkin, Goldberger’s Clinical
+                                                                                                  Electrocardiography-E-Book: A Simplified Approach, Elsevier Health Sciences,
+                                                                                                  2023.
+
+
+                                                                                         13
+F.A. Chowdhury et al.                                                                                                                     Computers in Biology and Medicine 176 (2024) 108555
+
+ [2] A.I. Taloba, et al., Machine algorithm for heartbeat monitoring and arrhythmia                   [29] S. Siuly, S.K. Khare, E. Kabir, M.T. Sadiq, H. Wang, An efficient Parkinson’s disease
+     detection based on ECG systems, Comput. Intell. Neurosci. 2021 (2021).                                detection framework: leveraging time-frequency representation and AlexNet
+ [3] T.W. Bae, K.K. Kwon, ECG PQRST complex detector and heart rate variability                            convolutional neural network, Comput. Biol. Med. 174 (2024) 108462.
+     analysis using temporal characteristics of fiducial points, Biomed. Signal Process               [30] L. Zheng, et al., AnnoPRO: a strategy for protein function annotation based on
+     Control 66 (2021) 102291.                                                                             multi-scale protein representation and a hybrid DL of dual-path encoding, Genome
+ [4] R. Costa, T. Winkert, A. Manhães, J.P. Teixeira, QRS peaks, P and T waves                            Biol. 25 (1) (2024) 41.
+     identification in ECG, Procedia Comput. Sci. 181 (2021) 957–964.                                 [31] M. Mou, et al., A transformer-based ensemble framework for the prediction of
+ [5] V. Gupta, M. Mittal, R-peak detection in ECG signal using Yule–Walker and                             protein–protein interaction sites, Research 6 (Apr. 2024) 240, https://doi.org/
+     principal component analysis, IETE J. Res. 67 (6) (2021) 921–934.                                     10.34133/research.0240.
+ [6] M. Kebe, R. Gadhafi, B. Mohammad, M. Sanduleanu, H. Saleh, M. Al-Qutayri,                        [32] Y. Wang, et al., A task-specific encoding algorithm for RNAs and RNA-associated
+     Human vital signs detection methods and potential using radars: a review, Sensors                     interactions based on convolutional autoencoder, Nucleic Acids Res. 51 (21)
+     20 (5) (2020) 1454.                                                                                   (2023) e110, e110.
+ [7] N. Malešević, V. Petrović, M. Belić, C. Antfolk, V. Mihajlović, M. Janković,               [33] S. Schellenberger, et al., A dataset of clinically recorded radar vital signs with
+     Contactless real-time heartbeat detection via 24 GHz continuous-wave Doppler                          synchronised reference sensor signals, Sci. Data 7 (1) (2020) 291.
+     radar using artificial neural networks, Sensors 20 (8) (2020) 2351.                              [34] T.-Y. Lin, P. Dollár, R. Girshick, K. He, B. Hariharan, S. Belongie, Feature pyramid
+ [8] I. Seflek, Y.E. Acar, E. Yaldiz, Small motion detection and non-contact vital signs                   networks for object detection, in: Proceedings of the IEEE Conference on Computer
+     monitoring with continuous wave Doppler radars, Elektronika ir elektrotechnika                        Vision and Pattern Recognition, 2017, pp. 2117–2125.
+     26 (3) (2020) 54–60.                                                                             [35] Z. Zhuang, et al., Nipple segmentation and localization using modified U-net on
+ [9] K. Yamamoto, R. Hiromatsu, T. Ohtsuki, ECG signal reconstruction via Doppler                          breast ultrasound images, J. Medical Imaging Health Informatics 9 (2019)
+     sensor by hybrid DL model with CNN and LSTM, IEEE Access 8 (2020)                                     1827–1837.
+     130551–130560.                                                                                   [36] A. Chaurasia, E. Culurciello, Linknet: exploiting encoder representations for
+[10] Y. Iwata, H.T. Thanh, G. Sun, K. Ishibashi, High accuracy heartbeat detection from                    efficient semantic segmentation, in: 2017 IEEE Visual Communications and Image
+     CW-Doppler radar using singular value decomposition and matched filter, Sensors                       Processing (VCIP), IEEE, 2017, pp. 1–4.
+     21 (11) (2021) 3588.                                                                             [37] F. Michler, et al., A clinically evaluated interferometric continuous-wave radar
+[11] L. Antognoli, S. Moccia, L. Migliorelli, S. Casaccia, L. Scalise, E. Frontoni, Heartbeat              system for the contactless measurement of human vital parameters, Sensors 19 (11)
+     detection by laser Doppler vibrometry and machine learning, Sensors 20 (18)                           (2019) 2492.
+     (2020) 5362.                                                                                     [38] C. Will, et al., Radar-based heart sound detection, Sci. Rep. 8 (1) (2018) 11551.
+[12] M. Ali, A. Elsayed, A. Mendez, Y. Savaria, M. Sawan, Contact and remote breathing                [39] J. Chen, D. Zhang, Z. Wu, F. Zhou, Q. Sun, Y. Chen, Contactless ECG monitoring
+     rate monitoring techniques: a review, IEEE Sens J 21 (13) (2021) 14569–14586.                         with millimeter wave radar, IEEE Trans Mob Comput (2022).
+[13] X. Qiao, G. Li, T. Shan, R. Tao, Human activity classification based on moving                   [40] Z. Xia, M.M.H. Shandhi, O.T. Inan, Y. Zhang, Non-contact sensing of
+     orientation determining using multistatic micro-Doppler radar signals, IEEE Trans.                    seismocardiogram signals using microwave Doppler radar, IEEE Sens J 18 (14)
+     Geosci. Rem. Sens. 60 (2021) 1–15.                                                                    (2018) 5956–5964.
+[14] H. Xu, M.P. Ebrahim, K. Hasan, F. Heydari, P. Howley, M.R. Yuce, Accurate heart                  [41] Y. Ran, D. Zhang, J. Chen, Y. Hu, Y. Chen, Contactless blood pressure monitoring
+     rate and respiration rate detection based on a higher-order harmonics peak                            with mmWave radar, in: GLOBECOM 2022-2022 IEEE Global Communications
+     selection method using radar non-contact sensors, Sensors 22 (1) (2021) 83.                           Conference, IEEE, 2022, pp. 541–546.
+[15] T. Kitagawa, K. Yamamoto, T. Ohtsuki, Non-contact heartbeat detection based on                   [42] S. Mahmud, et al., NABNet: a nested attention-guided BiConvLSTM network for a
+     beam diversity using multibeam Doppler sensor, in: 2021 IEEE Global                                   robust prediction of blood pressure components from reconstructed arterial blood
+     Communications Conference (GLOBECOM), IEEE, 2021, pp. 1–6.                                            pressure waveforms using PPG and ECG signals, Biomed. Signal Process Control 79
+[16] K. Yamamoto, T. Ohtsuki, Non-contact heartbeat detection by heartbeat signal                          (2023) 104247.
+     reconstruction based on spectrogram analysis with convolutional LSTM, IEEE                       [43] N. Ibtehaz, et al., PPG2ABP: translating photoplethysmogram (PPG) signals to
+     Access 8 (2020) 123603–123613.                                                                        arterial blood pressure (ABP) waveforms, Bioengineering 9 (11) (2022) 692.
+[17] J. Saluja, J. Casanova, J. Lin, A supervised machine learning algorithm for heart-               [44] A. Rahman, et al., Fetal ECG extraction from maternal ECG using deeply supervised
+     rate detection using Doppler motion-sensing radar, IEEE J Electromagn RF Microw                       LinkNet++ model, Eng. Appl. Artif. Intell. 123 (2023) 106414.
+     Med Biol 4 (1) (2020) 45–51, https://doi.org/10.1109/JERM.2019.2923673.                          [45] S. Mahmud, M.S. Hossain, M.E.H. Chowdhury, M.B.I. Reaz, MLMRS-Net:
+[18] V.L. Petrović, M.M. Janković, A. V Lupšić, V.R. Mihajlović, J.S. Popović-Božović,             electroencephalography (EEG) motion artifacts removal using a multi-layer multi-
+     High-accuracy real-time monitoring of heart rate variability using 24 GHz                             resolution spatially pooled 1D signal reconstruction network, Neural Comput.
+     continuous-wave Doppler radar, IEEE Access 7 (2019) 74721–74733, https://doi.                         Appl. 35 (11) (2023) 8371–8388.
+     org/10.1109/ACCESS.2019.2921240.                                                                 [46] M.S. Hossain, et al., MultiResUNet3+: a full-scale connected multi-residual UNet
+[19] Z.-K. Yang, S. Zhao, X.-D. Huang, W. Lu, Accurate Doppler radar-based heart rate                      model to denoise electrooculogram and electromyogram artifacts from corrupted
+     measurement using matched filter, IEICE Electron. Express 17 (8) (2020)                               electroencephalogram signals, Bioengineering 10 (5) (2023) 579.
+     20200062, https://doi.org/10.1587/elex.17.20200062.                                              [47] J.E. Hall, Pocket Companion to Guyton & Hall Textbook of Medical Physiology E-
+[20] S. Izumi, T. Okano, D. Matsunaga, H. Kawaguchi, M. Yoshimoto, Non-contact                             Book, Elsevier Health Sciences, 2015.
+     instantaneous heart rate extraction system using 24-GHz microwave Doppler                        [48] L. Pstras, K. Thomaseth, J. Waniewski, I. Balzani, F. Bellavere, The Valsalva
+     sensor, IEICE Trans. Commun. E102.B (6) (2019) 1088–1096, https://doi.org/                            manoeuvre: physiology and clinical examples, Acta Physiol. 217 (2) (2016)
+     10.1587/transcom.2018HMP0007.                                                                         103–119.
+[21] Q. Lv, et al., Doppler vital signs detection in the presence of large-scale random               [49] J.V. Rundo, Obstructive sleep apnea basics, Cleve. Clin. J. Med. 86 (9 Suppl 1)
+     body movements, IEEE Trans Microw Theory Tech 66 (9) (2018) 4261–4270,                                (2019) 2–9.
+     https://doi.org/10.1109/TMTT.2018.2852625.                                                       [50] L. Yaroslavsky, How to Optimally Sample and Resample Images: Theory and
+[22] A. Nocera, et al., Machine Learning in RADAR-Based Physiological Signals Sensing:                     Methods Using MATLAB, vol. 3, Bentham Science Publishers, 2020.
+     A Scoping Review of the Models, Datasets and Metrics, 2021.                                      [51] H. Meng, Y.L. Guan, S. Chen, Modeling and analysis of noise effects on broadband
+[23] R. Bagwe, J. Kachhia, A. Erdogan, K. George, Automated radar signal analysis                          power-line communications, IEEE Trans. Power Deliv. 20 (2) (2005) 630–637.
+     based on DL, in: 2020 10th Annual Computing and Communication Workshop and                       [52] M.S. Hossain, et al., Motion artifacts correction from EEG and fNIRS signals using
+     Conference, CCWC 2020, Institute of Electrical and Electronics Engineers Inc., Jan.                   novel multiresolution analysis, IEEE Access 10 (2022) 29760–29777.
+     2020, pp. 215–221, https://doi.org/10.1109/CCWC47524.2020.9031240.                               [53] M.S. Hossain, et al., Motion artifacts correction from single-channel EEG and fNIRS
+[24] K. Chen, Y. Duan, Y. Huang, W. Hu, Y. Xie, A DL method of human identification                        signals using novel wavelet packet decomposition in combination with canonical
+     from radar signal for daily sleep health monitoring, Bioengineering 11 (1) (Jan.                      correlation analysis, Sensors 22 (9) (2022) 3169.
+     2024), https://doi.org/10.3390/bioengineering11010002.                                           [54] S. Mahmud, et al., A shallow U-Net architecture for reliably predicting blood
+[25] S. Śmigiel, K. Pałczyński, D. Ledziński, DL techniques in the classification of ecg                pressure (BP) from photoplethysmogram (PPG) and ECG (ECG) signals, Sensors 22
+     signals using r-peak detection based on the ptb-xl dataset, Sensors 21 (24) (Dec.                     (3) (2022) 919.
+     2021), https://doi.org/10.3390/s21248174.                                                        [55] R. Takahashi, T. Matsubara, K. Uehara, Data augmentation using random image
+[26] Y. Xiang, J. Guo, M. Chen, Z. Wang, C. Han, MAE-based self-supervised pretraining                     cropping and patching for deep CNNs, IEEE Trans. Circ. Syst. Video Technol. 30 (9)
+     algorithm for heart rate estimation of radar signals, Sensors 23 (18) (Sep. 2023),                    (2019) 2917–2931.
+     https://doi.org/10.3390/s23187869.                                                               [56] N. Ibtehaz, M.S. Rahman, MultiResUNet: rethinking the U-Net architecture for
+[27] J.H. Choi, J.E. Kim, K.T. Kim, DL approach for radar-based people counting, IEEE                      multimodal biomedical image segmentation, Neural Network. 121 (2020) 74–87.
+     Internet Things J. 9 (10) (May 2022) 7715–7730, https://doi.org/10.1109/                         [57] R.N. Youngworth, B.B. Gallagher, B.L. Stamper, An overview of power spectral
+     JIOT.2021.3113671.                                                                                    density (PSD) calculations, Optical manufacturing and testing VI 5869 (2005)
+[28] D. Toda, R. Anzai, K. Ichige, R. Saito, D. Ueki, ECG signal reconstruction using                      206–216.
+     FMCW radar and a convolutional neural network for contactless vital-sign sensing,                [58] Y. Mu, X. Liu, L. Wang, A Pearson’s correlation coefficient based decision tree and
+     IEICE Trans. Commun. E106B (1) (Jan. 2023) 65–73, https://doi.org/10.1587/                            its parallel implementation, Inf. Sci. 435 (2018) 40–58.
+     transcom.2022EBP3005.                                                                            [59] H. Zhang, M. Zhao, C. Wei, D. Mantini, Z. Li, Q. Liu, EEGdenoiseNet: a benchmark
+                                                                                                           dataset for DL solutions of EEG denoising, J. Neural. Eng. 18 (5) (2021) 056057.
+
+
+
+
+                                                                                                 14
+

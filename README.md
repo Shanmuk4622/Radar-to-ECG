@@ -1,0 +1,58 @@
+# Radar -> ECG : Contactless ECG Reconstruction from 24 GHz CW Radar
+
+Research project aiming to beat **MultiResLinkNet** (Chowdhury et al., *Computers in Biology and
+Medicine* 176:108555, 2024) on the Schellenberger **CR-RVS** dataset with a new architecture.
+
+**Start here: [`00_admin/PLAN.md`](00_admin/PLAN.md)**
+
+## Folder structure
+
+```
+.
+├── 00_admin/                  plan, decisions, meeting/working notes
+│   └── PLAN.md                <- the full research plan
+├── 01_literature/
+│   ├── papers/                source PDFs (renamed to year_author_topic)
+│   ├── extracted_text/        machine-readable text of each PDF
+│   └── notes/                 per-paper notes
+│       └── baseline_results_MultiResLinkNet.md   <- every number we must beat
+├── 02_data/
+│   ├── raw/                   .mat files from Kaggle/figshare  (NOT versioned)
+│   ├── interim/               per-subject parsed + resampled arrays
+│   └── processed/             windowed train-ready shards / HDF5
+├── 03_notebooks/              Kaggle-ready .ipynb, numbered in run order
+├── 04_src/
+│   ├── data/                  loaders, windowing, augmentation
+│   ├── models/                baselines + CardioMamba-Net
+│   ├── losses/                composite loss components
+│   ├── training/              train loop, resumable HF checkpointing
+│   ├── evaluation/            metrics, peak detection, statistics
+│   └── utils/                 config, seeding, logging
+├── 05_experiments/
+│   ├── configs/               one YAML per run
+│   ├── logs/                  history.jsonl per run
+│   └── checkpoints/           local mirror of the HF checkpoints
+├── 06_results/
+│   ├── tables/                CSV/markdown results tables
+│   ├── figures/               publication figures
+│   └── metrics/               raw per-fold metric dumps
+└── 07_paper/
+    ├── draft/                 manuscript
+    ├── figures/               final figure files
+    └── references/            .bib
+```
+
+## Key references
+
+- **Baseline** — F. A. Chowdhury et al., "ECG waveform generation from radar signals: A deep
+  learning perspective," *Comput. Biol. Med.* 176:108555, 2024. doi:10.1016/j.compbiomed.2024.108555
+- **Dataset** — S. Schellenberger et al., "A dataset of clinically recorded radar vital signs with
+  synchronised reference sensor signals," *Sci. Data* 7:291, 2020. doi:10.1038/s41597-020-00629-5
+  (data: doi:10.6084/m9.figshare.12186516)
+- Kaggle mirror used for fast download: `pedababugaddala/datasets-file`
+
+## Conventions
+
+- Sampling rate after preprocessing: **128 Hz**. Window: **1024 samples (8 s)**, 50 % overlap on train only.
+- Checkpoints live on Hugging Face under `Shanmuk4622/`; local `05_experiments/checkpoints/` is a mirror.
+- `02_data/raw/` and `05_experiments/checkpoints/` should never be committed to git.

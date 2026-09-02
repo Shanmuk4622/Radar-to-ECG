@@ -1,0 +1,11 @@
+02_data/raw/
+02_data/interim/
+02_data/processed/
+05_experiments/checkpoints/
+05_experiments/logs/*.jsonl
+**/__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.mat
+*.h5
+*.npz
