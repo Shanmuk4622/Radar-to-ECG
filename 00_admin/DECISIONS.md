@@ -2,14 +2,19 @@
 
 | Date | Decision | Rationale |
 |---|---|---|
+| 2026-09-02 | **Do not exclude recordings by beat-coupling score in v2.** Retain it as a difficulty covariate and exclude only unusable signals. | The v1 threshold disproportionately removed Apnea, where reduced motion is physiological. Thresholding would select an easier, scenario-biased cohort and weaken comparison with the baseline. |
+| 2026-09-02 | **Restart training as v2 in five stage-specific HF repos.** Do not promote v1 checkpoints into the v2 queue. | The audit found that v1 did not restore `state.pt`, preprocessing could trust missing local arrays, and best-epoch uploads produced an unsafe commit burst. Separate repos also prevent notebook-level state collisions. |
+| 2026-09-02 | **Resume inside an epoch using deterministic replay.** Save active epoch, completed batch cursor, partial aggregates and every RNG state atomically every 50 steps/5 minutes. | A Kaggle session restart must not silently replay a different shuffle/augmentation stream or lose an epoch. |
+| 2026-09-02 | **Use subjects, not five fold means, for confirmatory Wilcoxon tests.** Compare the full model against each predeclared comparator and Holm-correct. | With n=5, the smallest possible exact two-sided Wilcoxon p-value is 0.0625; fold-level significance at α=0.05 is impossible. Subject is the independent experimental unit. |
+| 2026-09-02 | **Compute HR/HRV recording-by-recording.** Never concatenate unrelated recordings or scenarios before peak detection. | Concatenation fabricates RR intervals at boundaries and can bias HRV errors. |
 | 2026-09-01 | **Architecture tier: Recommended — full CardioMamba-Net (C1–C5).** C6 (diffusion + uncertainty) is parked as an optional stretch, revisited only after Stage 1 clears the targets. | Q1-journal novelty, and the contributions stack in stages so there is a publishable result even if the last stage disappoints. |
 | 2026-09-01 | **Reimplement all four baselines** (FPN-1D, UNet-1D, LinkNet-1D, MultiResLinkNet) on identical data, folds and seeds. Report both "as published" and "our run". | Reviewer expectation, and it doubles as the correctness gate: failure to reproduce their Table 2 means our pipeline has a bug. |
 | 2026-09-01 | Preprocessing frozen to the baseline's (128 Hz, 1024-sample windows, 50 % train overlap, 0.5–40 Hz, 50 Hz notch, order-5 polynomial detrend). One declared deviation: ECG target normalised to [-1,1]. | Any gain must be attributable to the model, not to a better pipeline. |
 | 2026-09-01 | Working model name **CardioMamba-Net**; final name to be picked before submission. | Placeholder. |
 
 ## Open items
-- [ ] Step 0: verify the Kaggle mirror `pedababugaddala/datasets-file` really contains the raw per-subject `.mat` tree.
-- [ ] Confirm HF repo names: `Shanmuk4622/cr-rvs-radar-ecg-processed` (dataset), `Shanmuk4622/cardiomamba-net` (checkpoints).
+- [x] Step 0: verify the Kaggle mirror `pedababugaddala/datasets-file` really contains the raw per-subject `.mat` tree.
+- [x] Confirm v2 HF repo names (listed in `03_notebooks/README.md`).
 - [ ] Decide whether Experiment C (all five scenarios) uses one model or per-scenario fine-tuning.
 
 ## Notebook 01 — build notes (2026-09-01)

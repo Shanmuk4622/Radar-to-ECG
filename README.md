@@ -5,6 +5,12 @@ Medicine* 176:108555, 2024) on the Schellenberger **CR-RVS** dataset with a new 
 
 **Start here: [`00_admin/PLAN.md`](00_admin/PLAN.md)**
 
+**Run the rewritten Kaggle workflow:** [`03_notebooks/README.md`](03_notebooks/README.md).
+The five v2 notebooks use chained Kaggle Notebook Outputs, dual T4 where training is required,
+atomic mid-epoch recovery, conservative Hugging Face uploads, and comprehensive epoch telemetry.
+The file-by-file audit and v1 failure analysis are in
+[`00_admin/REPOSITORY_AUDIT_V2.md`](00_admin/REPOSITORY_AUDIT_V2.md).
+
 ## Folder structure
 
 ```
@@ -54,5 +60,6 @@ Medicine* 176:108555, 2024) on the Schellenberger **CR-RVS** dataset with a new 
 ## Conventions
 
 - Sampling rate after preprocessing: **128 Hz**. Window: **1024 samples (8 s)**, 50 % overlap on train only.
-- Checkpoints live on Hugging Face under `Shanmuk4622/`; local `05_experiments/checkpoints/` is a mirror.
+- V2 data, checkpoints and results live in five stage-specific Hugging Face repositories under
+  `Shanmuk4622/`; exact names and run instructions are in `03_notebooks/README.md`.
 - `02_data/raw/` and `05_experiments/checkpoints/` should never be committed to git.

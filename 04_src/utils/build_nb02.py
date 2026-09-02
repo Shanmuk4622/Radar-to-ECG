@@ -23,8 +23,8 @@ never touch raw data again.
 
 | Step | Why |
 |---|---|
-| Pull `cr-rvs-radar-ecg-inventory` from HF | The 8 physics channels at 128 Hz already exist; re-deriving them would be wasted work |
-| Quality filter on `quality_flags` + `beat_coupling` | Exclude on evidence, not vibes. A recording where the radar demonstrably cannot see the heartbeat teaches the model nothing but noise |
+| Mount NB01 output (HF v2 fallback) | The 8 physics channels at 128 Hz already exist; re-deriving them would be wasted work |
+| Quality audit on `quality_flags` + `beat_coupling` | Exclude only unusable signals; keep weak coupling as a measured difficulty covariate |
 | Build ECG target, R-peak heatmap, instantaneous RR | The three heads of C4 need three targets |
 | Window index at 50 % overlap, flagged for no-overlap | One index serves both train (overlapped) and test (not) — see the leakage note below |
 | Subject-wise 5-fold **and** LOSO fold assignment | Experiments A/B/C use the folds; Experiment D uses LOSO |
@@ -57,32 +57,52 @@ relative to theirs. We say so in the paper.
 ## How to run
 
 1. *Session options* → **Accelerator: None**, **Internet: On**.
-2. *Add-ons → Secrets* → `HF_TOKEN` (write) attached.
-3. Run all. Expect **20–45 minutes**, most of it the download and the final upload.
-4. Interrupt-safe and resumable, same contract as NB01.
+2. Click **+ Add Input → Notebook Output** and attach the saved output of NB01. Please do this;
+   it is the fast path and avoids redownloading the corpus. HF remains the automatic fallback.
+3. *Add-ons → Secrets* → `HF_TOKEN` (write) attached.
+4. Run all. Interrupt-safe and resumable, same contract as NB01.
+
+### Cell-by-cell run guide
+
+| Code cell | What runs | Typical time |
+|---:|---|---:|
+| 1 | Configuration | < 5 s |
+| 2 | Imports, dependency and disk checks | 1–3 min |
+| 3 | Write shared data/metric/sync libraries | < 10 s |
+| 4 | HF login, restore state and completed recording arrays | 1–10 min |
+| 5 | Use attached NB01 output, or download it as fallback | mounted: < 1 min; fallback: 3–12 min |
+| 6 | Apply and report the quality gate | < 30 s |
+| 7 | Build 11-row recording arrays and all supervision targets | 10–30 min |
+| 8 | Assign subject folds, LOSO IDs, and window index | 1–3 min |
+| 9 | Compute leakage-free 5-fold, LOSO, and cross-scenario norms | 5–20 min |
+| 10 | Generate corpus sanity figures | 1–4 min |
+| 11 | Write dataset card/report and perform final verified upload | 3–15 min |
+
+Total: normally **25–75 minutes**. Long cells print progress; rerunning restores outputs before it
+trusts any completed-state marker.
 """)
 
 md("---\n# 1 · Configuration")
 
 code(r'''
 CFG = {
-    "SRC_REPO":   "Shanmuk4622/cr-rvs-radar-ecg-inventory",     # NB01 output
-    "DST_REPO":   "Shanmuk4622/cr-rvs-radar-ecg-processed",     # this notebook's output
+    "SRC_REPO":   "Shanmuk4622/cr-rvs-radar-ecg-inventory-v2",  # NB01 output
+    "DST_REPO":   "Shanmuk4622/cr-rvs-radar-ecg-processed-v2",  # this notebook's output
     "HF_PRIVATE": False,
-    "RUN_ID":     "nb02_corpus_v1",
+    "RUN_ID":     "nb02_corpus_v2",
 
     "WORK":    "/kaggle/working/nb02",
     "SCRATCH": "/kaggle/temp/nb02",
 
     "PUSH_INTERVAL_S": 30 * 60,
-    "HF_MAX_REQ_HOUR": 120,
+    "HF_MAX_UPLOADS_HOUR": 24,
 
     # frozen to Chowdhury et al. 2024 section 2.3
     "FS": 128, "WINDOW": 1024, "HOP_TRAIN": 512,
     "PEAK_SIGMA": 3.0,          # samples; ~23 ms at 128 Hz
 
     # quality gates -- exclusion is evidence-based, and every exclusion is logged
-    "MIN_BEAT_COUPLING": 1.30,  # radar must demonstrably see the heartbeat
+    "MIN_BEAT_COUPLING": None,  # do not select an easier cohort; retain as a covariate
     "MIN_DURATION_S":    60.0,
     "EXCLUDE_FLAGS":     ["NO_RADAR_CHANNELS", "missing_channels", "ecg_flatline",
                           "few_or_no_rpeaks", "implausible_hr", "nan_in_radar"],
@@ -107,7 +127,8 @@ def _pip(*p):
     miss = [x for x in p if __import__("importlib").util.find_spec(x.replace("-", "_")) is None]
     if miss:
         print("installing:", miss)
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=False)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=True)
+        for x in miss: __import__(x.replace("-", "_"))
 _pip("pyarrow", "huggingface_hub")
 
 import numpy as np, pandas as pd
@@ -157,6 +178,11 @@ for name, src in [("crvs_sync.py", CRVS_SYNC_SRC), ("crvs_data.py", CRVS_DATA_SR
     (WORK / name).write_text(src)
     print(f"wrote {name}  ({len(src):,} chars)")
 sys.path.insert(0, str(WORK))
+import hashlib
+MODULE_HASHES = {name: hashlib.sha256(src.encode()).hexdigest() for name, src in
+                 [("crvs_sync.py", CRVS_SYNC_SRC), ("crvs_data.py", CRVS_DATA_SRC),
+                  ("crvs_metrics.py", CRVS_METRICS_SRC)]}
+(WORK / "library_hashes.json").write_text(json.dumps(MODULE_HASHES, indent=2))
 ''')
 
 code(r'''
@@ -175,7 +201,8 @@ except Exception:
 from crvs_sync import HFSync
 sync = HFSync(repo_id=CFG["DST_REPO"], local_dir=WORK, token=HF_TOKEN, repo_type="dataset",
               private=CFG["HF_PRIVATE"], run_id=CFG["RUN_ID"],
-              push_interval_s=CFG["PUSH_INTERVAL_S"], max_req_hour=CFG["HF_MAX_REQ_HOUR"])
+              push_interval_s=CFG["PUSH_INTERVAL_S"],
+              max_upload_calls_hour=CFG["HF_MAX_UPLOADS_HOUR"])
 print("\ndestination:", sync.url, "(public)")
 
 _MAJOR = {"f": False, "n": ""}
@@ -191,8 +218,9 @@ try:
 except Exception as e:
     print("hook unavailable:", e)
 
-sync.pull(allow_patterns=["*.json", "*.jsonl", "*.parquet", "*.csv", "*.py", "*.md"])
-STATE = sync.load_state({"done_recordings": [], "stages": {}})
+sync.pull(allow_patterns=["*.json", "*.jsonl", "*.parquet", "*.csv", "*.md",
+                          "recordings/*.npy", "recordings/*.json", "logs/*"])
+STATE = sync.load_state({"done_recordings": [], "stages": {}, "version": 2})
 print("resuming with", len(STATE["done_recordings"]), "recordings already built")
 MAJOR("00_setup")
 ''')
@@ -211,13 +239,26 @@ If the decimated folder is missing — for instance if NB01 was run with `SAVE_D
 
 code(r'''
 from huggingface_hub import snapshot_download
-SRC = Path(SCRATCH) / "src"
-t0 = time.time()
-snapshot_download(CFG["SRC_REPO"], repo_type="dataset", token=HF_TOKEN,
-                  local_dir=str(SRC),
-                  allow_patterns=["inventory.csv", "verdict.json", "crosscheck.csv",
-                                  "decimated/*.npz"])
-print(f"downloaded in {time.time()-t0:.0f}s")
+
+# Fast path: attach NB01's saved Kaggle notebook output as an Input. It is read-only and
+# does not consume /kaggle/working. HF is a recovery fallback, not the primary data path.
+SRC = None
+input_root = Path("/kaggle/input")
+if input_root.exists():
+    for candidate in input_root.rglob("inventory.csv"):
+        if any((candidate.parent / "decimated").glob("*.npz")):
+            SRC = candidate.parent; break
+if SRC is not None:
+    print("using attached Kaggle NB01 output:", SRC)
+else:
+    SRC = Path(SCRATCH) / "src"
+    print("NB01 output was not attached; falling back to Hugging Face download.")
+    t0 = time.time()
+    snapshot_download(CFG["SRC_REPO"], repo_type="dataset", token=HF_TOKEN,
+                      local_dir=str(SRC),
+                      allow_patterns=["inventory.csv", "verdict.json", "crosscheck.csv",
+                                      "decimated/*.npz"], max_workers=4)
+    print(f"downloaded in {time.time()-t0:.0f}s")
 
 inv_path = SRC / "inventory.csv"
 if not inv_path.exists():
@@ -243,11 +284,11 @@ md(r"""
 Every exclusion is recorded with its reason, and the surviving corpus is compared against the
 baseline's segment counts so we know exactly how much we gave up for cleanliness.
 
-Two tiers. **Hard exclusions** are recordings the model cannot learn from: no radar channels, a
-flatlined or unreadable ECG, NaNs, or — the one NB01 added — a `beat_coupling` below 1.3, meaning
-the beat-triggered average of radar acceleration is indistinguishable from random triggers.
-**Warnings** (clipping, receiver imbalance, an odd lag) are kept but carried through as columns,
-so NB05 can test whether they correlate with reconstruction error.
+Two tiers. **Hard exclusions** are limited to unusable inputs/targets: missing radar, flat or
+unreadable ECG, NaNs, or a recording too short for a window. Weak `beat_coupling` is **not** an
+exclusion: Apnea physiologically reduces chest motion, so thresholding coupling selected an easier
+and scenario-biased v1 cohort. Coupling and all warnings are retained as covariates so NB05 can
+measure performance versus signal difficulty.
 """)
 
 code(r'''
@@ -268,10 +309,9 @@ def reasons(r):
         if f in fl:
             out.append(f)
     bc = r.get("beat_coupling", np.nan)
-    if pd.notna(bc) and bc < CFG["MIN_BEAT_COUPLING"]:
+    if (CFG["MIN_BEAT_COUPLING"] is not None and pd.notna(bc)
+            and bc < CFG["MIN_BEAT_COUPLING"]):
         out.append(f"beat_coupling<{CFG['MIN_BEAT_COUPLING']}")
-    if pd.isna(bc):
-        out.append("beat_coupling_missing")
     if r.get("duration_s", 0) < CFG["MIN_DURATION_S"]:
         out.append("too_short")
     return ";".join(out)
@@ -342,6 +382,11 @@ if CFG["SMOKE_TEST"]:
 by_stem = {p.stem: p for p in dec}
 done = set(STATE.get("done_recordings", []))
 rows = STATE.get("rec_rows", [])
+# A state bit is only valid when both payload files were restored. This prevents a fresh
+# Kaggle session from skipping a recording whose earlier upload had not completed.
+done = {rid for rid in done if (WORK / "recordings" / f"{rid}.npy").exists()
+        and (WORK / "recordings" / f"{rid}.json").exists()}
+rows = [r for r in rows if r.get("rec_id") in done]
 t0 = time.time(); built = 0; missing = []
 
 for i, (_, r) in enumerate(keep.iterrows(), 1):
@@ -379,15 +424,18 @@ for i, (_, r) in enumerate(keep.iterrows(), 1):
     stack = np.stack([ch[c] for c in CHANNELS] +
                      [ecg_norm, pk_map, rr.astype(np.float32)], 0).astype(np.float32)
     assert stack.shape == (len(ARRAY_ROWS), n), f"bad stack {stack.shape}"
+    data_sha256 = hashlib.sha256(memoryview(np.ascontiguousarray(stack))).hexdigest()
     np.save(WORK / "recordings" / (rec_id + ".npy"), stack)
     (WORK / "recordings" / (rec_id + ".json")).write_text(json.dumps({
         "rec_id": rec_id, "fs": FS, "n": int(n),
         "subject": str(r["subject"]), "scenario": str(r["scenario_canon"]),
-        "rows": ARRAY_ROWS, "r_peaks": [int(v) for v in peaks]}))
+        "rows": ARRAY_ROWS, "data_sha256": data_sha256,
+        "r_peaks": [int(v) for v in peaks]}))
 
     rows.append({"rec_id": rec_id, "subject": str(r["subject"]),
                  "scenario_canon": str(r["scenario_canon"]), "n": int(n),
                  "duration_s": round(n / FS, 2), "n_rpeaks": int(len(peaks)),
+                 "data_sha256": data_sha256,
                  "mean_hr_bpm": hrv["mean_hr_bpm"], "rmssd_ms": hrv["rmssd_ms"],
                  "beat_coupling": float(r.get("beat_coupling", np.nan)),
                  "warn_flags": ";".join(sorted(set(str(r[flags_col]).split(";")) &
@@ -530,11 +578,34 @@ for exp in EXPERIMENTS:
         assert not (set(tr["subject"]) & set(te["subject"])), "SUBJECT LEAK train/test"
         assert not (set(va["subject"]) & set(te["subject"])), "SUBJECT LEAK val/test"
 
+# Experiment D: leave one subject out, reserve the next subject for validation.
+loso_ids = sorted(map(int, W["loso_id"].unique()))
+for lid in loso_ids:
+    vid = loso_ids[(loso_ids.index(lid) + 1) % len(loso_ids)]
+    sub = W[W["scenario_canon"].isin(EXPERIMENTS["C_all5"])]
+    tr = sub[~sub["loso_id"].isin([lid, vid])]
+    va = sub[(sub["loso_id"] == vid) & sub["no_overlap"]]
+    te = sub[(sub["loso_id"] == lid) & sub["no_overlap"]]
+    if len(tr) and len(te):
+        NORM[f"D_loso|{lid}"] = compute_norm(
+            WORK / "recordings", tr, seed=CFG["SEED"] + 1000 + lid)
+
+# Experiment F: leave one scenario out. A second scenario is validation; the remaining
+# three train the model. Subjects may recur by design because this tests condition shift.
+cross_scenarios = list(EXPERIMENTS["C_all5"])
+for i, test_sc in enumerate(cross_scenarios):
+    val_sc = cross_scenarios[(i + 1) % len(cross_scenarios)]
+    tr = W[~W["scenario_canon"].isin([test_sc, val_sc])]
+    if len(tr):
+        NORM[f"F_cross:{test_sc}|0"] = compute_norm(
+            WORK / "recordings", tr, seed=CFG["SEED"] + 2000 + i)
+
 (WORK / "norm_stats.json").write_text(json.dumps(NORM, indent=2))
 (WORK / "experiments.json").write_text(json.dumps(
     {"experiments": EXPERIMENTS, "n_folds": CFG["N_FOLDS"],
      "fold_groups": {str(k): int(v) for k, v in groups.items()},
      "loso_ids": {str(k): int(v) for k, v in loso.items()},
+     "loso_values": loso_ids, "cross_scenarios": cross_scenarios,
      "window": WINDOW, "hop_train": HOP_TRAIN, "fs": FS,
      "channels": CHANNELS}, indent=2))
 print(f"\n{len(NORM)} normalisation sets written.  No subject appears in two splits anywhere.")
@@ -682,10 +753,10 @@ every 1024-sample window.
 
 ## Quality gate
 
-Recordings are excluded when the radar cannot be shown to see the heartbeat
-(`beat_coupling < {CFG['MIN_BEAT_COUPLING']}`), when the ECG is flat or unreadable, when radar
-channels are missing, or when the recording is under {CFG['MIN_DURATION_S']:.0f} s. Every
-exclusion and its reason is in `inventory_gated.csv`.
+Recordings are excluded only when ECG/radar inputs are unreadable or missing, contain invalid
+values, or are under {CFG['MIN_DURATION_S']:.0f} s. Beat coupling is retained as a continuous
+difficulty covariate and is not used to select an easier cohort. Every exclusion and its reason is
+in `inventory_gated.csv`.
 
 ## Cite
 
@@ -709,7 +780,7 @@ sizes = {str(p.relative_to(WORK)): p.stat().st_size for p in WORK.rglob("*") if 
 print(f"pushing {len(sizes)} files, {sum(sizes.values())/2**20:.0f} MB ...")
 ok = sync.flush(final=True, msg=f"{CFG['RUN_ID']} complete — {len(RECS)} recordings, {len(W)} windows")
 print("\n" + "=" * 76)
-print("  DONE" if ok else "  DONE (final push reported a problem — see history.jsonl)")
+print("  DONE" if ok else "  DONE (final push reported a problem — see sync_history.jsonl)")
 print("=" * 76)
 print(f"  repo       : {sync.url}")
 print(f"  recordings : {len(RECS)}   windows: {len(W):,}   subjects: {RECS['subject'].nunique()}")

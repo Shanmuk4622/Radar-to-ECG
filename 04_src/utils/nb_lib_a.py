@@ -60,163 +60,226 @@ class NB:
 
 # --------------------------------------------------------------------------- hf_sync
 HF_SYNC_SRC = r'''
-# crvs_sync.py -- resumable, rate-limited, interrupt-safe Hugging Face folder sync.
-# Identical across NB01-NB05 so the cadence rules are enforced in exactly one place.
-#   * push at most once per PUSH_INTERVAL_S (default 30 min)
-#   * push immediately when a stage finishes            -> sync.stage_done("name")
-#   * push immediately when execution is stopped        -> SIGINT / SIGTERM / atexit
-#   * one upload_folder call per flush, behind a token bucket, backing off on 429
-#   * resume by pulling the run folder back on startup
+# crvs_sync.py -- conservative, resumable and interrupt-safe Hugging Face sync.
+# A folder upload can involve several HTTP requests, so this deliberately schedules far
+# fewer than the nominal API limit: one periodic upload per 30 minutes, plus major stages
+# and a best-effort final upload on interrupt. All local writes are atomic.
 import os, json, time, random, threading, atexit, signal
+from collections import deque
 from pathlib import Path
 from datetime import datetime, timezone
 
-class TokenBucket:
-    # capacity = requests per hour, refilled continuously
-    def __init__(self, per_hour=120):
-        self.capacity = float(per_hour); self.tokens = float(per_hour)
-        self.rate = per_hour / 3600.0; self.t = time.monotonic()
-        self.lock = threading.Lock()
-    def take(self, n=1, block=True, timeout=1200):
+SYNC_VERSION = 2
+
+def atomic_json(path, value):
+    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(value, f, indent=2, default=str)
+        f.flush(); os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+class RollingLimiter:
+    # Limits upload_folder CALLS, not HTTP requests. The low default leaves a wide margin.
+    def __init__(self, calls_per_hour=24, min_gap_s=20):
+        self.limit = max(1, int(calls_per_hour)); self.min_gap = float(min_gap_s)
+        self.times = deque(); self.lock = threading.Lock()
+    def take(self, timeout=1800):
         deadline = time.monotonic() + timeout
         while True:
             with self.lock:
                 now = time.monotonic()
-                self.tokens = min(self.capacity, self.tokens + (now - self.t) * self.rate)
-                self.t = now
-                if self.tokens >= n:
-                    self.tokens -= n; return True
-                need = (n - self.tokens) / self.rate
-            if not block or time.monotonic() + need > deadline:
+                while self.times and now - self.times[0] >= 3600:
+                    self.times.popleft()
+                gap = self.min_gap - (now - self.times[-1]) if self.times else 0.0
+                window = 3600 - (now - self.times[0]) if len(self.times) >= self.limit else 0.0
+                wait = max(0.0, gap, window)
+                if wait <= 0:
+                    self.times.append(now); return True
+            if time.monotonic() + wait > deadline:
                 return False
-            time.sleep(min(need, 5.0))
+            time.sleep(min(wait, 10.0))
 
 class HFSync:
     def __init__(self, repo_id, local_dir, token, repo_type="dataset", private=False,
-                 run_id="run", push_interval_s=1800, max_req_hour=120, retry_max=6,
-                 verbose=True):
+                 run_id="run", push_interval_s=1800, max_upload_calls_hour=24,
+                 retry_max=6, verbose=True):
         from huggingface_hub import HfApi
+        if not token:
+            raise RuntimeError("HF_TOKEN is missing. Add it under Kaggle > Add-ons > Secrets.")
         self.api = HfApi(token=token); self.token = token
         self.repo_id = repo_id; self.repo_type = repo_type; self.private = private
         self.run_id = run_id
         self.local = Path(local_dir); self.local.mkdir(parents=True, exist_ok=True)
-        self.interval = push_interval_s
-        self.bucket = TokenBucket(max_req_hour)
+        self.interval = max(300, int(push_interval_s))
+        self.limiter = RollingLimiter(max_upload_calls_hour)
         self.retry_max = retry_max; self.verbose = verbose
-        self._last_push = 0.0
-        self._flag = threading.Event(); self._stop = threading.Event()
-        self._lock = threading.Lock()
-        self._pushes = 0; self._failures = 0
-        self.history = self.local / "history.jsonl"
-        self.state_path = self.local / "state.json"
+        self._last_push = time.time(); self._dirty = threading.Event()
+        self._force = threading.Event(); self._wake = threading.Event()
+        self._stop = threading.Event(); self._upload_lock = threading.Lock()
+        self._log_lock = threading.Lock(); self._dirty_lock = threading.Lock()
+        self._dirty_generation = 0; self._before_final = None
+        self._pushes = 0; self._failures = 0; self._closed = False
+        self.history = self.local / "sync_history.jsonl"
+        self.state_path = self.local / "sync_state.json"
         self._ensure_repo(); self._install_handlers()
         self._thread = threading.Thread(target=self._loop, daemon=True, name="hf-uploader")
         self._thread.start()
-        self.log("sync_started", repo=self.repo_id, private=self.private)
+        self.log("sync_started", repo=self.repo_id, private=self.private,
+                 interval_s=self.interval, sync_version=SYNC_VERSION)
 
     def _ensure_repo(self):
         from huggingface_hub import create_repo
         create_repo(self.repo_id, repo_type=self.repo_type, private=self.private,
                     exist_ok=True, token=self.token)
-        if not self.private:
-            try:
-                self.api.update_repo_visibility(self.repo_id, private=False,
-                                                repo_type=self.repo_type, token=self.token)
-            except Exception:
-                pass
 
     @property
     def url(self):
         kind = "datasets/" if self.repo_type == "dataset" else ""
         return "https://huggingface.co/" + kind + self.repo_id
 
-    def log(self, event, **kw):
+    def recently_pushed(self, seconds=10):
+        return self._pushes > 0 and (time.time() - self._last_push) <= float(seconds)
+
+    def log(self, event, _mark_dirty=True, **kw):
         rec = {"ts": datetime.now(timezone.utc).isoformat(), "run": self.run_id, "event": event}
         rec.update(kw)
         try:
-            with open(self.history, "a") as f:
-                f.write(json.dumps(rec, default=str) + "\n")
+            with self._log_lock, open(self.history, "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec, default=str) + "\n"); f.flush()
         except Exception:
             pass
+        if _mark_dirty:
+            self._touch()
         if self.verbose and event not in ("heartbeat",):
             print("  [" + event + "] " + " ".join(f"{k}={v}" for k, v in kw.items()))
 
+    def _touch(self):
+        with self._dirty_lock:
+            self._dirty_generation += 1; self._dirty.set()
+
+    def mark_dirty(self, reason=None):
+        if reason:
+            self.log("dirty", reason=reason)
+        else:
+            self._touch()
+
     def save_state(self, state):
-        tmp = self.state_path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(state, indent=2, default=str)); tmp.replace(self.state_path)
+        atomic_json(self.state_path, state); self._touch()
 
     def load_state(self, default=None):
         if self.state_path.exists():
             try:
-                return json.loads(self.state_path.read_text())
-            except Exception:
-                pass
+                return json.loads(self.state_path.read_text(encoding="utf-8"))
+            except Exception as e:
+                self.log("state_read_error", err=type(e).__name__)
         return default if default is not None else {}
 
     def pull(self, allow_patterns=None, into=None):
+        # Download into the real working folder. Call before producing new local files.
         from huggingface_hub import snapshot_download
+        target = Path(into or self.local); target.mkdir(parents=True, exist_ok=True)
         try:
-            self.bucket.take(1)
             p = snapshot_download(self.repo_id, repo_type=self.repo_type, token=self.token,
-                                  local_dir=str(into or self.local),
-                                  allow_patterns=allow_patterns)
-            self.log("resume_pull_ok", path=str(p)); return True
+                                  local_dir=str(target), allow_patterns=allow_patterns,
+                                  max_workers=4)
+            self.log("resume_pull_ok", _mark_dirty=False, path=str(p), patterns=allow_patterns)
+            return True
         except Exception as e:
-            self.log("resume_pull_empty", err=type(e).__name__); return False
+            self.log("resume_pull_empty", _mark_dirty=False,
+                     err=f"{type(e).__name__}: {str(e)[:240]}")
+            return False
+
+    def set_before_final_flush(self, callback):
+        # Trainer registers an atomic emergency-checkpoint callback while it is active.
+        self._before_final = callback
 
     def stage_done(self, name, **kw):
-        self.log("stage_done", stage=name, **kw); self._flag.set()
+        self.log("stage_done", stage=name, **kw)
+        self._force.set(); self._wake.set()
+
+    def _run_final_hook(self):
+        cb = self._before_final
+        if cb is not None:
+            try:
+                cb()
+            except Exception as e:
+                self.log("final_checkpoint_error", err=f"{type(e).__name__}: {e}")
 
     def _do_upload(self, msg):
         from huggingface_hub import upload_folder
         for attempt in range(self.retry_max):
-            if not self.bucket.take(1, block=True, timeout=1800):
-                self.log("rate_limited_giveup"); return False
+            if not self.limiter.take(timeout=1800):
+                self.log("upload_call_limit_timeout"); return False
             try:
-                upload_folder(folder_path=str(self.local), repo_id=self.repo_id,
-                              repo_type=self.repo_type, token=self.token,
-                              commit_message=msg,
-                              ignore_patterns=["*.tmp", "**/__pycache__/**", ".git*",
-                                               "*.lock", ".cache/**"])
+                info = upload_folder(folder_path=str(self.local), repo_id=self.repo_id,
+                                     repo_type=self.repo_type, token=self.token,
+                                     commit_message=msg,
+                                     ignore_patterns=["*.tmp", "**/__pycache__/**", ".git*",
+                                                      "*.lock", ".cache/**"])
                 self._pushes += 1; self._last_push = time.time()
-                self.log("push_ok", n=self._pushes, msg=msg); return True
+                meta = {"last_push_utc": datetime.now(timezone.utc).isoformat(),
+                        "pushes_this_session": self._pushes,
+                        "last_commit": str(getattr(info, "oid", "")), "message": msg}
+                atomic_json(self.local / "last_push.json", meta)
+                self.log("push_ok", _mark_dirty=False, n=self._pushes,
+                         commit=meta["last_commit"], msg=msg)
+                return True
             except Exception as e:
                 self._failures += 1
                 wait = min(300, (2 ** attempt) * 5) * (0.7 + 0.6 * random.random())
                 self.log("push_retry", attempt=attempt + 1,
-                         err=f"{type(e).__name__}: {e}", sleep=round(wait, 1))
+                         err=f"{type(e).__name__}: {str(e)[:500]}", sleep=round(wait, 1))
                 time.sleep(wait)
         self.log("push_failed_permanently", msg=msg); return False
 
-    def flush(self, final=False, msg=None):
-        with self._lock:
+    def flush(self, final=False, msg=None, force=False, run_final_hook=False):
+        if run_final_hook:
+            self._run_final_hook()
+        if not self._dirty.is_set() and not force:
+            return True
+        with self._upload_lock:
+            if not self._dirty.is_set() and not force:
+                return True
+            with self._dirty_lock:
+                generation = self._dirty_generation
             stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
-            m = msg or ((self.run_id + " final") if final else (self.run_id + " @ " + stamp + "Z"))
-            ok = self._do_upload(m); self._flag.clear(); return ok
+            label = "final" if final else "checkpoint"
+            message = msg or f"{self.run_id} {label} @ {stamp}Z"
+            ok = self._do_upload(message)
+            if ok:
+                self._force.clear()
+                with self._dirty_lock:
+                    if self._dirty_generation == generation:
+                        self._dirty.clear()
+            return ok
 
     def _loop(self):
         while not self._stop.is_set():
-            self._stop.wait(20)
+            remaining = max(1.0, self.interval - (time.time() - self._last_push))
+            self._wake.wait(min(30.0, remaining)); self._wake.clear()
             if self._stop.is_set():
                 break
+            forced = self._force.is_set()
             due = (time.time() - self._last_push) >= self.interval
-            want = self._flag.is_set()
-            if due or want:
+            if self._dirty.is_set() and (due or forced):
                 try:
-                    tag = "stage" if want else "periodic"
-                    self.flush(msg=self.run_id + " " + tag + " @ " +
+                    tag = "major-stage" if forced else "periodic-30min"
+                    self.flush(msg=f"{self.run_id} {tag} @ " +
                                datetime.now(timezone.utc).strftime("%H:%M") + "Z")
                 except Exception as e:
-                    self.log("loop_error", err=str(e))
+                    self.log("loop_error", err=f"{type(e).__name__}: {e}")
 
     def _install_handlers(self):
         def handler(signum, frame):
             self.log("interrupt", signal=int(signum))
             try:
-                self.flush(final=True, msg=self.run_id + " interrupted (sig " + str(signum) + ")")
+                self.flush(final=True, force=True, run_final_hook=True,
+                           msg=f"{self.run_id} interrupted (signal {signum})")
             finally:
                 if signum == signal.SIGINT:
                     raise KeyboardInterrupt
+                raise SystemExit(128 + int(signum))
         for sig in (signal.SIGINT, signal.SIGTERM):
             try:
                 signal.signal(sig, handler)
@@ -225,13 +288,15 @@ class HFSync:
         atexit.register(self.close)
 
     def close(self):
-        if self._stop.is_set():
+        if self._closed:
             return
-        self.log("closing"); self._stop.set()
+        self._closed = True; self.log("closing")
+        self._stop.set(); self._wake.set()
         try:
-            self.flush(final=True)
-        except Exception:
-            pass
+            self._thread.join(timeout=5)
+            self.flush(final=True, force=self._dirty.is_set(), run_final_hook=True)
+        except Exception as e:
+            print("Final Hugging Face sync failed:", type(e).__name__, e)
 '''
 
 # --------------------------------------------------------------------------- data
@@ -254,7 +319,7 @@ FS       = 128
 # asserts it after import, because writing a .py and importing it is NOT idempotent inside
 # one kernel: Python caches the module in sys.modules, so a second run silently keeps the
 # first version. That is how a stale .npz loader survived a rebuilt notebook once already.
-LIB_VERSION = 3
+LIB_VERSION = 4
 WINDOW   = 1024          # 8.0 s, frozen to Chowdhury et al. 2024 section 2.3.4
 HOP_TRAIN = 512          # 50 % overlap on train only
 SCENARIOS = ["Resting", "Valsalva", "Apnea", "Tilt-up", "Tilt-down"]
@@ -358,8 +423,13 @@ class WindowDataset:
         self.channels = channels or CHANNELS
         self.rows = [ROW[c] for c in self.channels]
         self.augment = augment
-        self.rng = np.random.RandomState(seed)
+        self.seed = int(seed); self.epoch = 0
         self._cache = {}
+
+    def set_epoch(self, epoch):
+        # Augmentation is a pure function of (seed, epoch, index). With workers restarted
+        # each epoch, an interrupted epoch can replay and skip batches byte-for-byte.
+        self.epoch = int(epoch)
 
     def __len__(self):
         return len(self.index)
@@ -388,10 +458,12 @@ class WindowDataset:
         pk = z.one("peak_map", s, e)
         rr = z.one("rr_ms", s, e) / 1000.0                           # seconds, O(1) scale
         if self.augment:
-            if self.rng.rand() < 0.5:
-                x = x + self.rng.randn(*x.shape).astype(np.float32) * 0.01
-            if self.rng.rand() < 0.3:
-                g = np.float32(1.0 + 0.1 * self.rng.randn())
+            rng = np.random.RandomState(np.random.SeedSequence(
+                [self.seed, self.epoch, int(i)]).generate_state(1)[0])
+            if rng.rand() < 0.5:
+                x = x + rng.randn(*x.shape).astype(np.float32) * 0.01
+            if rng.rand() < 0.3:
+                g = np.float32(1.0 + 0.1 * rng.randn())
                 x = x * g
         return (torch.from_numpy(np.ascontiguousarray(x)),
                 torch.from_numpy(y)[None, :],

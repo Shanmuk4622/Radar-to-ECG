@@ -29,6 +29,9 @@ because it is fashionable.
 
 ## ⚠️ Accelerator: **GPU T4 × 2**, Internet **On**, `HF_TOKEN` attached
 
+Please also attach NB02's saved output with **+ Add Input → Notebook Output** before Run All.
+The notebook verifies the mounted corpus and only downloads from HF when that input is absent.
+
 ## The ablation ladder
 
 This notebook does not just train one model. It trains the **ladder** from `PLAN.md` §7, so the
@@ -47,29 +50,51 @@ architecture":
 10. Full, Transformer bottleneck instead of SSM — the fair-fight control for C3
 
 Same queue machinery as NB03: completed runs are skipped, the session stops cleanly at the time
-budget, and re-running continues. **`QUICK = True` first** — one fold, 25 epochs, ~1 h, and it
-proves the whole ladder runs.
+budget, and re-running continues. **`QUICK = True` first** — the full model, one fold, 10 epochs,
+roughly 30–75 minutes. The earlier smoke cells exercise every ladder variant before this run.
 
 ## On `mamba-ssm`
 
 The SSM here is **pure PyTorch** (S4D-Lin as an FFT convolution). It needs no `nvcc`, no custom
 CUDA kernel, and it always builds on Kaggle — which the official `mamba-ssm` package frequently
 does not. Set `CFG["BOTTLENECK"] = "transformer"` for the attention control. Both are in the ladder.
+
+## Cell-by-cell run guide
+
+| Code cell | What runs | Typical time |
+|---:|---|---:|
+| 1 | Configuration | < 5 s |
+| 2 | Imports, dependency, dual-GPU and disk checks | 1–3 min |
+| 3 | Write/import all versioned model/training libraries | 10–30 s |
+| 4 | HF login and restore lightweight resume metadata | 1–5 min |
+| 5 | Mount attached NB02 corpus or download fallback | < 1 min mounted; 3–12 min fallback |
+| 6 | Smoke every architecture; parameters, memory and gradients | 5–15 min |
+| 7 | Probe each composite-loss term and head gradient | 2–8 min |
+| 8 | Build ablation plus A–F experiment queue | < 10 s |
+| 9 | Define split/dataset/recording-safe evaluation helpers | < 10 s |
+| 10 | Train/evaluate queue; exact mid-epoch checkpointing | quick: 30–75 min; full: many 10.5 h sessions |
+| 11 | Merge NB03 baseline and produce ablation tables | 1–5 min |
+| 12 | Draw curves and ablation figures | 2–8 min |
+| 13 | Final blocking HF upload and run summary | 2–15 min |
+
+The training cell prints per-epoch ETA. Full mode includes five folds, LOSO subjects, and held-out
+scenarios, so it is intentionally resumed across multiple Kaggle sessions.
 """)
 
 md("---\n# 1 · Configuration")
 
 code(r'''
 CFG = {
-    "SRC_REPO":  "Shanmuk4622/cr-rvs-radar-ecg-processed",
-    "DST_REPO":  "Shanmuk4622/cardiomamba-net",
+    "SRC_REPO":  "Shanmuk4622/cr-rvs-radar-ecg-processed-v2",
+    "BASELINE_REPO": "Shanmuk4622/cardiomamba-baselines-v2",
+    "DST_REPO":  "Shanmuk4622/cardiomamba-net-v2",
     "HF_PRIVATE": False,
-    "RUN_ID":    "nb04_cardiomamba_v1",
+    "RUN_ID":    "nb04_cardiomamba_v2",
 
     "WORK":    "/kaggle/working/nb04",
     "SCRATCH": "/kaggle/temp/nb04",
     "PUSH_INTERVAL_S": 30 * 60,
-    "HF_MAX_REQ_HOUR": 120,
+    "HF_MAX_UPLOADS_HOUR": 24,
 
     # ---- architecture (target: < 5 M params, < 1.5 GFLOPs per 8 s window) ----
     "CHANNELS_FULL": ["I", "Q", "phi", "dy", "vel", "acc", "amp", "cardiac"],   # C1
@@ -97,15 +122,21 @@ CFG = {
     "WEIGHT_DECAY": 1e-4,
     "AMP":      True,
     "MULTI_GPU": True,
+    "REQUIRE_DUAL_T4": True,
     "SEED":     1337,
+    "LOG_EVERY": 25,
+    "CHECKPOINT_EVERY_STEPS": 50,
+    "CHECKPOINT_EVERY_S": 300,
 
     # ---- queue ---------------------------------------------------------------
     "EXPERIMENT":  "B_rva",      # the ablation ladder runs on the headline experiment
     "EXTRA_EXPERIMENTS": ["A_resting", "A_valsalva", "A_apnea", "C_all5"],  # full model only
+    "RUN_LOSO": True,                 # Experiment D: one full-model run per retained subject
+    "RUN_CROSS_SCENARIO": True,       # Experiment F: one held-out scenario per run
     "N_FOLDS":     5,
     "TIME_BUDGET_H": 10.5,
     "QUICK": True,
-    "QUICK_EPOCHS": 25,
+    "QUICK_EPOCHS": 10,
     "QUICK_FOLDS": 1,
 }
 import json
@@ -123,7 +154,8 @@ def _pip(*p):
     miss = [x for x in p if importlib.util.find_spec(x.replace("-", "_")) is None]
     if miss:
         print("installing:", miss)
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=False)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=True)
+        for x in miss: __import__(x.replace("-", "_"))
 _pip("pyarrow", "huggingface_hub")
 
 import numpy as np, pandas as pd, torch
@@ -140,6 +172,9 @@ if torch.cuda.is_available():
     torch.backends.cudnn.benchmark = True
 else:
     print("  !! NO GPU -- set Accelerator to 'GPU T4 x2'. Training on CPU is impractical here.")
+if torch.cuda.device_count() < 2 or not all("T4" in torch.cuda.get_device_name(i)
+                                            for i in range(torch.cuda.device_count())):
+    raise RuntimeError("Select Kaggle Accelerator: GPU T4 x2, then restart and Run All.")
 ''')
 
 md(r"""
@@ -178,6 +213,9 @@ __ENGINE__
 for nm, src in MODULES.items():
     (WORK / nm).write_text(src)
     print(f"  {nm:<20} {len(src):>7,} chars")
+import hashlib
+MODULE_HASHES = {nm: hashlib.sha256(src.encode()).hexdigest() for nm, src in MODULES.items()}
+(WORK / "library_hashes.json").write_text(json.dumps(MODULE_HASHES, indent=2))
 
 # Purge before importing: Python caches modules in sys.modules, so re-running this cell
 # after updating the notebook would silently keep the previous version of the library.
@@ -186,7 +224,7 @@ for nm in MODULES:
     sys.modules.pop(nm[:-3], None)
 importlib.invalidate_caches()
 import crvs_data
-REQUIRED_LIB = 3
+REQUIRED_LIB = 4
 if getattr(crvs_data, "LIB_VERSION", 0) < REQUIRED_LIB:
     raise RuntimeError(
         f"\n{'='*74}\n  Stale crvs_data: version "
@@ -210,7 +248,8 @@ except Exception:
 from crvs_sync import HFSync
 sync = HFSync(repo_id=CFG["DST_REPO"], local_dir=WORK, token=HF_TOKEN, repo_type="model",
               private=CFG["HF_PRIVATE"], run_id=CFG["RUN_ID"],
-              push_interval_s=CFG["PUSH_INTERVAL_S"], max_req_hour=CFG["HF_MAX_REQ_HOUR"])
+              push_interval_s=CFG["PUSH_INTERVAL_S"],
+              max_upload_calls_hour=CFG["HF_MAX_UPLOADS_HOUR"])
 print("\nresults repo:", sync.url, "(public)")
 
 _M = {"f": False, "n": ""}
@@ -227,7 +266,7 @@ except Exception as e:
 
 sync.pull(allow_patterns=["*.json", "*.jsonl", "*.csv", "*.md",
                           "runs/**/summary.json", "runs/**/state.json", "results/*"])
-STATE = sync.load_state({"completed": [], "sessions": 0})
+STATE = sync.load_state({"completed": [], "sessions": 0, "version": 2})
 STATE["sessions"] = STATE.get("sessions", 0) + 1
 sync.save_state(STATE)
 print(f"session #{STATE['sessions']}  |  {len(STATE['completed'])} run(s) already complete")
@@ -236,15 +275,24 @@ MAJOR("00_setup")
 
 code(r'''
 from huggingface_hub import snapshot_download
-DATA = SCRATCH / "corpus"
-t0 = time.time()
-snapshot_download(CFG["SRC_REPO"], repo_type="dataset", token=HF_TOKEN, local_dir=str(DATA),
-                  allow_patterns=["recordings/*.npy", "recordings/*.json",
-                                  "recordings/*.npz",   # legacy corpus still works
-                                  "windows.parquet", "recordings.csv",
-                                  "norm_stats.json", "experiments.json"])
-print(f"corpus downloaded in {time.time()-t0:.0f}s")
+DATA = None
+input_root = Path("/kaggle/input")
+if input_root.exists():
+    for candidate in input_root.rglob("windows.parquet"):
+        if (candidate.parent / "recordings").exists() and (candidate.parent / "norm_stats.json").exists():
+            DATA = candidate.parent; break
+if DATA is not None:
+    print("using attached Kaggle NB02 output:", DATA)
+else:
+    DATA = SCRATCH / "corpus"; t0 = time.time()
+    print("NB02 output not attached; falling back to Hugging Face download.")
+    snapshot_download(CFG["SRC_REPO"], repo_type="dataset", token=HF_TOKEN, local_dir=str(DATA),
+                      allow_patterns=["recordings/*.npy", "recordings/*.json",
+                                      "recordings/*.npz", "windows.parquet", "recordings.csv",
+                                      "norm_stats.json", "experiments.json"], max_workers=4)
+    print(f"corpus downloaded in {time.time()-t0:.0f}s")
 W = pd.read_parquet(DATA / "windows.parquet")
+DATA_HASH = hashlib.sha256((DATA / "windows.parquet").read_bytes()).hexdigest()
 RECS = pd.read_csv(DATA / "recordings.csv")
 NORM = json.loads((DATA / "norm_stats.json").read_text())
 EXPINFO = json.loads((DATA / "experiments.json").read_text())
@@ -330,10 +378,18 @@ for nm, spec in VARIANTS.items():
     loss.backward()
     gn = sum(float(p.grad.norm()) for p in m.parameters() if p.grad is not None)
     p = count_params(m)
+    try:
+        from torch.utils.flop_counter import FlopCounterMode
+        with torch.no_grad(), FlopCounterMode(display=False) as fc:
+            m(x[:1])
+        gflops = float(fc.get_total_flops()) / 1e9
+    except Exception:
+        gflops = float("nan")
     heads = "+".join(k for k in ("wave", "peak", "rr") if k in out)
     ok = torch.isfinite(out["wave"]).all() and gn > 0 and math.isfinite(float(loss))
     budget.append({"variant": nm, "in_ch": len(spec["channels"]), "params": p,
-                   "mb": p * 4 / 2**20, "fwd_ms": dt, "ok": bool(ok)})
+                   "mb": p * 4 / 2**20, "fwd_ms_batch2": dt,
+                   "gflops_per_window": gflops, "ok": bool(ok)})
     print(f"{nm:<18}{len(spec['channels']):>4}{p:>12,}{p*4/2**20:>7.1f}{dt:>9.1f}  "
           f"{heads}  {'OK' if ok else 'FAIL'}")
     del m, out, loss
@@ -342,6 +398,7 @@ for nm, spec in VARIANTS.items():
         torch.cuda.empty_cache()
 
 B = pd.DataFrame(budget)
+BUDGET_BY_VARIANT = B.set_index("variant").to_dict("index")
 B.to_csv(WORK / "results" / "variant_budget.csv", index=False)
 if not B["ok"].all():
     raise RuntimeError("a variant failed its smoke test:\n" + B.to_string(index=False))
@@ -510,22 +567,33 @@ folds = list(range(CFG["QUICK_FOLDS"] if CFG["QUICK"] else CFG["N_FOLDS"]))
 EPOCHS = CFG["QUICK_EPOCHS"] if CFG["QUICK"] else CFG["EPOCHS"]
 
 QUEUE = []
-for vname in VARIANTS:                                  # ladder on B_rva
+queue_variants = ["L9_full"] if CFG["QUICK"] else list(VARIANTS)
+for vname in queue_variants:                            # ladder on B_rva
     for f in folds:
-        QUEUE.append({"run_id": f"{CFG['EXPERIMENT']}__{vname}__f{f}",
+        prefix = "quick__" if CFG["QUICK"] else ""
+        QUEUE.append({"run_id": f"{prefix}{CFG['EXPERIMENT']}__{vname}__f{f}",
                       "exp": CFG["EXPERIMENT"], "variant": vname, "fold": f})
 if not CFG["QUICK"]:                                    # full model everywhere else
     for exp in CFG["EXTRA_EXPERIMENTS"]:
         for f in folds:
             QUEUE.append({"run_id": f"{exp}__L9_full__f{f}", "exp": exp,
                           "variant": "L9_full", "fold": f})
+    if CFG["RUN_LOSO"]:
+        for lid in EXPINFO.get("loso_values", sorted(map(int, W["loso_id"].unique()))):
+            QUEUE.append({"run_id": f"D_loso__L9_full__s{lid}", "exp": "D_loso",
+                          "variant": "L9_full", "fold": int(lid)})
+    if CFG["RUN_CROSS_SCENARIO"]:
+        for sc in EXPINFO.get("cross_scenarios", sorted(W["scenario_canon"].unique())):
+            safe = str(sc).lower().replace("-", "_").replace(" ", "_")
+            QUEUE.append({"run_id": f"F_cross_{safe}__L9_full", "exp": f"F_cross:{sc}",
+                          "variant": "L9_full", "fold": 0})
 
 done = set(STATE.get("completed", []))
 todo = [q for q in QUEUE if q["run_id"] not in done]
 print(f"queue: {len(QUEUE)} run(s) | {len(done)} done | {len(todo)} remaining")
 print(f"epochs {EPOCHS} | folds {folds} | budget {CFG['TIME_BUDGET_H']} h")
 if CFG["QUICK"]:
-    print("\n>>> QUICK MODE: ladder only, 1 fold, 25 epochs. Then set QUICK=False.")
+    print("\n>>> QUICK MODE: full model only, 1 fold, 10 epochs. Then set QUICK=False.")
 print("\nnext up:")
 for q in todo[:10]:
     print("   ", q["run_id"])
@@ -539,6 +607,22 @@ from crvs_metrics import seg_metrics, detect_r_peaks, hrv_from_peaks, peak_detec
 
 def split_for(exp, fold, n_folds=None):
     n_folds = n_folds or CFG["N_FOLDS"]
+    if exp == "D_loso":
+        ids = EXPINFO.get("loso_values", sorted(map(int, W["loso_id"].unique())))
+        fold = int(fold); vid = ids[(ids.index(fold) + 1) % len(ids)]
+        sub = W[W["scenario_canon"].isin(EXPERIMENTS["C_all5"])]
+        tr = sub[~sub["loso_id"].isin([fold, vid])]
+        va = sub[(sub["loso_id"] == vid) & sub["no_overlap"]]
+        te = sub[(sub["loso_id"] == fold) & sub["no_overlap"]]
+        return tr, va, te
+    if exp.startswith("F_cross:"):
+        test_sc = exp.split(":", 1)[1]
+        scenarios = EXPINFO.get("cross_scenarios", list(EXPERIMENTS["C_all5"]))
+        val_sc = scenarios[(scenarios.index(test_sc) + 1) % len(scenarios)]
+        tr = W[~W["scenario_canon"].isin([test_sc, val_sc])]
+        va = W[(W["scenario_canon"] == val_sc) & W["no_overlap"]]
+        te = W[(W["scenario_canon"] == test_sc) & W["no_overlap"]]
+        return tr, va, te
     sub = W[W["scenario_canon"].isin(EXPERIMENTS[exp])]
     te_g, va_g = fold % n_folds, (fold + 1) % n_folds
     tr = sub[~sub["fold_group"].isin([te_g, va_g])]
@@ -549,9 +633,13 @@ def split_for(exp, fold, n_folds=None):
 
 def make_datasets(exp, fold, channels):
     tr, va, te = split_for(exp, fold)
-    norm = NORM.get(f"{exp}|{fold}")
+    if not exp.startswith("F_cross:"):
+        assert not (set(tr["subject"]) & set(te["subject"])), "SUBJECT LEAK train/test"
+        assert not (set(va["subject"]) & set(te["subject"])), "SUBJECT LEAK val/test"
+    norm_key = f"{exp}|{fold}" if not exp.startswith("F_cross:") else f"{exp}|0"
+    norm = NORM.get(norm_key)
     if norm is None:
-        raise RuntimeError(f"no normalisation stats for {exp}|{fold} -- re-run NB02")
+        raise RuntimeError(f"no normalisation stats for {norm_key} -- re-run NB02 v2")
     idx = [EXPINFO["channels"].index(c) for c in channels]
     sn = {"mean": [norm["mean"][i] for i in idx], "std": [norm["std"][i] for i in idx]}
     mk = lambda d, aug: WindowDataset(REC_DIR, d, sn, channels, augment=aug,
@@ -559,7 +647,8 @@ def make_datasets(exp, fold, channels):
     return mk(tr, True), mk(va, False), mk(te, False), (tr, va, te)
 
 def evaluate(Y, P, index, out_dir):
-    subs = index["subject"].to_numpy(); scen = index["scenario_canon"].to_numpy()
+    idx_frame = index.reset_index(drop=True)
+    subs = idx_frame["subject"].to_numpy(); scen = idx_frame["scenario_canon"].to_numpy()
     rows = []
     for i in range(len(Y)):
         m = seg_metrics(Y[i], P[i], FS)
@@ -572,19 +661,24 @@ def evaluate(Y, P, index, out_dir):
     agg = {c: float(dfw[c].mean()) for c in num}
     agg.update({c + "_std": float(dfw[c].std()) for c in num})
     hr = []
-    for s in pd.unique(subs):
-        sel = subs == s
-        if sel.sum() < 2:
+    for rid, grp in idx_frame.assign(_row=np.arange(len(idx_frame))).groupby("rec_id"):
+        grp = grp.sort_values("start"); pos = grp["_row"].to_numpy()
+        if len(pos) < 2:
             continue
-        yg = np.concatenate(Y[sel]); yp = np.concatenate(P[sel])
+        yg = np.concatenate(Y[pos]); yp = np.concatenate(P[pos])
         g = hrv_from_peaks(detect_r_peaks(yg, FS), FS)
         pr = hrv_from_peaks(detect_r_peaks(yp, FS), FS)
-        hr.append({"subject": s, **{f"gt_{k}": v for k, v in g.items()},
+        hr.append({"rec_id": rid, "subject": str(grp["subject"].iloc[0]),
+                   "scenario": str(grp["scenario_canon"].iloc[0]),
+                   **{f"gt_{k}": v for k, v in g.items()},
                    **{f"pr_{k}": v for k, v in pr.items()},
                    **peak_detection_scores(yg, yp, FS)})
     dfh = pd.DataFrame(hr)
     if len(dfh):
-        dfh.to_parquet(out_dir / "metrics_subjects.parquet", index=False)
+        dfh.to_parquet(out_dir / "metrics_recordings.parquet", index=False)
+        numeric = [c for c in dfh.columns if dfh[c].dtype.kind in "fi"]
+        dfh.groupby("subject", as_index=False)[numeric].mean().to_parquet(
+            out_dir / "metrics_subjects.parquet", index=False)
         for k in ("F1", "precision", "recall", "accuracy", "missed_rate", "timing_err_ms_median"):
             if k in dfh.columns:
                 agg["peak_" + k] = float(dfh[k].mean())
@@ -622,6 +716,13 @@ for qi, q in enumerate(todo, 1):
     print(f"[{qi}/{len(todo)}]  {rid}   ({el/3600:.2f} h elapsed)")
     print("=" * 78)
     try:
+        if (out / "state.json").exists() and not (out / "state.pt").exists():
+            print("  interrupted remote run found; restoring exact checkpoint...")
+            sync.pull(allow_patterns=[f"runs/{rid}/state.pt", f"runs/{rid}/best.pt",
+                                      f"runs/{rid}/state.json", f"runs/{rid}/run_config.json",
+                                      f"runs/{rid}/environment.json", f"runs/{rid}/*.jsonl",
+                                      f"runs/{rid}/*.csv", f"runs/{rid}/validation_windows/*",
+                                      f"runs/{rid}/validation_recordings/*"])
         tr_ds, va_ds, te_ds, (tri, vai, tei) = make_datasets(exp, fold, spec["channels"])
         print(f"  in_ch {len(spec['channels'])} | train {len(tr_ds):,} val {len(va_ds):,} "
               f"test {len(te_ds):,} | test subjects {sorted(tei['subject'].unique())}")
@@ -634,7 +735,22 @@ for qi, q in enumerate(todo, 1):
         tr = Trainer(model, loss_fn, out, rid, sync=sync, lr=CFG["LR"],
                      weight_decay=CFG["WEIGHT_DECAY"], epochs=EPOCHS,
                      patience=CFG["PATIENCE"], batch_size=CFG["BATCH"],
-                     num_workers=CFG["WORKERS"], amp=CFG["AMP"], multi_gpu=CFG["MULTI_GPU"])
+                     num_workers=CFG["WORKERS"], amp=CFG["AMP"], multi_gpu=CFG["MULTI_GPU"],
+                     log_every=CFG["LOG_EVERY"],
+                     checkpoint_every_steps=CFG["CHECKPOINT_EVERY_STEPS"],
+                     checkpoint_every_s=CFG["CHECKPOINT_EVERY_S"], seed=CFG["SEED"] + fold,
+                     require_dual_gpu=CFG["REQUIRE_DUAL_T4"],
+                     run_config={"experiment": exp, "variant": vname, "fold": fold,
+                                 "epochs": EPOCHS, "spec": spec, "base": CFG["BASE"],
+                                 "d_ssm": CFG["D_SSM"], "ssm_blocks": CFG["SSM_BLOCKS"],
+                                 "d_state": CFG["D_STATE"], "levels": CFG["LEVELS"],
+                                 "dropout": CFG["DROPOUT"], "loss_weights": CFG["W"],
+                                 "lr": CFG["LR"], "batch": CFG["BATCH"],
+                                 "seed": CFG["SEED"] + fold,
+                                 "data_index_sha256": DATA_HASH, "library_sha256": MODULE_HASHES,
+                                 "train_subjects": sorted(map(str, tri["subject"].unique())),
+                                 "val_subjects": sorted(map(str, vai["subject"].unique())),
+                                 "test_subjects": sorted(map(str, tei["subject"].unique()))})
         tr.load(); tr.fit(tr_ds, va_ds)
         Y, P = tr.predict(te_ds)
         agg, dfw = evaluate(Y, P, tei, out)
@@ -646,6 +762,8 @@ for qi, q in enumerate(todo, 1):
             "run_id": rid, "experiment": exp, "variant": vname, "fold": fold,
             "spec": {k: v for k, v in spec.items()},
             "params": count_params(tr.raw_model), "epochs_run": tr.state["epoch"],
+            "gflops_per_window": BUDGET_BY_VARIANT.get(vname, {}).get("gflops_per_window"),
+            "forward_ms_batch2": BUDGET_BY_VARIANT.get(vname, {}).get("fwd_ms_batch2"),
             "best_epoch": tr.state["best_epoch"], "best_val": tr.state["best"],
             "n_train": len(tr_ds), "n_val": len(va_ds), "n_test": len(te_ds),
             "test_subjects": sorted(map(str, tei["subject"].unique())),
@@ -657,7 +775,12 @@ for qi, q in enumerate(todo, 1):
               f"dRMSSD {agg.get('MAE_rmssd_ms', float('nan')):.1f} ms")
         done.add(rid); completed_now.append(rid)
         STATE["completed"] = sorted(done); sync.save_state(STATE)
-        sync.stage_done(f"run:{rid}", cc_t=round(agg["CC_temporal"], 2))
+        pushed = sync.flush(force=True, msg=f"{rid} complete CCt={agg['CC_temporal']:.2f}")
+        if pushed:
+            for name in ("state.pt", "best.pt"):
+                p = out / name
+                if p.exists(): p.unlink()
+            sync.log("local_checkpoints_pruned", run_id=rid, remote_copy=True)
         del tr, model, tr_ds, va_ds, te_ds, Y, P
         gc.collect()
         if torch.cuda.is_available():
@@ -683,7 +806,7 @@ The table the paper's Discussion is built on. Each rung adds one component; the 
 what that component is worth. This is what turns "our architecture is better" into "the SSM
 bottleneck contributes 3.2 points of temporal correlation".
 
-Rung 1 is pulled from NB03's runs if they are present in the same repo.
+Rung 1 is pulled from NB03's separate baseline v2 repo.
 """)
 
 code(r'''
@@ -696,8 +819,15 @@ for p in sorted((WORK / "runs").glob("*/summary.json")):
                      **{k: v for k, v in s["metrics"].items() if not k.endswith("_std")}})
     except Exception:
         pass
-# rung 1 comes from NB03
-for p in sorted(Path(CFG["WORK"]).parent.glob("nb03/runs/B_rva__multireslinknet__f*/summary.json")):
+# Rung 1 comes from NB03's separate v2 repo. Pull summaries only (not checkpoints).
+baseline_cache = SCRATCH / "baseline_compare"
+try:
+    snapshot_download(CFG["BASELINE_REPO"], repo_type="model", token=HF_TOKEN,
+                      local_dir=str(baseline_cache),
+                      allow_patterns=["runs/B_rva__multireslinknet__f*/summary.json"], max_workers=4)
+except Exception as e:
+    print("baseline summaries unavailable:", type(e).__name__, e)
+for p in sorted((baseline_cache / "runs").glob("B_rva__multireslinknet__f*/summary.json")):
     try:
         s = json.loads(p.read_text())
         rows.append({"experiment": s["experiment"], "variant": "L1_baseline_mse",

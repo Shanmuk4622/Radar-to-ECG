@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Generate 01_verify_and_download.ipynb -- stdlib only, no nbformat needed."""
 import json, sys, ast
+from nb_lib_a import HF_SYNC_SRC as SHARED_HF_SYNC_SRC
 
 C = []
 def _src(s):
@@ -56,10 +57,10 @@ public artifact on Hugging Face that every later notebook reads instead of re-sc
 | `previews/*.npz` | A 60-second full-rate excerpt from every file — enough to unit-test the whole preprocessing chain without touching the raw data again |
 | `decimated/*.npz` *(optional)* | The **entire corpus** decimated to 128 Hz, ~350 MB — makes NB02 nearly free |
 | `report.md` | Human-readable summary of everything above |
-| `history.jsonl` | Append-only event log — every step, every timing, every warning |
-| `state.json` | Resume state |
+| `sync_history.jsonl` | Append-only event log — every step, every timing, every warning |
+| `sync_state.json` | Resume state |
 
-All of it lands in a **public** HF dataset repo: `Shanmuk4622/cr-rvs-radar-ecg-inventory`
+All of it lands in a **public** HF dataset repo: `Shanmuk4622/cr-rvs-radar-ecg-inventory-v2`
 
 ---
 
@@ -84,15 +85,39 @@ token with **write** permission. Then make sure its toggle is **attached to this
 The token is never printed and never written to disk.
 
 **5. Run all cells, top to bottom.**
-Expect **15–40 minutes** depending on how fast the `.mat` files read. There is nothing to babysit.
+Expect **25–70 minutes** including the final upload. There is nothing to babysit.
+
+## Cell-by-cell run guide
+
+| Code cell | What runs | Typical time |
+|---:|---|---:|
+| 1 | Configuration only | < 5 s |
+| 2 | Imports, dependency check, folders, environment manifest | 1–3 min |
+| 3 | Write the shared resumable HF sync module | < 5 s |
+| 4 | Read HF_TOKEN, create/open v2 repo, restore prior outputs | 1–8 min |
+| 5 | Register major-cell upload hook | < 5 s |
+| 6 | Locate the attached Kaggle dataset (download fallback only) | 5 s mounted; 5–20 min fallback |
+| 7 | Walk the file tree and build its manifest | 1–4 min |
+| 8 | Raw-dataset gate/verdict | < 10 s |
+| 9–10 | Probe MATLAB schema and normalize variable access | 10–60 s total |
+| 11–12 | Define and unit-test signal-processing helpers | < 30 s total |
+| 13 | Define the per-recording census function | < 5 s |
+| 14 | Census every file; save previews and 128 Hz corpus | 15–45 min |
+| 15–16 | Paper cross-checks and quality summaries | 10–60 s total |
+| 17–20 | Generate all inventory/quality figures | 3–10 min total |
+| 21–22 | Write report, manifest, and dataset card | < 30 s total |
+| 23 | Blocking final HF upload and verification | 2–15 min |
+
+Times are estimates; the live census cell prints its own ETA. A hard Kaggle shutdown can lose at
+most the work since the last successful remote upload; a normal Stop/SIGINT triggers a final push.
 
 ---
 
 ## What happens if you stop it, or Kaggle kills the session
 
-Nothing is lost.
+Normal stops are protected; a sudden machine loss can recover only the last successful push.
 
-- Progress is checkpointed to `state.json` **after every file**.
+- Progress is checkpointed to `sync_state.json` **after every file**.
 - A background uploader pushes to Hugging Face **at most once every 30 minutes**, and additionally
   **the moment a major stage finishes**.
 - Pressing **stop**, or a `SIGTERM` from Kaggle, triggers an **immediate final push** before the
@@ -100,9 +125,8 @@ Nothing is lost.
 - On restart, the notebook pulls the run folder back down from HF and **skips every file already
   censused**. Re-running from scratch after an interruption costs you nothing.
 
-HF's API allows ~128 requests/hour. Every push is batched into **one** `upload_folder` call behind a
-token-bucket limiter set to 120/hour, with exponential backoff on 429. You cannot get rate-limited
-by running this normally.
+A folder upload can itself make several API requests, so the scheduler permits only 24 upload
+calls/hour, spaces them, batches files and backs off with jitter.
 
 ---
 
@@ -139,10 +163,10 @@ CFG = {
 
     # ---- destination (PUBLIC Hugging Face dataset repo) ------------------
     "HF_USER":          "Shanmuk4622",
-    "HF_REPO":          "Shanmuk4622/cr-rvs-radar-ecg-inventory",
+    "HF_REPO":          "Shanmuk4622/cr-rvs-radar-ecg-inventory-v2",
     "HF_REPO_TYPE":     "dataset",
     "HF_PRIVATE":       False,                      # <-- public, as requested
-    "RUN_ID":           "nb01_inventory_v1",
+    "RUN_ID":           "nb01_inventory_v2",
 
     # ---- local paths ----------------------------------------------------
     "WORK":             "/kaggle/working/nb01",     # small, pushed to HF, 20 GB budget
@@ -150,7 +174,7 @@ CFG = {
 
     # ---- HF sync policy (your standing rules) ---------------------------
     "PUSH_INTERVAL_S":  30 * 60,                    # at most one push per 30 minutes
-    "HF_MAX_REQ_HOUR":  120,                        # below the 128/hr ceiling, deliberately
+    "HF_MAX_UPLOADS_HOUR": 24,                       # calls/hour; each call may make many requests
     "HF_RETRY_MAX":     6,
 
     # ---- signal-processing constants (FROZEN to the baseline paper) -----
@@ -164,7 +188,7 @@ CFG = {
     # ---- census options -------------------------------------------------
     "PREVIEW_SECONDS":  60,                         # full-rate excerpt saved per file
     "SAVE_DECIMATED":   True,                       # dump whole corpus at TARGET_FS
-    "CHECKPOINT_EVERY": 1,                          # files between state.json writes
+    "CHECKPOINT_EVERY": 1,                          # files between sync_state.json writes
     "SMOKE_TEST":       False,                      # True -> only 6 files, ~2 min
     "SMOKE_N":          6,
     "SEED":             1337,
@@ -227,7 +251,9 @@ def _pip(*pkgs):
             missing.append(p)
     if missing:
         print("installing:", missing)
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *missing], check=False)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *missing], check=True)
+        for p in missing:
+            __import__(p)
 
 _pip("pyarrow", "huggingface_hub", "scipy")
 
@@ -293,13 +319,13 @@ to `hf_sync.py` in the working directory. NB02–NB05 will import it rather than
 
 | Rule | How it is enforced |
 |---|---|
-| Push **at most** once per 30 min | `Uploader` thread wakes every 20 s, pushes only if `PUSH_INTERVAL_S` has elapsed **or** a stage flagged itself |
+| Periodic push every 30 min when dirty | Background worker tracks the last successful upload |
 | Push **immediately** when a major stage finishes | `sync.stage_done("name")` sets the flag and wakes the thread |
 | Push **immediately** when you stop execution | `SIGINT` + `SIGTERM` handlers and `atexit`, all routed to a blocking `flush(final=True)` |
-| Never exceed the API rate limit | `TokenBucket(120/hr)`; each flush is **one** `upload_folder` call, not one call per file |
+| Stay well below the API limit | Rolling limiter allows 24 folder-upload calls/hour |
 | Survive a 429 or a network blip | exponential backoff, 6 attempts, jittered |
-| Resume exactly where it stopped | `pull()` does `snapshot_download` into `WORK` on startup; `state.json` records completed work |
-| Lose no detail | every event appended to `history.jsonl`, which is itself pushed |
+| Resume exactly where it stopped | `pull()` restores payloads before `sync_state.json` is trusted |
+| Lose no logged detail | every event is appended to `sync_history.jsonl` |
 
 ### A note on the interrupt path
 
@@ -547,15 +573,17 @@ sync = HFSync(
     private         = CFG["HF_PRIVATE"],
     run_id          = CFG["RUN_ID"],
     push_interval_s = CFG["PUSH_INTERVAL_S"],
-    max_req_hour    = CFG["HF_MAX_REQ_HOUR"],
+    max_upload_calls_hour = CFG["HF_MAX_UPLOADS_HOUR"],
     retry_max       = CFG["HF_RETRY_MAX"],
 )
 
 print("\nrepo :", sync.url, "(public)" if not CFG["HF_PRIVATE"] else "(private)")
 
-# Resume: pull back everything except the bulky arrays, which we never need to re-read.
-sync.pull(allow_patterns=["*.json", "*.jsonl", "*.csv", "*.md", "*.parquet", "figures/*"])
-STATE = sync.load_state({"done_files": [], "stages": {}, "version": 1})
+# Resume: restore the evidence arrays too. A fresh Kaggle kernel has an empty /working folder;
+# trusting only a "done" bit without its corresponding file would create an incomplete corpus.
+sync.pull(allow_patterns=["*.json", "*.jsonl", "*.csv", "*.md", "*.parquet",
+                          "figures/*", "previews/*", "decimated/*", "logs/*"])
+STATE = sync.load_state({"done_files": [], "stages": {}, "version": 2})
 print("resuming with", len(STATE["done_files"]), "files already censused")
 ''')
 
@@ -1354,7 +1382,7 @@ ECG R-peak train, plus the correlation peak height — the dataset paper reports
 an implausible lag is a file to investigate rather than silently train on
 **Quality flags** a list of everything suspicious, so NB02 can exclude on evidence rather than vibes
 
-**Resumability:** `state.json` is rewritten after every file. If the session dies at file 180 of 250,
+**Resumability:** `sync_state.json` is rewritten after every file. If the session dies at file 180 of 250,
 the restart pulls the state back from HF and starts at 181. The background uploader keeps the remote
 copy fresh on the 30-minute cadence throughout.
 
@@ -2104,15 +2132,15 @@ A("| `previews/*.npz` | 60 s full-rate excerpt per recording |")
 A("| `decimated/*.npz` | whole corpus at 128 Hz " + ("(present)" if CFG["SAVE_DECIMATED"] else "(disabled)") + " |")
 A("| `figures/*.png` | 8 diagrams |")
 A("| `unit_tests.json` | ellipse / peak-detector / demodulation self-tests |")
-A("| `history.jsonl` | append-only event log |")
-A("| `state.json` | resume state |")
+A("| `sync_history.jsonl` | append-only event log |")
+A("| `sync_state.json` | resume state |")
 A("| `run_manifest.json` | environment, versions, config |")
 A("| `hf_sync.py` | the resumable uploader, reused by NB02–NB05 |")
 A("")
 A("## 5. Next\n")
 A("`02_preprocess_to_hf.ipynb` — build the 8-channel windowed training corpus from `decimated/`, "
   "with subject-wise and LOSO fold assignments baked in, and push it to "
-  "`Shanmuk4622/cr-rvs-radar-ecg-processed`.\n")
+  "`Shanmuk4622/cr-rvs-radar-ecg-processed-v2`.\n")
 
 (WORK / "report.md").write_text("\n".join(lines))
 print("\n".join(lines[:60]))
@@ -2222,7 +2250,7 @@ ok = sync.flush(final=True, msg=f"{CFG['RUN_ID']} complete -- {len(INV)} records
                                 f"verdict={VERDICT['verdict']}")
 
 print("\n" + "=" * 78)
-print("  DONE" if ok else "  DONE (final push reported a problem -- check history.jsonl)")
+print("  DONE" if ok else "  DONE (final push reported a problem -- check sync_history.jsonl)")
 print("=" * 78)
 print(f"  repo     : {sync.url}")
 print(f"  public   : {not CFG['HF_PRIVATE']}")
@@ -2252,8 +2280,8 @@ with the *write* role and replace the secret.
 
 **`429 Too Many Requests`**
 Handled automatically — the uploader backs off and retries six times. If you see it repeatedly, you
-are probably running several notebooks against HF at once. `CFG["HF_MAX_REQ_HOUR"]` is already set to
-120 against a ceiling of 128; lower it to 60 if you need headroom.
+are probably running several notebooks against HF at once. Stop the other notebook, wait ten
+minutes, and retry; the 24-call/hour limiter and backoff are automatic.
 
 **No `.mat` files found**
 You most likely skipped step 3 of the run instructions. Add the dataset as an Input:
@@ -2271,7 +2299,7 @@ missing, run `!pip install h5py` and re-run.
 `CFG["SAVE_DECIMATED"] = False` and re-run — the decimated dump is the only large output.
 
 **Session died mid-census**
-Just re-run the notebook from the top. It pulls `state.json` back from HF and skips every file
+Just re-run the notebook from the top. It pulls `sync_state.json` and payload files back from HF and skips every file
 already processed. This is the designed path, not a recovery hack.
 
 **Kernel restarts without warning during the census**
@@ -2290,7 +2318,7 @@ and I will build the remaining four notebooks:
 
 | Notebook | Job |
 |---|---|
-| `02_preprocess_to_hf` | 8-channel windowed corpus, subject-wise + LOSO fold assignment, pushed to `cr-rvs-radar-ecg-processed` |
+| `02_preprocess_to_hf` | 8-channel windowed corpus, subject-wise + LOSO fold assignment, pushed to `cr-rvs-radar-ecg-processed-v2` |
 | `03_baselines` | FPN-1D, UNet-1D, LinkNet-1D, MultiResLinkNet — the Week-2 reproduction gate |
 | `04_cardiomamba_train` | C1–C5, dual-T4, the full ablation ladder |
 | `05_evaluate_and_figures` | All metrics, Bland–Altman, Wilcoxon, every paper figure |
@@ -2298,6 +2326,21 @@ and I will build the remaining four notebooks:
 Each one reuses `hf_sync.py` from this repo, so the 30-minute cadence, the stage-boundary push, the
 interrupt push and the resume behaviour are identical everywhere.
 """)
+
+# NB01 historically carried its own older sync implementation. Replace that generated cell with
+# the exact shared v2 source used by NB02-NB05, keeping one auditable recovery contract.
+_shared_sync_cell = f'''HF_SYNC_SRC = {SHARED_HF_SYNC_SRC!r}
+(WORK / "hf_sync.py").write_text(HF_SYNC_SRC, encoding="utf-8")
+sys.path.insert(0, str(WORK))
+print("wrote", WORK / "hf_sync.py", f"({{len(HF_SYNC_SRC)}} chars), sync v2")'''
+_matches = 0
+for _cell in C:
+    _body = "".join(_cell.get("source", []))
+    if _cell.get("cell_type") == "code" and "HF_SYNC_SRC = r\"\"\"" in _body:
+        ast.parse(_shared_sync_cell)
+        _cell["source"] = _src(_shared_sync_cell)
+        _matches += 1
+assert _matches == 1, f"expected one embedded sync cell, found {_matches}"
 
 nb = {
     "cells": C,

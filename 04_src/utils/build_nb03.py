@@ -40,6 +40,9 @@ Everything else is theirs: **1 input channel** (the arctangent-demodulated displ
 
 *Session options → Accelerator → **GPU T4 x2***, Internet **On**, `HF_TOKEN` secret attached.
 
+Before Run All, please click **+ Add Input → Notebook Output** and attach NB02's saved output.
+That read-only Kaggle mount is the preferred corpus source; Hugging Face is only the fallback.
+
 Both GPUs are used through `DataParallel`. AMP (mixed precision) is on, which roughly doubles
 throughput on T4s and halves memory.
 
@@ -53,23 +56,43 @@ through as many as fit in `TIME_BUDGET_H`. Then it pushes and stops cleanly. **S
 and run it again** — it picks up exactly where it left off. Three or four sessions completes the
 matrix. Nothing is ever recomputed.
 
-Start with `QUICK = True`: one fold, 25 epochs, ~40 minutes, and it proves the whole path end to
+Start with `QUICK = True`: MultiResLinkNet on one fold for 10 epochs, ~20–45 minutes, and it proves the whole path end to
 end. Then set it `False` and let the queue run.
+
+## Cell-by-cell run guide
+
+| Code cell | What runs | Typical time |
+|---:|---|---:|
+| 1 | Configuration | < 5 s |
+| 2 | Imports, dependency, dual-GPU and disk checks | 1–3 min |
+| 3 | Write/import the versioned shared libraries | 10–30 s |
+| 4 | HF login; restore run summaries and resume markers | 1–5 min |
+| 5 | Mount attached NB02 corpus or download fallback | < 1 min mounted; 3–12 min fallback |
+| 6 | Forward/backward smoke test all four baselines | 2–8 min |
+| 7 | Build the resumable run queue | < 10 s |
+| 8 | Define split, dataset, and recording-safe evaluation helpers | < 10 s |
+| 9 | Train/evaluate queued runs; checkpoint every 5 min/50 steps | quick: 20–45 min; full: many 10.5 h sessions |
+| 10 | Assemble the reproduction table | < 1 min |
+| 11 | Draw learning curves and comparison figures | 1–5 min |
+| 12 | Write report/card and final upload | 2–15 min |
+
+The training cell prints epoch time and ETA after its first epoch. **Full mode is deliberately a
+multi-session queue**; each session stops at 10.5 hours, pushes, and resumes on the next Run All.
 """)
 
 md("---\n# 1 · Configuration")
 
 code(r'''
 CFG = {
-    "SRC_REPO":  "Shanmuk4622/cr-rvs-radar-ecg-processed",   # NB02 output
-    "DST_REPO":  "Shanmuk4622/cardiomamba-net",              # models + results (public)
+    "SRC_REPO":  "Shanmuk4622/cr-rvs-radar-ecg-processed-v2", # NB02 output
+    "DST_REPO":  "Shanmuk4622/cardiomamba-baselines-v2",       # isolated v2 runs
     "HF_PRIVATE": False,
-    "RUN_ID":    "nb03_baselines_v1",
+    "RUN_ID":    "nb03_baselines_v2",
 
     "WORK":    "/kaggle/working/nb03",
     "SCRATCH": "/kaggle/temp/nb03",
     "PUSH_INTERVAL_S": 30 * 60,
-    "HF_MAX_REQ_HOUR": 120,
+    "HF_MAX_UPLOADS_HOUR": 24,
 
     # ---- faithful reproduction of Chowdhury et al. 2024 ----------------------
     "CHANNELS":   ["dy"],        # THEIR input: one arctangent-demodulated displacement channel
@@ -87,15 +110,19 @@ CFG = {
     "WEIGHT_DECAY": 1e-4,
     "AMP":        True,
     "MULTI_GPU":  True,
+    "REQUIRE_DUAL_T4": True,
     "SEED":       1337,
+    "LOG_EVERY":  25,
+    "CHECKPOINT_EVERY_STEPS": 50,
+    "CHECKPOINT_EVERY_S": 300,
 
     # ---- the queue -----------------------------------------------------------
     "MODELS":      ["fpn", "unet", "linknet", "multireslinknet"],
     "EXPERIMENTS": ["B_rva", "A_resting", "A_valsalva", "A_apnea"],   # B first: it is the headline
     "N_FOLDS":     5,
     "TIME_BUDGET_H": 10.5,       # stop cleanly before Kaggle's 12 h wall
-    "QUICK":       True,         # <-- first run: 1 fold, 25 epochs. Then set False.
-    "QUICK_EPOCHS": 25,
+    "QUICK":       True,         # first run: one model/fold, 10 epochs. Then set False.
+    "QUICK_EPOCHS": 10,
     "QUICK_FOLDS":  1,
 }
 import json
@@ -113,7 +140,8 @@ def _pip(*p):
     miss = [x for x in p if importlib.util.find_spec(x.replace("-", "_")) is None]
     if miss:
         print("installing:", miss)
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=False)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=True)
+        for x in miss: __import__(x.replace("-", "_"))
 _pip("pyarrow", "huggingface_hub")
 
 import numpy as np, pandas as pd, torch
@@ -131,6 +159,9 @@ if torch.cuda.is_available():
 else:
     print("  !! NO GPU -- set Accelerator to 'GPU T4 x2' in Session options.")
     print("     The notebook will still run on CPU but training will be impractically slow.")
+if torch.cuda.device_count() < 2 or not all("T4" in torch.cuda.get_device_name(i)
+                                            for i in range(torch.cuda.device_count())):
+    raise RuntimeError("Select Kaggle Accelerator: GPU T4 x2, then restart and Run All.")
 ''')
 
 md(r"""
@@ -169,6 +200,9 @@ __ENGINE__
 for nm, src in MODULES.items():
     (WORK / nm).write_text(src)
     print(f"  {nm:<20} {len(src):>7,} chars")
+import hashlib
+MODULE_HASHES = {nm: hashlib.sha256(src.encode()).hexdigest() for nm, src in MODULES.items()}
+(WORK / "library_hashes.json").write_text(json.dumps(MODULE_HASHES, indent=2))
 
 # Writing a .py and importing it is NOT idempotent inside one kernel: Python caches the
 # module object in sys.modules, so re-running this cell after updating the notebook keeps
@@ -180,7 +214,7 @@ for nm in MODULES:
 importlib.invalidate_caches()
 
 import crvs_data
-REQUIRED_LIB = 3
+REQUIRED_LIB = 4
 if getattr(crvs_data, "LIB_VERSION", 0) < REQUIRED_LIB:
     raise RuntimeError(
         f"\n{'='*74}\n  Stale crvs_data: version "
@@ -206,7 +240,8 @@ except Exception:
 from crvs_sync import HFSync
 sync = HFSync(repo_id=CFG["DST_REPO"], local_dir=WORK, token=HF_TOKEN, repo_type="model",
               private=CFG["HF_PRIVATE"], run_id=CFG["RUN_ID"],
-              push_interval_s=CFG["PUSH_INTERVAL_S"], max_req_hour=CFG["HF_MAX_REQ_HOUR"])
+              push_interval_s=CFG["PUSH_INTERVAL_S"],
+              max_upload_calls_hour=CFG["HF_MAX_UPLOADS_HOUR"])
 print("\nresults repo:", sync.url, "(public)")
 
 _M = {"f": False, "n": ""}
@@ -225,7 +260,7 @@ except Exception as e:
 # finished runs never need their checkpoints re-downloaded, only their summary.json.
 sync.pull(allow_patterns=["*.json", "*.jsonl", "*.csv", "*.md", "runs/**/summary.json",
                           "runs/**/state.json", "results/*"])
-STATE = sync.load_state({"completed": [], "sessions": 0})
+STATE = sync.load_state({"completed": [], "sessions": 0, "version": 2})
 STATE["sessions"] = STATE.get("sessions", 0) + 1
 sync.save_state(STATE)
 print(f"session #{STATE['sessions']}  |  {len(STATE['completed'])} run(s) already complete")
@@ -242,16 +277,27 @@ into the 20 GB output budget that the checkpoints need.
 
 code(r'''
 from huggingface_hub import snapshot_download
-DATA = SCRATCH / "corpus"
-t0 = time.time()
-snapshot_download(CFG["SRC_REPO"], repo_type="dataset", token=HF_TOKEN, local_dir=str(DATA),
-                  allow_patterns=["recordings/*.npy", "recordings/*.json",
-                                  "recordings/*.npz",   # legacy corpus still works
-                                  "windows.parquet", "recordings.csv",
-                                  "norm_stats.json", "experiments.json"])
-print(f"corpus downloaded in {time.time()-t0:.0f}s")
+
+# Prefer NB02's saved Kaggle notebook output: it mounts instantly and costs no working disk.
+DATA = None
+input_root = Path("/kaggle/input")
+if input_root.exists():
+    for candidate in input_root.rglob("windows.parquet"):
+        if (candidate.parent / "recordings").exists() and (candidate.parent / "norm_stats.json").exists():
+            DATA = candidate.parent; break
+if DATA is not None:
+    print("using attached Kaggle NB02 output:", DATA)
+else:
+    DATA = SCRATCH / "corpus"; t0 = time.time()
+    print("NB02 output not attached; falling back to Hugging Face download.")
+    snapshot_download(CFG["SRC_REPO"], repo_type="dataset", token=HF_TOKEN, local_dir=str(DATA),
+                      allow_patterns=["recordings/*.npy", "recordings/*.json",
+                                      "recordings/*.npz", "windows.parquet", "recordings.csv",
+                                      "norm_stats.json", "experiments.json"], max_workers=4)
+    print(f"corpus downloaded in {time.time()-t0:.0f}s")
 
 W = pd.read_parquet(DATA / "windows.parquet")
+DATA_HASH = hashlib.sha256((DATA / "windows.parquet").read_bytes()).hexdigest()
 RECS = pd.read_csv(DATA / "recordings.csv")
 NORM = json.loads((DATA / "norm_stats.json").read_text())
 EXPINFO = json.loads((DATA / "experiments.json").read_text())
@@ -327,8 +373,16 @@ for nm in CFG["MODELS"]:
     loss.backward()
     gn = sum(float(p.grad.norm()) for p in m.parameters() if p.grad is not None)
     p = count_params(m)
+    try:
+        from torch.utils.flop_counter import FlopCounterMode
+        with torch.no_grad(), FlopCounterMode(display=False) as fc:
+            m(x[:1])
+        gflops = float(fc.get_total_flops()) / 1e9
+    except Exception:
+        gflops = float("nan")
     ok = (out["wave"].shape == y.shape and torch.isfinite(out["wave"]).all() and gn > 0)
-    rows.append({"model": nm, "params": p, "mb": p * 4 / 2**20, "ok": bool(ok)})
+    rows.append({"model": nm, "params": p, "mb": p * 4 / 2**20,
+                 "gflops_per_window": gflops, "forward_ms_batch4": dt, "ok": bool(ok)})
     print(f"{nm:<20}{p:>12,}{p*4/2**20:>8.1f}{str(tuple(out['wave'].shape)):>18}"
           f"{dt:>9.1f}  {'OK' if ok else 'FAIL'}")
     del m, out, loss
@@ -337,6 +391,7 @@ for nm in CFG["MODELS"]:
         torch.cuda.empty_cache()
 assert all(r["ok"] for r in rows), "a baseline failed its smoke test"
 pd.DataFrame(rows).to_csv(WORK / "results" / "model_budget.csv", index=False)
+BUDGET_BY_MODEL = pd.DataFrame(rows).set_index("model").to_dict("index")
 print("\nall four baselines forward, backward and produce finite output.")
 MAJOR("01_smoke")
 ''')
@@ -348,26 +403,29 @@ md(r"""
 Each entry is one (experiment, model, fold). Completed runs are read from HF state and skipped,
 so re-running the notebook in a fresh session simply continues.
 
-`QUICK = True` collapses this to one fold and 25 epochs — enough to confirm the whole path works
-and to see whether the losses look sane, without committing a full session.
+`QUICK = True` collapses this to one MultiResLinkNet/RVA fold and 10 epochs — enough to confirm
+the whole path works without letting a smoke run count as full training.
 """)
 
 code(r'''
 folds = range(CFG["QUICK_FOLDS"] if CFG["QUICK"] else CFG["N_FOLDS"])
 EPOCHS = CFG["QUICK_EPOCHS"] if CFG["QUICK"] else CFG["EPOCHS"]
+queue_experiments = ["B_rva"] if CFG["QUICK"] else CFG["EXPERIMENTS"]
+queue_models = ["multireslinknet"] if CFG["QUICK"] else CFG["MODELS"]
 
 QUEUE = []
-for exp in CFG["EXPERIMENTS"]:
-    for mdl in CFG["MODELS"]:
+for exp in queue_experiments:
+    for mdl in queue_models:
         for f in folds:
-            QUEUE.append({"run_id": f"{exp}__{mdl}__f{f}", "exp": exp, "model": mdl, "fold": f})
+            prefix = "quick__" if CFG["QUICK"] else ""
+            QUEUE.append({"run_id": f"{prefix}{exp}__{mdl}__f{f}", "exp": exp, "model": mdl, "fold": f})
 
 done = set(STATE.get("completed", []))
 todo = [q for q in QUEUE if q["run_id"] not in done]
 print(f"queue: {len(QUEUE)} run(s) total | {len(done)} done | {len(todo)} remaining")
 print(f"epochs per run: {EPOCHS}   time budget: {CFG['TIME_BUDGET_H']} h")
 if CFG["QUICK"]:
-    print("\n>>> QUICK MODE. Confirm this completes, then set CFG['QUICK']=False and re-run.")
+    print("\n>>> QUICK MODE: one MultiResLinkNet/RVA run. Confirm it, then set QUICK=False.")
 print("\nnext up:")
 for q in todo[:8]:
     print("   ", q["run_id"])
@@ -405,8 +463,9 @@ def evaluate(Y, P, index, out_dir):
     # Per-window metrics, then per-subject and overall aggregates. Saving per-window rows
     # lets NB05 run the statistics without ever re-running a model.
     rows = []
-    subs = index["subject"].to_numpy()
-    scen = index["scenario_canon"].to_numpy()
+    idx_frame = index.reset_index(drop=True)
+    subs = idx_frame["subject"].to_numpy()
+    scen = idx_frame["scenario_canon"].to_numpy()
     for i in range(len(Y)):
         m = seg_metrics(Y[i], P[i], FS)
         m["subject"] = subs[i] if i < len(subs) else "?"
@@ -417,21 +476,28 @@ def evaluate(Y, P, index, out_dir):
     num = [c for c in dfw.columns if dfw[c].dtype.kind in "fi"]
     agg = {c: float(dfw[c].mean()) for c in num}
     agg.update({c + "_std": float(dfw[c].std()) for c in num})
-    # continuous-signal HR / HRV, computed on the concatenated test signal per subject
+    # HR/HRV is computed recording-by-recording in chronological window order. Joining
+    # different recordings/scenarios would invent an RR interval at every boundary.
     hr_rows = []
-    for s in pd.unique(subs):
-        sel = subs == s
-        if sel.sum() < 2:
+    for rid, grp in idx_frame.assign(_row=np.arange(len(idx_frame))).groupby("rec_id"):
+        grp = grp.sort_values("start")
+        pos = grp["_row"].to_numpy()
+        if len(pos) < 2:
             continue
-        yg = np.concatenate(Y[sel]); yp = np.concatenate(P[sel])
+        yg = np.concatenate(Y[pos]); yp = np.concatenate(P[pos])
         g = hrv_from_peaks(detect_r_peaks(yg, FS), FS)
         p = hrv_from_peaks(detect_r_peaks(yp, FS), FS)
         pk = peak_detection_scores(yg, yp, FS)
-        hr_rows.append({"subject": s, **{f"gt_{k}": v for k, v in g.items()},
+        hr_rows.append({"rec_id": rid, "subject": str(grp["subject"].iloc[0]),
+                        "scenario": str(grp["scenario_canon"].iloc[0]),
+                        **{f"gt_{k}": v for k, v in g.items()},
                         **{f"pr_{k}": v for k, v in p.items()}, **pk})
     dfh = pd.DataFrame(hr_rows)
     if len(dfh):
-        dfh.to_parquet(out_dir / "metrics_subjects.parquet", index=False)
+        dfh.to_parquet(out_dir / "metrics_recordings.parquet", index=False)
+        numeric = [c for c in dfh.columns if dfh[c].dtype.kind in "fi"]
+        dfh.groupby("subject", as_index=False)[numeric].mean().to_parquet(
+            out_dir / "metrics_subjects.parquet", index=False)
         for k in ("F1", "precision", "recall", "accuracy", "missed_rate",
                   "timing_err_ms_median"):
             if k in dfh.columns:
@@ -475,6 +541,15 @@ for qi, q in enumerate(todo, 1):
     print(f"[{qi}/{len(todo)}]  {rid}   ({el/3600:.2f} h elapsed)")
     print("=" * 78)
     try:
+        # The lightweight startup pull tells us whether an interrupted checkpoint exists.
+        # Restore its weights/optimizer just in time; completed runs are never downloaded.
+        if (out / "state.json").exists() and not (out / "state.pt").exists():
+            print("  interrupted remote run found; restoring exact checkpoint...")
+            sync.pull(allow_patterns=[f"runs/{rid}/state.pt", f"runs/{rid}/best.pt",
+                                      f"runs/{rid}/state.json", f"runs/{rid}/run_config.json",
+                                      f"runs/{rid}/environment.json", f"runs/{rid}/*.jsonl",
+                                      f"runs/{rid}/*.csv", f"runs/{rid}/validation_windows/*",
+                                      f"runs/{rid}/validation_recordings/*"])
         tr_ds, va_ds, te_ds, (tri, vai, tei) = make_datasets(exp, fold)
         print(f"  train {len(tr_ds):,} | val {len(va_ds):,} | test {len(te_ds):,} windows   "
               f"test subjects: {sorted(tei['subject'].unique())}")
@@ -486,7 +561,19 @@ for qi, q in enumerate(todo, 1):
                      weight_decay=CFG["WEIGHT_DECAY"], epochs=EPOCHS,
                      patience=CFG["PATIENCE"], batch_size=CFG["BATCH"],
                      num_workers=CFG["WORKERS"], amp=CFG["AMP"],
-                     multi_gpu=CFG["MULTI_GPU"])
+                     multi_gpu=CFG["MULTI_GPU"], log_every=CFG["LOG_EVERY"],
+                     checkpoint_every_steps=CFG["CHECKPOINT_EVERY_STEPS"],
+                     checkpoint_every_s=CFG["CHECKPOINT_EVERY_S"], seed=CFG["SEED"] + fold,
+                     require_dual_gpu=CFG["REQUIRE_DUAL_T4"],
+                     run_config={"experiment": exp, "model": mdl, "fold": fold,
+                                 "epochs": EPOCHS, "channels": CFG["CHANNELS"],
+                                 "base": CFG["BASE"], "levels": CFG["LEVELS"],
+                                 "loss": CFG["LOSS"], "lr": CFG["LR"],
+                                 "batch": CFG["BATCH"], "seed": CFG["SEED"] + fold,
+                                 "data_index_sha256": DATA_HASH, "library_sha256": MODULE_HASHES,
+                                 "train_subjects": sorted(map(str, tri["subject"].unique())),
+                                 "val_subjects": sorted(map(str, vai["subject"].unique())),
+                                 "test_subjects": sorted(map(str, tei["subject"].unique()))})
         tr.load()
         tr.fit(tr_ds, va_ds)
         Y, P = tr.predict(te_ds)
@@ -501,6 +588,8 @@ for qi, q in enumerate(todo, 1):
                    "channels": CFG["CHANNELS"], "loss": CFG["LOSS"], "epochs_run": tr.state["epoch"],
                    "best_epoch": tr.state["best_epoch"], "best_val": tr.state["best"],
                    "params": count_params(tr.raw_model),
+                   "gflops_per_window": BUDGET_BY_MODEL.get(mdl, {}).get("gflops_per_window"),
+                   "forward_ms_batch4": BUDGET_BY_MODEL.get(mdl, {}).get("forward_ms_batch4"),
                    "n_train": len(tr_ds), "n_val": len(va_ds), "n_test": len(te_ds),
                    "test_subjects": sorted(map(str, tei["subject"].unique())),
                    "metrics": agg,
@@ -511,7 +600,14 @@ for qi, q in enumerate(todo, 1):
               f"RRMSE_t {agg['RRMSE_temporal']:.4f}  F1 {agg.get('peak_F1', float('nan')):.3f}")
         done.add(rid); completed_now.append(rid)
         STATE["completed"] = sorted(done); sync.save_state(STATE)
-        sync.stage_done(f"run:{rid}", cc_t=round(agg["CC_temporal"], 2))
+        pushed = sync.flush(force=True, msg=f"{rid} complete CCt={agg['CC_temporal']:.2f}")
+        if pushed:
+            # The remote commit now contains both recovery and best checkpoints. Remove the
+            # local copies so a long queue cannot exhaust Kaggle's 20 GB working volume.
+            for name in ("state.pt", "best.pt"):
+                p = out / name
+                if p.exists(): p.unlink()
+            sync.log("local_checkpoints_pruned", run_id=rid, remote_copy=True)
         del tr, model, tr_ds, va_ds, te_ds, Y, P
         gc.collect()
         if torch.cuda.is_available():

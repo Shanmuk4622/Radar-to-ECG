@@ -24,6 +24,7 @@ is optional.
 |---|---|
 | `table2_per_scenario.csv` | Their Table 2 — per-scenario, all models |
 | `table3_rva_combined.csv` | Their Table 3 — the headline comparison |
+| `table3b/3c/3d_*.csv` | All-five, LOSO, and held-out-scenario generalisation |
 | `table4_peak_detection.csv` | Their Table 4 — R-peak accuracy/precision/recall/F1 |
 | `table5_hrv.csv` | Their Table 5 — μRR, σRR, μHR, σHR, RMSSD, **in real milliseconds** |
 | `table6_ablation.csv` | Ours — the ablation ladder |
@@ -34,9 +35,10 @@ is optional.
 ## What the statistics are for
 
 The baseline reports means and standard deviations and stops. That is not enough to claim a win.
-Here every model pair is compared with a **Wilcoxon signed-rank test across folds**, and the
-p-values are **Holm-corrected** for multiple comparisons — because with 10 ablation rungs there are
-45 pairwise tests and roughly two of them will look significant by chance alone.
+Here the full model is compared with every ablation using a **subject-paired Wilcoxon signed-rank
+test**, and the p-values are **Holm-corrected**. Five fold averages are too few for a two-sided
+Wilcoxon test to reach 0.05 even when every fold moves in the same direction; subjects are the
+independent experimental units and provide the defensible paired analysis.
 
 Bland–Altman with limits of agreement is the standard way to report agreement between two
 measurement methods in clinical work, and it is what a reviewer from a medical journal will look
@@ -47,24 +49,50 @@ can be trusted on an individual patient.
 
 Sections 1–6 and 8 run fine on CPU. If you only want the tables and figures, set
 `CFG["RUN_ROBUSTNESS"] = False` and use **Accelerator: None**.
+
+When robustness is enabled, please attach NB02's saved output with **+ Add Input → Notebook
+Output**. Tables use the HF run repositories; the attached corpus makes inference faster and
+keeps it outside the 20 GB working area.
+
+## Cell-by-cell run guide
+
+| Code cell | What runs | Typical time |
+|---:|---|---:|
+| 1 | Configuration | < 5 s |
+| 2 | Imports/dependencies/output folders | 1–3 min |
+| 3 | Write libraries, HF login, start results-repo sync | 1–3 min |
+| 4 | Download summaries/metrics from baseline and model repos | 2–15 min |
+| 5 | Build waveform comparison tables | < 1 min |
+| 6 | Build peak, HR and HRV tables | < 2 min |
+| 7 | Ablation, subject-paired Wilcoxon-Holm, compute budget | 1–5 min |
+| 8 | Generate manuscript figures | 2–10 min |
+| 9 | Optional GPU robustness inference | 20–90 min |
+| 10 | Write manuscript summary and final HF upload | 2–15 min |
+
+Total without robustness: **10–45 minutes**. With robustness: typically **30–120 minutes**, mainly
+depending on whether inputs/checkpoints are already cached.
 """)
 
 md("---\n# 1 · Configuration")
 
 code(r'''
 CFG = {
-    "DATA_REPO":  "Shanmuk4622/cr-rvs-radar-ecg-processed",
-    "MODEL_REPO": "Shanmuk4622/cardiomamba-net",
+    "DATA_REPO":     "Shanmuk4622/cr-rvs-radar-ecg-processed-v2",
+    "BASELINE_REPO": "Shanmuk4622/cardiomamba-baselines-v2",
+    "MODEL_REPO":    "Shanmuk4622/cardiomamba-net-v2",
+    "RESULT_REPO":   "Shanmuk4622/cardiomamba-results-v2",
     "HF_PRIVATE": False,
-    "RUN_ID":     "nb05_evaluation_v1",
+    "RUN_ID":     "nb05_evaluation_v2",
 
     "WORK":    "/kaggle/working/nb05",
     "SCRATCH": "/kaggle/temp/nb05",
     "PUSH_INTERVAL_S": 30 * 60,
-    "HF_MAX_REQ_HOUR": 120,
+    "HF_MAX_UPLOADS_HOUR": 24,
 
     "RUN_ROBUSTNESS": True,          # needs GPU + checkpoints; set False for tables only
     "SNR_DB": [12, 6, 3, 0, -3],
+    "MOTION_AMPLITUDE": [0.25, 0.50],   # normalised slow-drift amplitudes
+    "TEST_CHANNEL_DROPOUT": True,
     "ROBUST_MODELS": ["L9_full", "multireslinknet"],
     "ROBUST_MAX_WINDOWS": 800,
 
@@ -87,7 +115,8 @@ def _pip(*p):
     miss = [x for x in p if importlib.util.find_spec(x.replace("-", "_")) is None]
     if miss:
         print("installing:", miss)
-        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=False)
+        subprocess.run([sys.executable, "-m", "pip", "install", "-q", *miss], check=True)
+        for x in miss: __import__(x.replace("-", "_"))
 _pip("pyarrow", "huggingface_hub")
 
 import numpy as np, pandas as pd
@@ -130,7 +159,7 @@ for nm in MODULES:
     sys.modules.pop(nm[:-3], None)
 importlib.invalidate_caches()
 import crvs_data
-REQUIRED_LIB = 3
+REQUIRED_LIB = 4
 if getattr(crvs_data, "LIB_VERSION", 0) < REQUIRED_LIB:
     raise RuntimeError(f"stale crvs_data v{getattr(crvs_data,'LIB_VERSION','missing')}, "
                        f"need >= {REQUIRED_LIB}. Restart the kernel.")
@@ -148,10 +177,12 @@ except Exception:
             "\n  HF_TOKEN not found. Add-ons -> Secrets -> HF_TOKEN (write) -> attach.\n" + "="*74)
 
 from crvs_sync import HFSync
-sync = HFSync(repo_id=CFG["MODEL_REPO"], local_dir=WORK, token=HF_TOKEN, repo_type="model",
+sync = HFSync(repo_id=CFG["RESULT_REPO"], local_dir=WORK, token=HF_TOKEN, repo_type="model",
               private=CFG["HF_PRIVATE"], run_id=CFG["RUN_ID"],
-              push_interval_s=CFG["PUSH_INTERVAL_S"], max_req_hour=CFG["HF_MAX_REQ_HOUR"])
+              push_interval_s=CFG["PUSH_INTERVAL_S"],
+              max_upload_calls_hour=CFG["HF_MAX_UPLOADS_HOUR"])
 print("\nresults repo:", sync.url)
+sync.pull(allow_patterns=["*.json", "*.jsonl", "*.md", "tables/*", "figures/*"])
 _M = {"f": False, "n": ""}
 def MAJOR(nm):
     _M["f"] = True; _M["n"] = nm
@@ -176,15 +207,19 @@ tables do not need them.
 
 code(r'''
 from huggingface_hub import snapshot_download
-RUNS = SCRATCH / "runs"
 pats = ["runs/**/summary.json", "runs/**/metrics_windows.parquet",
-        "runs/**/metrics_subjects.parquet", "runs/**/preds_sample.npz",
-        "runs/**/state.json", "results/*", "README.md"]
+        "runs/**/metrics_subjects.parquet", "runs/**/metrics_recordings.parquet",
+        "runs/**/preds_sample.npz",
+        "runs/**/state.json", "runs/**/run_config.json", "results/*", "README.md"]
 if CFG["RUN_ROBUSTNESS"]:
     pats.append("runs/**/best.pt")
 t0 = time.time()
-snapshot_download(CFG["MODEL_REPO"], repo_type="model", token=HF_TOKEN,
-                  local_dir=str(RUNS), allow_patterns=pats)
+RUN_ROOTS = []
+for label, repo in (("baselines", CFG["BASELINE_REPO"]), ("cardiomamba", CFG["MODEL_REPO"])):
+    root = SCRATCH / label
+    snapshot_download(repo, repo_type="model", token=HF_TOKEN,
+                      local_dir=str(root), allow_patterns=pats, max_workers=4)
+    RUN_ROOTS.append(root)
 print(f"downloaded in {time.time()-t0:.0f}s")
 
 def norm_variant(s):
@@ -194,14 +229,19 @@ def norm_variant(s):
     return v
 
 rows, wrows, srows = [], [], []
-for p in sorted((RUNS / "runs").glob("*/summary.json")):
+summary_paths = []
+for root in RUN_ROOTS:
+    summary_paths.extend((root / "runs").glob("*/summary.json"))
+for p in sorted(summary_paths):
     try:
         s = json.loads(p.read_text())
     except Exception:
         continue
     v = norm_variant(s)
     base = {"run_id": s["run_id"], "experiment": s["experiment"], "variant": v,
-            "fold": s["fold"], "params": s.get("params"), "best_epoch": s.get("best_epoch")}
+            "fold": s["fold"], "params": s.get("params"), "best_epoch": s.get("best_epoch"),
+            "gflops_per_window": s.get("gflops_per_window"),
+            "forward_ms": s.get("forward_ms_batch2", s.get("forward_ms_batch4"))}
     rows.append({**base, **{k: val for k, val in s["metrics"].items() if not k.endswith("_std")}})
     mw = p.parent / "metrics_windows.parquet"
     if mw.exists():
@@ -298,6 +338,13 @@ T3 = table_for(["B_rva"], "table3_rva_combined.csv",
 print()
 TC = table_for(["C_all5"], "table3b_all_five.csv",
                "TABLE 3b  —  ALL FIVE SCENARIOS  (new: the baseline never evaluated Tilt)")
+print()
+TD = table_for(["D_loso"], "table3c_loso.csv",
+               "TABLE 3c  —  LEAVE-ONE-SUBJECT-OUT GENERALISATION")
+print()
+cross_exps = sorted(x for x in R["experiment"].unique() if str(x).startswith("F_cross:"))
+TF = table_for(cross_exps, "table3d_cross_scenario.csv",
+               "TABLE 3d  —  HELD-OUT-SCENARIO GENERALISATION")
 MAJOR("01_tables_2_3")
 ''')
 
@@ -374,17 +421,17 @@ md(r"""
 ---
 # 5 · Table 6 — the ablation, and Table 7 — significance
 
-Table 7 is what lets us write "significantly better" without a reviewer objecting. Wilcoxon
-signed-rank is paired and non-parametric, which is right here: the same folds are used for every
-model, and with five folds we have no business assuming normality.
+Table 7 is what lets us write "significantly better" when the data support it. Wilcoxon
+signed-rank is paired and non-parametric: each subject contributes one average temporal
+correlation per model, regardless of how many windows that subject has.
 
-Holm correction matters more than people expect. Ten rungs give 45 pairwise comparisons; at
-α = 0.05 you would expect about two false positives. Holm controls the family-wise error rate
-without the crushing conservatism of Bonferroni.
+The planned comparisons are the full model against each baseline/ablation. Holm correction
+controls the family-wise error rate without pretending that all 45 possible pairs were hypotheses
+we intended to test.
 """)
 
 code(r'''
-from crvs_metrics import wilcoxon_holm
+from scipy import stats as sstats
 
 b = R[R["experiment"] == CFG["HEADLINE_EXP"]]
 LAB6 = {"multireslinknet": "1. MultiResLinkNet + MSE (baseline)",
@@ -410,16 +457,34 @@ if lad:
     print(T6.round(5).to_string())
     T6.to_csv(WORK / "tables" / "table6_ablation.csv")
 
-    groups = {v: b[b["variant"] == v].sort_values("fold")["CC_temporal"].tolist() for v in lad}
-    nf = min(len(x) for x in groups.values())
-    if nf >= 3:
-        res = wilcoxon_holm(groups)
-        T7 = pd.DataFrame(res)
+    # Subject is the independent unit. First average windows within subject/model, then
+    # align the exact same subjects for every full-vs-comparator test.
+    subject_cc = (WD[WD["experiment"] == CFG["HEADLINE_EXP"]]
+                  .groupby(["subject", "variant"], as_index=False)["CC_temporal"].mean())
+    full = "L9_full"; raw = []
+    if full in set(subject_cc["variant"]):
+        for v in [x for x in lad if x != full]:
+            pair = subject_cc[subject_cc["variant"].isin([full, v])].pivot(
+                index="subject", columns="variant", values="CC_temporal").dropna()
+            if len(pair) < 6 or np.allclose(pair[full], pair[v]):
+                p = np.nan
+            else:
+                p = float(sstats.wilcoxon(pair[full], pair[v], alternative="two-sided").pvalue)
+            raw.append({"a": full, "b": v, "n_subjects": len(pair), "p": p,
+                        "median_delta_cc_t": float(np.median(pair[full]-pair[v])) if len(pair) else np.nan})
+    if raw:
+        finite = sorted([i for i, r in enumerate(raw) if np.isfinite(r["p"])], key=lambda i: raw[i]["p"])
+        running = 0.0; mtests = len(finite)
+        for rank, i in enumerate(finite):
+            running = max(running, (mtests-rank)*raw[i]["p"])
+            raw[i]["p_holm"] = min(1.0, running)
+        for r in raw: r.setdefault("p_holm", np.nan)
+        T7 = pd.DataFrame(raw)
         T7["a"] = T7["a"].map(LAB6); T7["b"] = T7["b"].map(LAB6)
         T7["significant"] = T7["p_holm"] < CFG["ALPHA"]
-        T7 = T7.sort_values("p_holm")
+        T7 = T7.sort_values("p_holm", na_position="last")
         print("\n" + "=" * 118)
-        print(f"TABLE 7  —  Wilcoxon signed-rank on CC_temporal across {nf} folds, Holm-corrected")
+        print("TABLE 7  —  subject-paired Wilcoxon on CC_temporal, Holm-corrected")
         print("=" * 118)
         print(T7.to_string(index=False))
         T7.to_csv(WORK / "tables" / "table7_significance.csv", index=False)
@@ -428,13 +493,15 @@ if lad:
             print(f"\n  comparisons involving the full model: "
                   f"{int(vs['significant'].sum())}/{len(vs)} significant at alpha={CFG['ALPHA']}")
     else:
-        print(f"\nTABLE 7 skipped: only {nf} fold(s). Wilcoxon needs at least 3.")
-        print("Run NB03/NB04 with QUICK=False so all 5 folds complete.")
+        print("\nTABLE 7 skipped: full-model and comparator per-subject rows are incomplete.")
+        print("Run NB03/NB04 with QUICK=False so all subject-held-out folds complete.")
 
 if "params" in R.columns and R["params"].notna().any():
     T8 = (R[R["experiment"] == CFG["HEADLINE_EXP"]]
           .groupby("variant").agg(params=("params", "mean"),
-                                  CC_temporal=("CC_temporal", "mean")).dropna())
+                                  gflops=("gflops_per_window", "mean"),
+                                  forward_ms=("forward_ms", "mean"),
+                                  CC_temporal=("CC_temporal", "mean")).dropna(subset=["params", "CC_temporal"]))
     T8["M_params"] = (T8["params"] / 1e6).round(3)
     T8["CC_per_Mparam"] = (T8["CC_temporal"] / T8["M_params"]).round(2)
     T8 = T8.sort_values("CC_temporal", ascending=False)
@@ -442,7 +509,7 @@ if "params" in R.columns and R["params"].notna().any():
     print("\n" + "=" * 96)
     print("TABLE 8  —  budget.  The baseline paper reports neither parameters nor FLOPs.")
     print("=" * 96)
-    print(T8[["M_params", "CC_temporal", "CC_per_Mparam"]].to_string())
+    print(T8[["M_params", "gflops", "forward_ms", "CC_temporal", "CC_per_Mparam"]].to_string())
     T8.to_csv(WORK / "tables" / "table8_budget.csv")
 MAJOR("03_tables_6_7_8")
 ''')
@@ -619,8 +686,9 @@ md(r"""
 The baseline never tests robustness. radarODE-MTL set the precedent that it matters, and a reviewer
 will ask: what happens when the radar signal is noisier than a clinical recording room?
 
-We add white Gaussian noise to the **input channels** at a range of SNRs and re-evaluate the saved
-checkpoints. No retraining — this measures how gracefully each model degrades. Set
+We test white noise across SNRs, low-frequency motion drift, and every single-channel dropout, then
+retain all waveform metrics for every condition. No retraining — this measures how gracefully
+each model degrades and which physics channel it relies on. Set
 `CFG["RUN_ROBUSTNESS"] = False` to skip.
 """)
 
@@ -641,13 +709,21 @@ else:
     if dev.type != "cuda":
         print("  (CPU -- this will be slow; consider setting RUN_ROBUSTNESS=False)")
 
-    DATA = SCRATCH / "corpus"
-    snapshot_download(CFG["DATA_REPO"], repo_type="dataset", token=HF_TOKEN,
-                      local_dir=str(DATA),
-                      allow_patterns=["recordings/*.npy", "recordings/*.json",
-                                      "recordings/*.npz",   # legacy corpus still works
-                                      "windows.parquet", "norm_stats.json",
-                                      "experiments.json"])
+    DATA = None
+    input_root = Path("/kaggle/input")
+    if input_root.exists():
+        for candidate in input_root.rglob("windows.parquet"):
+            if (candidate.parent / "recordings").exists() and (candidate.parent / "norm_stats.json").exists():
+                DATA = candidate.parent; break
+    if DATA is None:
+        DATA = SCRATCH / "corpus"
+        snapshot_download(CFG["DATA_REPO"], repo_type="dataset", token=HF_TOKEN,
+                          local_dir=str(DATA),
+                          allow_patterns=["recordings/*.npy", "recordings/*.json",
+                                          "recordings/*.npz", "windows.parquet", "norm_stats.json",
+                                          "experiments.json"], max_workers=4)
+    else:
+        print("using attached Kaggle NB02 output:", DATA)
     Wn = pd.read_parquet(DATA / "windows.parquet")
     NORM = json.loads((DATA / "norm_stats.json").read_text())
     EXPINFO = json.loads((DATA / "experiments.json").read_text())
@@ -656,27 +732,37 @@ else:
 
     def load_run(run_dir):
         s = json.loads((run_dir / "summary.json").read_text())
+        rc_path = run_dir / "run_config.json"
+        rc = json.loads(rc_path.read_text()) if rc_path.exists() else {}
         v = norm_variant(s)
         spec = s.get("spec", {})
         ch = spec.get("channels") or s.get("channels") or ["dy"]
         if spec.get("kind") == "cmnet" or (v or "").startswith("L") and spec.get("kind") != "baseline":
-            m = build_cmnet(in_ch=len(ch), base=32, levels=4, d_ssm=256, ssm_blocks=3,
+            m = build_cmnet(in_ch=len(ch), base=rc.get("base", 32),
+                            levels=rc.get("levels", 4), d_ssm=rc.get("d_ssm", 256),
+                            ssm_blocks=rc.get("ssm_blocks", 3), d_state=rc.get("d_state", 64),
                             bottleneck=spec.get("bottleneck", "ssm"),
                             use_wavelet=spec.get("wavelet", True),
                             multitask=spec.get("multitask", True),
-                            use_film=spec.get("film", True))
+                            use_film=spec.get("film", True), dropout=rc.get("dropout", 0.1))
         else:
             m = build_baseline(spec.get("model", s.get("model", "multireslinknet")),
-                               in_ch=len(ch), out_ch=1, base=64, levels=4)
+                               in_ch=len(ch), out_ch=1, base=rc.get("base", 64),
+                               levels=rc.get("levels", 4))
         sd = torch.load(run_dir / "best.pt", map_location="cpu", weights_only=False)["model"]
-        m.load_state_dict(sd, strict=False)
+        m.load_state_dict(sd, strict=True)
         return m.to(dev).eval(), ch, s, v
 
-    rob = []
+    rob_path = WORK / "tables" / "table9_robustness.csv"
+    rob = pd.read_csv(rob_path).to_dict("records") if rob_path.exists() else []
+    finished = {(str(r["variant"]), str(r["corruption"]), f"{float(r.get('level', 0)):g}",
+                 "" if pd.isna(r.get("channel", "")) else str(r.get("channel", ""))) for r in rob}
     seed_all(CFG["SEED"])
     for v in CFG["ROBUST_MODELS"]:
-        cand = [p for p in (RUNS / "runs").glob(f"{CFG['HEADLINE_EXP']}__{v}__f*")
-                if (p / "best.pt").exists() and (p / "summary.json").exists()]
+        cand = []
+        for root in RUN_ROOTS:
+            cand.extend(p for p in (root / "runs").glob(f"{CFG['HEADLINE_EXP']}__{v}__f*")
+                        if (p / "best.pt").exists() and (p / "summary.json").exists())
         if not cand:
             print(f"  no checkpoint for {v} -- skipped"); continue
         rd = sorted(cand)[0]
@@ -693,24 +779,45 @@ else:
         sn = {"mean": [norm["mean"][i] for i in idx], "std": [norm["std"][i] for i in idx]}
         ds = WindowDataset(REC_DIR, te, sn, ch, augment=False)
         print(f"\n  {v}: {len(ds)} test windows, {len(ch)} channel(s)")
-        for snr in CFG["SNR_DB"]:
-            ccs = []
+        cases = [("clean", 0, "")] + [("awgn", x, "") for x in CFG["SNR_DB"]]
+        cases += [("motion_drift", x, "") for x in CFG["MOTION_AMPLITUDE"]]
+        if CFG["TEST_CHANNEL_DROPOUT"]:
+            cases += [("channel_dropout", 1, c) for c in ch]
+        for case_i, (corruption, level, channel) in enumerate(cases):
+            key = (v, corruption, f"{float(level):g}", str(channel))
+            if key in finished:
+                print(f"    {corruption} {level} {channel} restored"); continue
+            seed_all(CFG["SEED"] + 1000 * CFG["ROBUST_MODELS"].index(v) + case_i)
+            mets = []
             with torch.no_grad():
                 for i in range(0, len(ds), 32):
                     xb, yb = [], []
                     for j in range(i, min(i + 32, len(ds))):
                         x, y, _, _ = ds[j]; xb.append(x); yb.append(y)
                     X = torch.stack(xb).to(dev); Y = torch.stack(yb)
-                    p_sig = X.pow(2).mean(dim=(1, 2), keepdim=True)
-                    p_noise = p_sig / (10 ** (snr / 10.0))
-                    X = X + torch.randn_like(X) * p_noise.sqrt()
+                    if corruption == "awgn":
+                        p_sig = X.pow(2).mean(dim=(1, 2), keepdim=True)
+                        X = X + torch.randn_like(X) * (p_sig / (10 ** (float(level)/10))).sqrt()
+                    elif corruption == "motion_drift":
+                        tt = torch.arange(X.shape[-1], device=dev) / FS
+                        drift = float(level) * torch.sin(2*math.pi*0.30*tt)[None, None, :]
+                        X = X + drift
+                    elif corruption == "channel_dropout":
+                        X[:, ch.index(channel), :] = 0
                     out = model(X)["wave"].float().cpu().numpy()[:, 0]
                     Yn = Y.numpy()[:, 0]
                     for a, bb in zip(Yn, out):
-                        ccs.append(seg_metrics(a, bb, FS)["CC_temporal"])
-            rob.append({"variant": v, "snr_db": snr, "CC_temporal": float(np.mean(ccs)),
-                        "n": len(ccs)})
-            print(f"    SNR {snr:>4} dB   CC_t {np.mean(ccs):6.2f}")
+                        mets.append(seg_metrics(a, bb, FS))
+            row = {"variant": v, "corruption": corruption, "level": level,
+                   "channel": channel, "n": len(mets)}
+            for metric in mets[0] if mets else []:
+                vals = np.asarray([m[metric] for m in mets], float)
+                row[metric] = float(np.nanmean(vals)); row[metric+"_std"] = float(np.nanstd(vals))
+            rob.append(row); finished.add(key)
+            pd.DataFrame(rob).to_csv(rob_path, index=False)
+            sync.mark_dirty(f"robustness:{v}:{corruption}:{level}:{channel}")
+            print(f"    {corruption:<16} {str(level):>5} {channel:<8} "
+                  f"CC_t {row.get('CC_temporal', float('nan')):6.2f}")
         del model
         gc.collect()
         if dev.type == "cuda":
@@ -721,8 +828,9 @@ else:
         ROB.to_csv(WORK / "tables" / "table9_robustness.csv", index=False)
         fig, ax = plt.subplots(figsize=(7.4, 3.8))
         for v in ROB["variant"].unique():
-            d = ROB[ROB["variant"] == v].sort_values("snr_db", ascending=False)
-            ax.plot(d["snr_db"], d["CC_temporal"], "o-", lw=1.6, ms=5,
+            d = ROB[(ROB["variant"] == v) & (ROB["corruption"] == "awgn")].copy()
+            d["level"] = pd.to_numeric(d["level"]); d = d.sort_values("level", ascending=False)
+            ax.plot(d["level"], d["CC_temporal"], "o-", lw=1.6, ms=5,
                     color=S["ecg"] if v == "L9_full" else S["muted"],
                     label=NICE.get(v, LAB6.get(v, v)))
         ax.invert_xaxis()
@@ -746,7 +854,7 @@ code(r'''
 now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 L = []
 A = L.append
-A(f"# CardioMamba-Net — results\n\nGenerated {now} from `{CFG['MODEL_REPO']}`.\n")
+A(f"# CardioMamba-Net — results\n\nGenerated {now} from `{CFG['BASELINE_REPO']}` and `{CFG['MODEL_REPO']}`.\n")
 A(f"- runs analysed: **{len(R)}**")
 A(f"- experiments: {sorted(R['experiment'].unique())}")
 A(f"- variants: {sorted(R['variant'].unique())}\n")
@@ -758,6 +866,10 @@ if T2 is not None and len(T2):
     A("## Table 2 — per scenario\n"); A(T2.round(5).to_markdown(index=False)); A("")
 if TC is not None and len(TC):
     A("## Table 3b — all five scenarios (new)\n"); A(TC.round(5).to_markdown(index=False)); A("")
+if TD is not None and len(TD):
+    A("## Table 3c — leave-one-subject-out\n"); A(TD.round(5).to_markdown(index=False)); A("")
+if TF is not None and len(TF):
+    A("## Table 3d — held-out scenario\n"); A(TF.round(5).to_markdown(index=False)); A("")
 try:
     A("## Table 4 — R-peak detection\n"); A(T4.to_markdown()); A("")
     A("## Table 5 — HR and HRV (real ms)\n"); A(T5.to_markdown(index=False)); A("")
@@ -765,7 +877,7 @@ except Exception:
     pass
 try:
     A("## Table 6 — ablation ladder\n"); A(T6.round(5).to_markdown()); A("")
-    A("## Table 7 — Wilcoxon signed-rank, Holm-corrected\n"); A(T7.to_markdown(index=False)); A("")
+    A("## Table 7 — subject-paired Wilcoxon, Holm-corrected\n"); A(T7.to_markdown(index=False)); A("")
     A("## Table 8 — budget\n"); A(T8[["M_params","CC_temporal","CC_per_Mparam"]].to_markdown()); A("")
 except Exception:
     pass
@@ -783,8 +895,8 @@ A("- Our splits are strictly subject-wise with non-overlapping test windows. The
 A("- Correlations are reported x100 throughout, matching the baseline's tables.")
 A("- mu_RR is in genuine milliseconds. The baseline's Table 5 reports 126 ms alongside 62 bpm, "
   "which is arithmetically impossible; 126 samples at 128 Hz is 0.98 s.")
-A("- Significance is Wilcoxon signed-rank across folds with Holm correction. With ten ablation "
-  "rungs there are 45 pairwise tests, so uncorrected p-values would be misleading.")
+A("- Significance uses subject-paired Wilcoxon tests for predeclared full-model comparisons "
+  "with Holm correction.")
 (WORK / "RESULTS.md").write_text("\n".join(L))
 
 sizes = {str(p.relative_to(WORK)): p.stat().st_size for p in WORK.rglob("*") if p.is_file()}
@@ -805,11 +917,11 @@ md(r"""
 ---
 # 9 · Troubleshooting
 
-**`No runs found`** — NB03 and NB04 push to `CFG["MODEL_REPO"]`. Check the repo name matches and
-that at least one run finished.
+**`No runs found`** — NB03 and NB04 push to separate `BASELINE_REPO` and `MODEL_REPO`.
+Check both names and that at least one run finished.
 
-**`TABLE 7 skipped: only 1 fold`** — expected while `QUICK = True`. Wilcoxon needs at least three
-paired observations; run NB03/NB04 with `QUICK = False` so all five folds complete.
+**Table 7 skipped** — expected while quick runs are incomplete. Run NB03/NB04 with
+`QUICK = False` so every held-out subject has paired results.
 
 **Bland–Altman plots empty** — the per-subject metrics come from `metrics_subjects.parquet`, which
 is only written when a test split has at least two windows per subject. Re-run with the full folds.
@@ -818,8 +930,8 @@ is only written when a test split has at least two windows per subject. Re-run w
 `CFG["RUN_ROBUSTNESS"] = False` and run it in its own session.
 
 **A checkpoint fails to load** — architecture config drifted between training and evaluation. The
-loader uses `strict=False` so partial mismatches warn rather than crash, but the numbers would then
-be meaningless. If you changed `CFG["BASE"]` or `D_SSM` in NB04 after training, set them back.
+loader uses `strict=True` and stops on any mismatch. If you changed `CFG["BASE"]` or `D_SSM`
+after training, restore the recorded configuration rather than forcing a partial load.
 """)
 
 out = sys.argv[1] if len(sys.argv) > 1 else "05_evaluate_and_figures.ipynb"

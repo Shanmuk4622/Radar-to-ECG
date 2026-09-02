@@ -63,7 +63,7 @@ Subject ID comes from the `GDN\d+` folder name (also present in `measurement_inf
 
 ---
 
-# Processed corpus (NB02 output)
+# Historical processed corpus (NB02 v1 output)
 
 Public: **`Shanmuk4622/cr-rvs-radar-ecg-processed`**
 
@@ -87,4 +87,12 @@ Public: **`Shanmuk4622/cr-rvs-radar-ecg-processed`**
 breath-holding, so the chest is deliberately still and the beat-coupling ratio is *expected* to
 fall for physiological rather than quality reasons — which means `MIN_BEAT_COUPLING = 1.30` is
 probably biased against exactly the scenario where the baseline is weakest. See
-`00_admin/DECISIONS.md` for the options; this has to be settled before Table 2 is final.
+`00_admin/DECISIONS.md` for the resolution.
+
+## V2 rebuild (2026-09-02)
+
+The clean-run destination is **`Shanmuk4622/cr-rvs-radar-ecg-processed-v2`**. It rebuilds
+uncompressed mmap-ready `.npy` arrays, does not exclude on beat coupling, and adds normalisation
+sets for five-fold experiments, subject-level LOSO, and held-out-scenario testing. Counts are
+intentionally left pending until NB02 v2 is run on Kaggle; no v1 number is copied forward as a v2
+result.

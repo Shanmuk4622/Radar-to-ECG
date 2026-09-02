@@ -246,7 +246,7 @@ our reimplementation differs. Report both "as published" and "our run".
   RRMSE_spectral, peak Accuracy/Precision/Recall/F1, mu_RR, sd_RR, mu_HR, sd_HR, RMSSD.
 - **Ours (new):** R-peak timing error in ms (median + IQR), missed-detection rate,
   **Bland-Altman for HR and RMSSD with limits of agreement**, R^2, MAE_HR, MAE_RMSSD,
-  **Wilcoxon signed-rank + Holm correction** across folds for every model pair,
+  **subject-paired Wilcoxon signed-rank + Holm correction** for the predeclared full-model comparisons,
   parameters / FLOPs / inference latency per window, and a per-subject box plot of CC_temporal.
 - **Fix their bug:** report mu_RR in real milliseconds.
 
@@ -258,28 +258,28 @@ This project is **compute-light** — the bottleneck is preprocessing I/O, not G
 
 **Stage 0 — one-off preprocessing notebook.**
 Download the Kaggle mirror -> parse `.mat` per subject/scenario -> derive the 8 channels -> decimate
-to 128 Hz -> window -> save as **sharded `.npz` or a single HDF5** (~350 MB) -> **push the processed
-corpus to a Hugging Face dataset repo `Shanmuk4622/cr-rvs-radar-ecg-processed`**. Every later run
-downloads that in seconds instead of re-parsing 8 GB of `.mat`. Do this once.
+to 128 Hz -> window -> save as uncompressed, memory-mapped **per-recording `.npy` arrays** -> push
+the processed corpus to **`Shanmuk4622/cr-rvs-radar-ecg-processed-v2`**. Later runs preferably
+mount NB02's saved Kaggle output; HF is the recovery fallback.
 
 **Stage 1 — training runs.**
-~13 k segments of 1024 samples, model < 5 M params. On one T4 an epoch is a few seconds; 300 epochs
-is minutes. The full matrix (6 models x 4 scenario settings x 5 folds ≈ 120 runs) plus 30-fold LOSO
-is a handful of 12-hour sessions, not weeks. Use `torch.nn.DataParallel` or DDP across the two T4s
-only for the LOSO sweep; a single T4 is enough for one run.
+~13 k segments of 1024 samples, model < 5 M params. Actual epoch time is measured and an ETA is
+printed after every epoch. The full matrix plus LOSO and cross-scenario runs
+is a handful of 12-hour sessions, not weeks. Use `torch.nn.DataParallel` across both T4s for every
+training run; fail early if Kaggle T4 x2 was not selected.
 
 **Resumability + HF discipline (your standing requirements, restated as build rules):**
-- Every run writes `state.pt` = `{epoch, model, optimizer, scheduler, scaler, rng_states, fold,
-  best_metric, history}` to local disk **every epoch**.
-- A **background uploader thread** flushes to HF **at most once per 30 min**, and additionally on:
-  (a) a new best validation metric, (b) end of a fold, (c) `KeyboardInterrupt` / `SIGINT` /
-  `SIGTERM`, (d) `atexit`. Implemented as an `atexit` + `signal` handler around a `threading.Event`.
-- HF write budget is ~128 requests/hour: batch every flush into **one** `upload_folder` call with a
-  `commit_message` carrying epoch + metrics; keep a token-bucket limiter (`128/h`, refill 1 per
-  28 s) with exponential backoff on `429`.
+- Every run atomically saves active epoch, completed batch cursor, model, optimizer, scheduler,
+  scaler, Python/NumPy/Torch/CUDA RNG states, early-stop counter, partial aggregates and history
+  every 50 steps/five minutes, every epoch, and every run boundary.
+- A **background uploader thread** flushes dirty output every 30 min, and additionally on:
+  (a) a major notebook stage/run boundary, (b) `KeyboardInterrupt` / `SIGINT` /
+  `SIGTERM`, or (c) `atexit`. Implemented as an `atexit` + `signal` handler around a `threading.Event`.
+- A folder upload can make several requests or commits, so the scheduler permits only **24
+  `upload_folder` calls/hour**, spaces calls, batches files, and backs off with jitter.
 - On startup the notebook **always** tries `snapshot_download` of the run's HF folder first and
-  resumes from the exact epoch — restarting the Kaggle session must cost nothing.
-- Log to a single append-only `history.jsonl` pushed with the checkpoint so no metric is ever lost.
+  restores the active run's weights and resumes from the exact epoch/batch.
+- Keep append-only batch/sync JSONL, per-epoch JSONL+CSV, and per-window/per-recording Parquet.
 - `HF_TOKEN` from Kaggle Secrets, never inline.
 
 ---

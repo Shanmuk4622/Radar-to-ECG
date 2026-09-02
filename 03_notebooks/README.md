@@ -1,93 +1,95 @@
-# Notebooks
+# Kaggle notebooks — v2 clean run
 
-Run in order. Each is self-contained and Kaggle-ready.
+Run these notebooks in order. They are self-contained, Kaggle-compatible, output-conscious, and
+start in smoke-test mode where training is involved. The earlier v1 run remains useful evidence,
+but v2 uses new Hugging Face repositories and does not treat any v1 model as complete.
 
-| # | Notebook | Purpose | Accel | Status |
+| # | Notebook | Purpose | Accelerator | Typical runtime |
 |---|---|---|---|---|
-| 01 | `01_verify_and_download.ipynb` | Verify the mirror; per-file census; cross-check against both papers | **None (CPU)** | **DONE** — verdict `RAW_MAT_TREE`, 135 files, cross-check within 0.1 % |
-| 02 | `02_preprocess_to_hf.ipynb` | Windowed corpus, targets, folds; push to HF | **None (CPU)** | **DONE** — 76 recordings, 27 subjects, 12,425 windows |
-| 03 | `03_baselines.ipynb` | FPN-1D, UNet-1D, LinkNet-1D, MultiResLinkNet — the reproduction gate | **2×T4** | ready (v2 — dual-format corpus reader) |
-| 04 | `04_cardiomamba_train.ipynb` | CardioMamba-Net (C1–C5) + the 10-rung ablation ladder | **2×T4** | ready |
-| 05 | `05_evaluate_and_figures.ipynb` | All 8 tables, Bland–Altman, Wilcoxon+Holm, 10 figures, robustness | **2×T4** (CPU if robustness off) | ready |
+| 01 | `01_verify_and_download.ipynb` | Verify raw mirror; census; 128 Hz derivative | CPU | 25–70 min |
+| 02 | `02_preprocess_to_hf.ipynb` | Targets, quality audit, folds, LOSO/cross-scenario norms | CPU | 25–75 min |
+| 03 | `03_baselines.ipynb` | Four published baselines and reproduction gate | **T4 x2** | quick 20–45 min; full queue spans sessions |
+| 04 | `04_cardiomamba_train.ipynb` | C1–C5, ablations, experiments A–F | **T4 x2** | quick 30–75 min; full queue spans sessions |
+| 05 | `05_evaluate_and_figures.ipynb` | Tables, subject-paired statistics, figures, robustness | CPU or **T4 x2** | 10–45 min; +20–90 min robustness |
 
-## Shared conventions
+Every notebook contains its own cell-by-cell description and time estimate.
 
-- `hf_sync.py` is written by NB01 into its HF repo and imported by NB02–05. One implementation of
-  the 30-minute cadence, the stage-boundary push, the interrupt push and the resume logic.
-- Every notebook: `HF_TOKEN` from Kaggle Secrets; **public** HF repos; `state.json` + `history.jsonl`
-  pushed with every flush; restart-safe by design.
-- Signal constants (128 Hz, 1024-sample windows, 50 % overlap, 0.5–40 Hz ECG band) are frozen to the
-  baseline paper so results are directly comparable. See `00_admin/PLAN.md` §6.
+## Inputs to attach
 
-## HF repos
+1. NB01: add Kaggle dataset `pedababugaddala/datasets-file`.
+2. After NB01 completes, **Save Version**. Attach that Notebook Output to NB02.
+3. After NB02 completes, **Save Version**. Attach that Notebook Output to NB03, NB04, and NB05.
+4. Attach the Kaggle secret `HF_TOKEN` with write access to all five notebooks.
 
-| Repo | Contents | Made by |
+The notebook-output chain is the primary, fast path. Hugging Face is the durable backup and
+automatic recovery path.
+
+## Hugging Face v2 repositories
+
+| Repository | Produced by | Contents |
 |---|---|---|
-| `Shanmuk4622/cr-rvs-radar-ecg-inventory` | inventory, previews, decimated corpus, figures | NB01 |
-| `Shanmuk4622/cr-rvs-radar-ecg-processed` | windowed training corpus + fold assignments | NB02 |
-| `Shanmuk4622/cardiomamba-net` | checkpoints, logs, metrics | NB03–04 |
+| `Shanmuk4622/cr-rvs-radar-ecg-inventory-v2` | NB01 | inventory, previews, 128 Hz corpus, figures |
+| `Shanmuk4622/cr-rvs-radar-ecg-processed-v2` | NB02 | mmap-ready recordings, targets, indexes, all normalisation sets |
+| `Shanmuk4622/cardiomamba-baselines-v2` | NB03 | baseline checkpoints, metrics and logs |
+| `Shanmuk4622/cardiomamba-net-v2` | NB04 | CardioMamba checkpoints, ablations, A–F results |
+| `Shanmuk4622/cardiomamba-results-v2` | NB05 | final tables, statistics, figures, report |
 
-All public.
+All are configured public. Change `HF_PRIVATE` before the first run if the dataset license or
+release plan requires private storage.
 
-## Generators
+## Recovery contract
 
-`04_src/utils/build_nb01.py` emits `01_verify_and_download.ipynb`. Edit the generator, not the
-`.ipynb` — it validates every code cell with `ast.parse` and round-trips the JSON on write.
+- Local checkpoints are atomic and include model, optimizer, scheduler, AMP scaler, Python/NumPy/
+  Torch/CUDA random states, early-stopping counter, active epoch, batch cursor and partial epoch
+  aggregates.
+- Training data order and augmentation are deterministic functions of seed, epoch and sample.
+- State is saved every 50 optimizer steps or five minutes, at every epoch, and at every run end.
+- A normal Stop/SIGINT/SIGTERM first creates an emergency checkpoint and then performs a blocking
+  HF upload. A hard machine loss cannot run cleanup, so the maximum remote recovery gap is the last
+  successful scheduled upload (normally 30 minutes).
+- Major notebook stages request an immediate upload. Ordinary best epochs do not; this avoids the
+  v1 failure mode that created dozens of commits in one hour.
+- The scheduler permits only 24 `upload_folder` calls per hour. This is deliberately far below
+  the approximate API ceiling because one folder upload may make multiple HTTP requests/commits.
+- On restart, an interrupted run's `state.pt` and `best.pt` are restored before `Trainer.load()`.
+  A config-hash mismatch or corrupt checkpoint stops loudly instead of silently restarting.
 
+## Telemetry retained
 
-## Run order and expected wall-clock
+Each run keeps loss components, train/validation totals, MAE/MSE, temporal and spectral
+correlation, temporal/spectral RRMSE, R², waveform peak scores, peak-head precision/recall/F1,
+RR-head MAE/RMSE, recording-safe HR/HRV errors, learning rate, AMP scale, gradient norm/clipping,
+throughput, data/compute time, GPU memory/utilisation/temperature/power, disk usage, per-batch
+JSONL, per-epoch JSONL/CSV, and per-window/per-recording validation Parquet files.
 
-| Notebook | Accelerator | Time | Sessions |
-|---|---|---|---|
-| 01 | None | 15–40 min | 1 |
-| 02 | None | 20–45 min | 1 |
-| 03 | GPU T4 x2 | ~1 h in QUICK, then 3–4 full sessions | queue, resumable |
-| 04 | GPU T4 x2 | ~1 h in QUICK, then 3–4 full sessions | queue, resumable |
-| 05 | GPU T4 x2 | 10–25 min | 1 |
+## Training sequence
 
-Set `CFG["QUICK"] = True` on the first run of NB03 and NB04 — one fold, 25 epochs, enough to prove
-the path end to end. Then set it `False` and let the queue work through sessions.
+Keep `QUICK=True` for the first successful run:
 
-## Shared library
+- NB03 trains one MultiResLinkNet/RVA fold for 10 epochs.
+- NB04 trains one full CardioMamba/RVA fold for 10 epochs; the smoke cells exercise all variants.
 
-`crvs_sync, crvs_data, crvs_metrics, crvs_models, crvs_cmnet, crvs_losses, crvs_engine` are
-embedded byte-identically in every notebook (verified by md5 at build time). Edit them in
-`04_src/utils/nb_lib_a.py` / `nb_lib_b.py` and re-run the generators — never edit an `.ipynb`
-by hand.
+Then set `QUICK=False` and Run All in fresh Kaggle sessions. Each queue works for at most 10.5
+hours, uploads, exits cleanly, and continues next session.
 
-## Generators
+## Source of truth
 
+Edit the generators and shared libraries in `04_src/utils`, not notebook JSON by hand. Rebuild:
+
+```powershell
+python 04_src/utils/build_nb01.py 03_notebooks/01_verify_and_download.ipynb
+python 04_src/utils/build_nb02.py 03_notebooks/02_preprocess_to_hf.ipynb
+python 04_src/utils/build_nb03.py 03_notebooks/03_baselines.ipynb
+python 04_src/utils/build_nb04.py 03_notebooks/04_cardiomamba_train.ipynb
+python 04_src/utils/build_nb05.py 03_notebooks/05_evaluate_and_figures.ipynb
 ```
-cd 03_notebooks
-PYTHONPATH=../04_src/utils python3 ../04_src/utils/build_nb02.py 02_preprocess_to_hf.ipynb
-PYTHONPATH=../04_src/utils python3 ../04_src/utils/build_nb03.py 03_baselines.ipynb
-PYTHONPATH=../04_src/utils python3 ../04_src/utils/build_nb04.py 04_cardiomamba_train.ipynb
-PYTHONPATH=../04_src/utils python3 ../04_src/utils/build_nb05.py 05_evaluate_and_figures.ipynb
-```
 
-Every generator `ast.parse`s each code cell and round-trips the JSON before writing.
+Every builder parses each generated code cell and round-trips the notebook JSON.
 
+## Historical v1 evidence
 
-## Progress
-
-| Stage | Status | Result |
-|---|---|---|
-| NB01 | complete | `RAW_MAT_TREE`. 135 `.mat`, 5.6 GB, 30 subjects. Durations match the papers to **0.00 %**; Apnea segment count matched **exactly** (1140 = 1140) |
-| NB02 | complete | [`cr-rvs-radar-ecg-processed`](https://huggingface.co/datasets/Shanmuk4622/cr-rvs-radar-ecg-processed) — 76 recordings, 27 subjects, 12,425 windows, 25 normalisation sets |
-| NB03 | ready to run | first attempt failed on a corpus-format mismatch plus a stale imported module; both fixed |
-| NB04 | ready | |
-| NB05 | ready | |
-
-### Corpus formats
-
-The live corpus was written as compressed `.npz`. `crvs_data._Rec` reads **either** `.npz` or the
-newer uncompressed `.npy`, so nothing needs re-uploading — but the legacy format costs
-**11.3 ms per window against 0.07 ms**, a 155x difference that will dominate GPU time. Re-running
-NB02 regenerates the corpus as `.npy` and is worth the 20 minutes.
-
-### If a notebook behaves as though your edits did not take
-
-Restart the kernel. The notebooks write `crvs_*.py` to disk and import them, and Python caches
-modules in `sys.modules` — so a second run in the same kernel keeps the first version. Each
-notebook now purges the cache and asserts `crvs_data.LIB_VERSION`, printing the file it loaded, so
-this fails loudly instead of silently.
+The 2026-09-01 NB01/NB02 run found 135 raw MATLAB files (30 subjects) and produced 76 retained
+recordings, 12,425 windows and 25 original fold-normalisation sets. The compressed v1 arrays were
+measured much slower per window than mmap-ready `.npy`. V2 intentionally rebuilds them and also
+adds LOSO and cross-scenario normalisation sets. See `00_admin/DECISIONS.md` and
+`02_data/DATASET_FACTS.md` for the audit trail.
