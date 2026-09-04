@@ -20,6 +20,10 @@ Everything the manuscript needs, generated from the per-window metrics that NB03
 wrote — so **no model is retrained here**. Only the robustness section (§7) runs inference, and it
 is optional.
 
+NB04 run IDs beginning with `quick__` are validation smoke tests and are excluded by default.
+The notebook writes `input_audit.json` and labels its final output **PARTIAL** until the canonical
+NB04 queue is complete; it never silently presents one quick fold as a final model result.
+
 | Output | Corresponds to |
 |---|---|
 | `table2_per_scenario.csv` | Their Table 2 — per-scenario, all models |
@@ -88,8 +92,16 @@ CFG = {
     "SCRATCH": "/kaggle/temp/nb05",
     "PUSH_INTERVAL_S": 30 * 60,
     "HF_MAX_UPLOADS_HOUR": 24,
+    # Remove artifacts restored from an older/partial evaluation before rebuilding them.
+    # The final forced upload replaces the canonical HF paths with this run's outputs.
+    "REBUILD_CANONICAL_RESULTS": True,
 
     "RUN_ROBUSTNESS": True,          # needs GPU + checkpoints; set False for tables only
+    # Quick NB04 runs are architecture smoke tests, not paper results. Keeping them out by
+    # default prevents a single 10-epoch fold being presented as the trained full model.
+    "INCLUDE_QUICK_RUNS": False,
+    "EXPECTED_BASELINE_RUNS": 80,
+    "EXPECTED_NB04_FULL_RUNS": 100,
     "SNR_DB": [12, 6, 3, 0, -3],
     "MOTION_AMPLITUDE": [0.25, 0.50],   # normalised slow-drift amplitudes
     "TEST_CHANNEL_DROPOUT": True,
@@ -105,7 +117,7 @@ print(json.dumps(CFG, indent=2))
 ''')
 
 code(r'''
-import os, sys, gc, json, math, time, warnings, subprocess, itertools
+import os, sys, gc, json, math, time, warnings, subprocess, itertools, hashlib
 from pathlib import Path
 from datetime import datetime, timezone
 warnings.filterwarnings("ignore")
@@ -183,6 +195,18 @@ sync = HFSync(repo_id=CFG["RESULT_REPO"], local_dir=WORK, token=HF_TOKEN, repo_t
               max_upload_calls_hour=CFG["HF_MAX_UPLOADS_HOUR"])
 print("\nresults repo:", sync.url)
 sync.pull(allow_patterns=["*.json", "*.jsonl", "*.md", "tables/*", "figures/*"])
+if CFG["REBUILD_CANONICAL_RESULTS"]:
+    removed = []
+    for folder, pattern in ((WORK / "tables", "*.csv"), (WORK / "figures", "*.png")):
+        for path in folder.glob(pattern):
+            path.unlink()
+            removed.append(str(path.relative_to(WORK)))
+    for name in ("RESULTS.md", "input_audit.json", "results_generation.json"):
+        path = WORK / name
+        if path.exists():
+            path.unlink()
+            removed.append(name)
+    print(f"cleared {len(removed)} restored result artifact(s); rebuilding canonical outputs")
 _M = {"f": False, "n": ""}
 def MAJOR(nm):
     _M["f"] = True; _M["n"] = nm
@@ -210,16 +234,17 @@ from huggingface_hub import snapshot_download
 pats = ["runs/**/summary.json", "runs/**/metrics_windows.parquet",
         "runs/**/metrics_subjects.parquet", "runs/**/metrics_recordings.parquet",
         "runs/**/preds_sample.npz",
-        "runs/**/state.json", "runs/**/run_config.json", "results/*", "README.md"]
-if CFG["RUN_ROBUSTNESS"]:
-    pats.append("runs/**/best.pt")
+        "runs/**/state.json", "runs/**/run_config.json", "results/*", "README.md",
+        "sync_state.json", "last_push.json"]
 t0 = time.time()
 RUN_ROOTS = []
+RUN_REPOS = []
 for label, repo in (("baselines", CFG["BASELINE_REPO"]), ("cardiomamba", CFG["MODEL_REPO"])):
     root = SCRATCH / label
     snapshot_download(repo, repo_type="model", token=HF_TOKEN,
                       local_dir=str(root), allow_patterns=pats, max_workers=4)
     RUN_ROOTS.append(root)
+    RUN_REPOS.append(repo)
 print(f"downloaded in {time.time()-t0:.0f}s")
 
 def norm_variant(s):
@@ -230,22 +255,62 @@ def norm_variant(s):
 
 rows, wrows, srows = [], [], []
 summary_paths = []
-for root in RUN_ROOTS:
-    summary_paths.extend((root / "runs").glob("*/summary.json"))
-for p in sorted(summary_paths):
+for source_label, root in zip(("baselines", "cardiomamba"), RUN_ROOTS):
+    summary_paths.extend((source_label, p) for p in (root / "runs").glob("*/summary.json"))
+quick_skipped = []
+for source_label, p in sorted(summary_paths, key=lambda x: str(x[1])):
     try:
         s = json.loads(p.read_text())
     except Exception:
         continue
+    run_id = str(s.get("run_id", p.parent.name))
+    if run_id.startswith("quick__") and not CFG["INCLUDE_QUICK_RUNS"]:
+        quick_skipped.append(run_id)
+        continue
     v = norm_variant(s)
-    base = {"run_id": s["run_id"], "experiment": s["experiment"], "variant": v,
+    rc_path = p.parent / "run_config.json"
+    try:
+        rc = json.loads(rc_path.read_text()) if rc_path.exists() else {}
+    except Exception:
+        rc = {}
+    protocol = str(s.get("protocol_id", rc.get("protocol_id", ""))).lower()
+    target_01 = bool(s.get("target_01", rc.get("target_01", "target01" in protocol)))
+    metric_values = {k: val for k, val in s["metrics"].items() if not k.endswith("_std")}
+    # NB03 was trained/evaluated on [0,1]; NB04 uses the corpus-native [-1,1]. Convert the
+    # exactly transformable error metrics to [0,1], which is also the paper's reported scale.
+    # Preserve recorded values because temporal RRMSE cannot be transformed without raw y.
+    if "MAE" in metric_values:
+        metric_values["MAE_recorded"] = metric_values["MAE"]
+    if "MSE" in metric_values:
+        metric_values["MSE_recorded"] = metric_values["MSE"]
+    if not target_01:
+        if "MAE" in metric_values:
+            metric_values["MAE"] = float(metric_values["MAE"]) / 2.0
+        if "MSE" in metric_values:
+            metric_values["MSE"] = float(metric_values["MSE"]) / 4.0
+    base = {"run_id": run_id, "source_repo": source_label,
+            "experiment": s["experiment"], "variant": v,
+            "target_scale_recorded": "[0,1]" if target_01 else "[-1,1]",
+            "comparison_scale": "[0,1]",
             "fold": s["fold"], "params": s.get("params"), "best_epoch": s.get("best_epoch"),
             "gflops_per_window": s.get("gflops_per_window"),
             "forward_ms": s.get("forward_ms_batch2", s.get("forward_ms_batch4"))}
-    rows.append({**base, **{k: val for k, val in s["metrics"].items() if not k.endswith("_std")}})
+    rows.append({**base, **metric_values})
     mw = p.parent / "metrics_windows.parquet"
     if mw.exists():
-        d = pd.read_parquet(mw); d["variant"] = v; d["experiment"] = s["experiment"]
+        d = pd.read_parquet(mw)
+        if "MAE" in d:
+            d["MAE_recorded"] = d["MAE"]
+        if "MSE" in d:
+            d["MSE_recorded"] = d["MSE"]
+        if not target_01:
+            if "MAE" in d:
+                d["MAE"] = d["MAE"] / 2.0
+            if "MSE" in d:
+                d["MSE"] = d["MSE"] / 4.0
+        d["target_scale_recorded"] = "[0,1]" if target_01 else "[-1,1]"
+        d["comparison_scale"] = "[0,1]"
+        d["variant"] = v; d["experiment"] = s["experiment"]
         d["fold"] = s["fold"]; wrows.append(d)
     msj = p.parent / "metrics_subjects.parquet"
     if msj.exists():
@@ -259,9 +324,64 @@ if not len(R):
     raise RuntimeError("No runs found. Run NB03 and NB04 first.")
 R.to_csv(WORK / "tables" / "all_runs.csv", index=False)
 print(f"runs: {len(R)}   window rows: {len(WD):,}   subject rows: {len(SD):,}")
+if quick_skipped:
+    print(f"excluded {len(quick_skipped)} quick smoke run(s): {quick_skipped[:5]}")
 print("\nruns per experiment x variant:")
 print(R.pivot_table(index="variant", columns="experiment", values="fold",
                     aggfunc="count", fill_value=0).to_string())
+
+baseline_runs = int((R["source_repo"] == "baselines").sum())
+nb04_canonical = ((R["source_repo"] == "cardiomamba") &
+                  ~R["run_id"].astype(str).str.startswith("quick__"))
+nb04_full_runs = int(nb04_canonical.sum())
+try:
+    BASELINE_GATE = json.loads(
+        (RUN_ROOTS[0] / "results" / "reproduction_gate.json").read_text(encoding="utf-8"))
+except Exception as e:
+    BASELINE_GATE = {"complete": False, "passed": False,
+                     "read_error": f"{type(e).__name__}: {e}"}
+CORE_VARIANTS = ["L2_loss_only", "L3_c1_only", "L4_c1_c5", "L5_no_wavelet",
+                 "L6_no_ssm", "L7_singletask", "L8_no_film", "L9_full",
+                 "L10_transformer"]
+core_counts = (R[(R["source_repo"] == "cardiomamba") &
+                 (R["experiment"] == CFG["HEADLINE_EXP"])]
+               .groupby("variant").size().to_dict())
+CORE_LADDER_COMPLETE = all(int(core_counts.get(v, 0)) >= 5 for v in CORE_VARIANTS)
+EVALUATION_INPUTS_COMPLETE = (
+    baseline_runs >= CFG["EXPECTED_BASELINE_RUNS"] and
+    nb04_full_runs >= CFG["EXPECTED_NB04_FULL_RUNS"] and CORE_LADDER_COMPLETE)
+EVALUATION_VALIDATED = EVALUATION_INPUTS_COMPLETE and bool(BASELINE_GATE.get("passed", False))
+available_headline = set(R[R["experiment"] == CFG["HEADLINE_EXP"]]["variant"])
+ROBUSTNESS_EFFECTIVE = bool(
+    CFG["RUN_ROBUSTNESS"] and set(CFG["ROBUST_MODELS"]).issubset(available_headline))
+INPUT_AUDIT = {
+    "baseline_runs": baseline_runs, "expected_baseline_runs": CFG["EXPECTED_BASELINE_RUNS"],
+    "nb04_full_runs": nb04_full_runs,
+    "expected_nb04_full_runs": CFG["EXPECTED_NB04_FULL_RUNS"],
+    "quick_runs_excluded": sorted(set(quick_skipped)),
+    "core_ladder_counts": {v: int(core_counts.get(v, 0)) for v in CORE_VARIANTS},
+    "core_ladder_complete": CORE_LADDER_COMPLETE,
+    "baseline_gate_complete": bool(BASELINE_GATE.get("complete", False)),
+    "baseline_gate_passed": bool(BASELINE_GATE.get("passed", False)),
+    "evaluation_inputs_complete": EVALUATION_INPUTS_COMPLETE,
+    "evaluation_validated": EVALUATION_VALIDATED,
+    "robustness_requested": bool(CFG["RUN_ROBUSTNESS"]),
+    "robustness_effective": ROBUSTNESS_EFFECTIVE,
+    "mae_mse_comparison_scale": "[0,1]",
+    "rrmse_temporal_note": "retained as recorded; target-offset dependent across NB03/NB04",
+}
+(WORK / "input_audit.json").write_text(json.dumps(INPUT_AUDIT, indent=2), encoding="utf-8")
+print("\ninput audit:")
+print(json.dumps(INPUT_AUDIT, indent=2))
+if not EVALUATION_INPUTS_COMPLETE:
+    print("\n>>> PARTIAL EVALUATION: NB04 full training is not complete.")
+    print("    Tables remain usable for completed runs, but missing sections are not final results.")
+if not BASELINE_GATE.get("passed", False):
+    print(">>> NOT VALIDATED: NB03 completed, but its reproduction gate failed.")
+if CFG["RUN_ROBUSTNESS"] and not ROBUSTNESS_EFFECTIVE:
+    print(">>> Robustness inference will be skipped until every requested trained model exists.")
+print(">>> MAE/MSE are standardized to [0,1]; *_recorded columns preserve repository values.")
+print(">>> Temporal RRMSE is retained as recorded and is not cross-scale comparable.")
 ''')
 
 md(r"""
@@ -343,8 +463,9 @@ TD = table_for(["D_loso"], "table3c_loso.csv",
                "TABLE 3c  —  LEAVE-ONE-SUBJECT-OUT GENERALISATION")
 print()
 cross_exps = sorted(x for x in R["experiment"].unique() if str(x).startswith("F_cross:"))
-TF = table_for(cross_exps, "table3d_cross_scenario.csv",
-               "TABLE 3d  —  HELD-OUT-SCENARIO GENERALISATION")
+TF = (table_for(cross_exps, "table3d_cross_scenario.csv",
+                "TABLE 3d  —  HELD-OUT-SCENARIO GENERALISATION")
+      if cross_exps else None)
 MAJOR("01_tables_2_3")
 ''')
 
@@ -434,6 +555,7 @@ code(r'''
 from scipy import stats as sstats
 
 b = R[R["experiment"] == CFG["HEADLINE_EXP"]]
+T6, T7, T8 = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 LAB6 = {"multireslinknet": "1. MultiResLinkNet + MSE (baseline)",
         "L2_loss_only": "2. + composite loss (C5)",
         "L3_c1_only": "3. + 8-channel input (C1)",
@@ -495,6 +617,9 @@ if lad:
     else:
         print("\nTABLE 7 skipped: full-model and comparator per-subject rows are incomplete.")
         print("Run NB03/NB04 with QUICK=False so all subject-held-out folds complete.")
+        pd.DataFrame(columns=["a", "b", "n_subjects", "p", "median_delta_cc_t",
+                              "p_holm", "significant"]).to_csv(
+            WORK / "tables" / "table7_significance.csv", index=False)
 
 if "params" in R.columns and R["params"].notna().any():
     T8 = (R[R["experiment"] == CFG["HEADLINE_EXP"]]
@@ -635,11 +760,17 @@ if len(WD):
 
 # --- F7 qualitative grid ---------------------------------------------------
 sp = {}
-for p in sorted((RUNS / "runs").glob("*/preds_sample.npz")):
-    nm = p.parent.name
-    for v in ORDER:
-        if f"__{v}__" in nm and nm.startswith(CFG["HEADLINE_EXP"]) and v not in sp:
-            sp[v] = p
+for root in RUN_ROOTS:
+    for p in sorted((root / "runs").glob("*/preds_sample.npz")):
+        nm = p.parent.name
+        is_quick = nm.startswith("quick__")
+        if is_quick and not CFG["INCLUDE_QUICK_RUNS"]:
+            continue
+        logical_nm = nm[len("quick__"):] if is_quick else nm
+        for v in ORDER:
+            if (f"__{v}__" in logical_nm and
+                    logical_nm.startswith(CFG["HEADLINE_EXP"]) and v not in sp):
+                sp[v] = p
 picks = [v for v in ("multireslinknet", "L6_no_ssm", "L9_full") if v in sp]
 if picks:
     z0 = np.load(sp[picks[0]])
@@ -693,11 +824,21 @@ each model degrades and which physics channel it relies on. Set
 """)
 
 code(r'''
-if not CFG["RUN_ROBUSTNESS"]:
-    print("robustness skipped (CFG['RUN_ROBUSTNESS'] = False)")
-    ROB = pd.DataFrame()
+if not ROBUSTNESS_EFFECTIVE:
+    if not CFG["RUN_ROBUSTNESS"]:
+        print("robustness skipped (CFG['RUN_ROBUSTNESS'] = False)")
+    else:
+        missing = sorted(set(CFG["ROBUST_MODELS"]) - available_headline)
+        print("robustness skipped: trained canonical checkpoint(s) missing for", missing)
+        print("quick smoke checkpoints are intentionally not treated as final models.")
+    ROB = pd.DataFrame(columns=["variant", "corruption", "level", "channel", "n",
+                                "comparison_scale", "CC_temporal", "CC_spectral",
+                                "MAE", "MSE", "RRMSE_temporal", "RRMSE_spectral"])
+    # Always replace a table from an earlier/partial NB05 run; an empty schema is explicit.
+    ROB.to_csv(WORK / "tables" / "table9_robustness.csv", index=False)
 else:
     import torch
+    from huggingface_hub import hf_hub_download
     from crvs_data import WindowDataset, FS
     from crvs_models import build_baseline
     from crvs_cmnet import build_cmnet
@@ -730,6 +871,20 @@ else:
     EXPERIMENTS = EXPINFO["experiments"]
     REC_DIR = DATA / "recordings"
 
+    class BaselineOutputConvention(torch.nn.Module):
+        """Recreate NB03's recorded [0,1] target/output convention exactly."""
+        def __init__(self, base, target_01=False):
+            super().__init__()
+            self.base = base
+            self.target_01 = bool(target_01)
+        def forward(self, x):
+            pred = self.base(x)
+            if self.target_01:
+                pred["wave"] = (pred["wave"] + 1.0) * 0.5
+                if "aux" in pred:
+                    pred["aux"] = [torch.sigmoid(v) for v in pred["aux"]]
+            return pred
+
     def load_run(run_dir):
         s = json.loads((run_dir / "summary.json").read_text())
         rc_path = run_dir / "run_config.json"
@@ -737,7 +892,11 @@ else:
         v = norm_variant(s)
         spec = s.get("spec", {})
         ch = spec.get("channels") or s.get("channels") or ["dy"]
-        if spec.get("kind") == "cmnet" or (v or "").startswith("L") and spec.get("kind") != "baseline":
+        sd = torch.load(run_dir / "best.pt", map_location="cpu", weights_only=False)["model"]
+        target_01 = False
+        is_cmnet = (spec.get("kind") == "cmnet" or
+                    ((v or "").startswith("L") and spec.get("kind") != "baseline"))
+        if is_cmnet:
             m = build_cmnet(in_ch=len(ch), base=rc.get("base", 32),
                             levels=rc.get("levels", 4), d_ssm=rc.get("d_ssm", 256),
                             ssm_blocks=rc.get("ssm_blocks", 3), d_state=rc.get("d_state", 64),
@@ -745,13 +904,19 @@ else:
                             use_wavelet=spec.get("wavelet", True),
                             multitask=spec.get("multitask", True),
                             use_film=spec.get("film", True), dropout=rc.get("dropout", 0.1))
+            m.load_state_dict(sd, strict=True)
         else:
-            m = build_baseline(spec.get("model", s.get("model", "multireslinknet")),
-                               in_ch=len(ch), out_ch=1, base=rc.get("base", 64),
-                               levels=rc.get("levels", 4))
-        sd = torch.load(run_dir / "best.pt", map_location="cpu", weights_only=False)["model"]
-        m.load_state_dict(sd, strict=True)
-        return m.to(dev).eval(), ch, s, v
+            base_model = build_baseline(spec.get("model", s.get("model", "multireslinknet")),
+                                        in_ch=len(ch), out_ch=1, base=rc.get("base", 64),
+                                        levels=rc.get("levels", 4))
+            target_01 = bool(rc.get("target_01", s.get("target_01", False)))
+            if any(str(k).startswith("base.") for k in sd):
+                m = BaselineOutputConvention(base_model, target_01)
+                m.load_state_dict(sd, strict=True)
+            else:
+                base_model.load_state_dict(sd, strict=True)
+                m = BaselineOutputConvention(base_model, target_01) if target_01 else base_model
+        return m.to(dev).eval(), ch, s, v, target_01
 
     rob_path = WORK / "tables" / "table9_robustness.csv"
     rob = pd.read_csv(rob_path).to_dict("records") if rob_path.exists() else []
@@ -760,14 +925,21 @@ else:
     seed_all(CFG["SEED"])
     for v in CFG["ROBUST_MODELS"]:
         cand = []
-        for root in RUN_ROOTS:
-            cand.extend(p for p in (root / "runs").glob(f"{CFG['HEADLINE_EXP']}__{v}__f*")
-                        if (p / "best.pt").exists() and (p / "summary.json").exists())
+        for root, repo in zip(RUN_ROOTS, RUN_REPOS):
+            prefixes = [""] + (["quick__"] if CFG["INCLUDE_QUICK_RUNS"] else [])
+            for prefix in prefixes:
+                cand.extend((p, repo, root) for p in (root / "runs").glob(
+                    f"{prefix}{CFG['HEADLINE_EXP']}__{v}__f*")
+                    if (p / "summary.json").exists())
         if not cand:
             print(f"  no checkpoint for {v} -- skipped"); continue
-        rd = sorted(cand)[0]
+        rd, source_repo, source_root = sorted(cand, key=lambda x: str(x[0]))[0]
+        if not (rd / "best.pt").exists():
+            print(f"  downloading one selected checkpoint: {rd.name}/best.pt")
+            hf_hub_download(source_repo, f"runs/{rd.name}/best.pt", repo_type="model",
+                            token=HF_TOKEN, local_dir=str(source_root))
         try:
-            model, ch, s, vv = load_run(rd)
+            model, ch, s, vv, target_01 = load_run(rd)
         except Exception as e:
             print(f"  could not load {rd.name}: {type(e).__name__}: {e}"); continue
         fold = s["fold"]
@@ -806,10 +978,16 @@ else:
                         X[:, ch.index(channel), :] = 0
                     out = model(X)["wave"].float().cpu().numpy()[:, 0]
                     Yn = Y.numpy()[:, 0]
+                    # Compare every model on the paper's [0,1] target scale. WindowDataset
+                    # always yields the corpus-native [-1,1] target; NB03's wrapper already
+                    # converts predictions, whereas NB04 predictions still need conversion.
+                    Yn = (Yn + 1.0) * 0.5
+                    if not target_01:
+                        out = (out + 1.0) * 0.5
                     for a, bb in zip(Yn, out):
                         mets.append(seg_metrics(a, bb, FS))
             row = {"variant": v, "corruption": corruption, "level": level,
-                   "channel": channel, "n": len(mets)}
+                   "channel": channel, "n": len(mets), "comparison_scale": "[0,1]"}
             for metric in mets[0] if mets else []:
                 vals = np.asarray([m[metric] for m in mets], float)
                 row[metric] = float(np.nanmean(vals)); row[metric+"_std"] = float(np.nanstd(vals))
@@ -858,6 +1036,9 @@ A(f"# CardioMamba-Net — results\n\nGenerated {now} from `{CFG['BASELINE_REPO']
 A(f"- runs analysed: **{len(R)}**")
 A(f"- experiments: {sorted(R['experiment'].unique())}")
 A(f"- variants: {sorted(R['variant'].unique())}\n")
+A(f"- input completeness: **{EVALUATION_INPUTS_COMPLETE}**")
+A(f"- baseline reproduction gate passed: **{bool(BASELINE_GATE.get('passed', False))}**")
+A(f"- evaluation validated: **{EVALUATION_VALIDATED}**\n")
 
 if T3 is not None and len(T3):
     A("## Table 3 — RVA combined (headline)\n")
@@ -875,13 +1056,13 @@ try:
     A("## Table 5 — HR and HRV (real ms)\n"); A(T5.to_markdown(index=False)); A("")
 except Exception:
     pass
-try:
+if len(T6):
     A("## Table 6 — ablation ladder\n"); A(T6.round(5).to_markdown()); A("")
+if len(T7):
     A("## Table 7 — subject-paired Wilcoxon, Holm-corrected\n"); A(T7.to_markdown(index=False)); A("")
+if len(T8):
     A("## Table 8 — budget\n"); A(T8[["M_params","CC_temporal","CC_per_Mparam"]].to_markdown()); A("")
-except Exception:
-    pass
-if CFG["RUN_ROBUSTNESS"] and len(ROB):
+if ROBUSTNESS_EFFECTIVE and len(ROB):
     A("## Table 9 — robustness\n"); A(ROB.to_markdown(index=False)); A("")
 
 A("## Figures\n")
@@ -893,24 +1074,69 @@ A("- Our splits are strictly subject-wise with non-overlapping test windows. The
   "across train and test. Baseline rows landing below their published values is the expected "
   "consequence of removing that, not a weaker implementation.")
 A("- Correlations are reported x100 throughout, matching the baseline's tables.")
+A("- MAE and MSE are standardized to the paper's [0,1] waveform scale. The lossless "
+  "all_runs.csv and per-window data retain MAE_recorded/MSE_recorded and the original scale.")
+A("- Temporal RRMSE is retained exactly as recorded. Because it depends on the target's DC "
+  "offset, it must not be compared directly between NB03 [0,1] and NB04 [-1,1] runs.")
 A("- mu_RR is in genuine milliseconds. The baseline's Table 5 reports 126 ms alongside 62 bpm, "
   "which is arithmetically impossible; 126 samples at 128 Hz is 0.98 s.")
 A("- Significance uses subject-paired Wilcoxon tests for predeclared full-model comparisons "
   "with Holm correction.")
 (WORK / "RESULTS.md").write_text("\n".join(L))
 
+push_state = ("validated-complete" if EVALUATION_VALIDATED else
+              "inputs-complete-gate-failed" if EVALUATION_INPUTS_COMPLETE else "partial")
+artifact_paths = sorted(
+    [p for p in (WORK / "tables").glob("*.csv")] +
+    [p for p in (WORK / "figures").glob("*.png")] +
+    [WORK / "RESULTS.md", WORK / "input_audit.json"])
+artifact_paths = [p for p in artifact_paths if p.exists()]
+generation_basis = R.sort_values("run_id").to_json(orient="records", double_precision=12)
+generation_id = hashlib.sha256(generation_basis.encode("utf-8")).hexdigest()[:16]
+generation = {
+    "schema_version": 1,
+    "generation_id": generation_id,
+    "generated_utc": datetime.now(timezone.utc).isoformat(),
+    "status": push_state,
+    "source_repositories": [CFG["BASELINE_REPO"], CFG["MODEL_REPO"]],
+    "run_count": int(len(R)),
+    "run_ids": sorted(map(str, R["run_id"].tolist())),
+    "input_audit": INPUT_AUDIT,
+    "artifacts": {
+        str(p.relative_to(WORK)): {
+            "bytes": int(p.stat().st_size),
+            "sha256": hashlib.sha256(p.read_bytes()).hexdigest(),
+        } for p in artifact_paths
+    },
+}
+(WORK / "results_generation.json").write_text(
+    json.dumps(generation, indent=2), encoding="utf-8")
+sync.mark_dirty(f"canonical-results-rebuilt:{generation_id}")
+# `force=True` matters here: major-cell hooks may already have cleared the dirty flag.
+# This final commit overwrites RESULTS.md, tables, figures, audit and generation manifest on HF.
+ok = sync.flush(final=True, force=True,
+                msg=f"{CFG['RUN_ID']} — {push_state}, {len(R)} runs, generation {generation_id}")
 sizes = {str(p.relative_to(WORK)): p.stat().st_size for p in WORK.rglob("*") if p.is_file()}
-ok = sync.flush(final=True, msg=f"{CFG['RUN_ID']} — evaluation complete, {len(R)} runs")
 print("\n" + "=" * 76)
-print("  EVALUATION COMPLETE" if ok else "  COMPLETE (final push had a problem)")
+if not EVALUATION_INPUTS_COMPLETE:
+    status = "PARTIAL EVALUATION — NB04 FULL RUNS MISSING"
+elif not EVALUATION_VALIDATED:
+    status = "EVALUATION COMPLETE — BASELINE GATE NOT VALIDATED"
+else:
+    status = "EVALUATION COMPLETE AND VALIDATED"
+print(f"  {status}" if ok else f"  {status} (final push had a problem)")
 print("=" * 76)
 print(f"  repo    : {sync.url}")
 print(f"  runs    : {len(R)}")
+print(f"  version : {generation_id}")
 print(f"  tables  : {len(list((WORK/'tables').glob('*.csv')))}")
 print(f"  figures : {len(list(FIG.glob('*.png')))}")
 print(f"  payload : {sum(sizes.values())/2**20:.1f} MB")
 print("=" * 76)
-print("\n  RESULTS.md holds every table in markdown, ready to paste into the manuscript.")
+if EVALUATION_VALIDATED:
+    print("\n  RESULTS.md holds every validated table, ready for the manuscript.")
+else:
+    print("\n  RESULTS.md is an interim report. Do not present it as final/validated yet.")
 ''')
 
 md(r"""
@@ -920,8 +1146,12 @@ md(r"""
 **`No runs found`** — NB03 and NB04 push to separate `BASELINE_REPO` and `MODEL_REPO`.
 Check both names and that at least one run finished.
 
-**Table 7 skipped** — expected while quick runs are incomplete. Run NB03/NB04 with
-`QUICK = False` so every held-out subject has paired results.
+**Table 7 skipped** — expected while only quick results exist. Finish the canonical NB04 queue
+(`QUICK = False`) so every held-out subject has paired results.
+
+**`PARTIAL EVALUATION — NB04 FULL RUNS MISSING`** — the notebook is working correctly, but only
+quick or incomplete NB04 runs exist. Quick runs are excluded from paper tables. Finish NB04 and
+re-run NB05; all existing baseline tables remain resumable in the results repository.
 
 **Bland–Altman plots empty** — the per-subject metrics come from `metrics_subjects.parquet`, which
 is only written when a test split has at least two windows per subject. Re-run with the full folds.

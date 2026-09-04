@@ -574,7 +574,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-ENGINE_VERSION = 4
+ENGINE_VERSION = 5
 
 def _autocast(device_type, enabled):
     try:
@@ -660,7 +660,8 @@ class Trainer:
                  epochs=120, patience=20, batch_size=64, num_workers=2, amp=True,
                  multi_gpu=True, grad_clip=1.0, min_lr=1e-6, log_every=25,
                  checkpoint_every_steps=50, checkpoint_every_s=300, seed=42,
-                 require_dual_gpu=False, run_config=None):
+                 require_dual_gpu=False, run_config=None, monitor="val_total",
+                 monitor_mode="min", min_epochs=0):
         self.device, self.ngpu, self.gpu_names = pick_device()
         if require_dual_gpu and self.ngpu < 2:
             raise RuntimeError("This training notebook requires Kaggle GPU T4 x2. "
@@ -672,6 +673,11 @@ class Trainer:
         self.out = Path(out_dir); self.out.mkdir(parents=True, exist_ok=True)
         self.run_id = run_id; self.sync = sync
         self.epochs = int(epochs); self.patience = int(patience)
+        self.monitor = str(monitor)
+        self.monitor_mode = str(monitor_mode).lower()
+        if self.monitor_mode not in ("min", "max"):
+            raise ValueError("monitor_mode must be 'min' or 'max'")
+        self.min_epochs = max(0, int(min_epochs))
         self.bs = int(batch_size); self.nw = int(num_workers); self.seed = int(seed)
         self.amp = bool(amp and self.device.type == "cuda"); self.grad_clip = grad_clip
         self.opt = torch.optim.AdamW(self.raw_model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -686,7 +692,10 @@ class Trainer:
             self.config, sort_keys=True, default=str).encode()).hexdigest()
         self.state = {"schema_version": 4, "engine_version": ENGINE_VERSION,
                       "epoch": 0, "active_epoch": 0, "batch_in_epoch": 0,
-                      "global_step": 0, "best": float("inf"), "best_epoch": -1,
+                      "global_step": 0,
+                      "best": float("inf") if self.monitor_mode == "min" else -float("inf"),
+                      "best_epoch": -1, "monitor": self.monitor,
+                      "monitor_mode": self.monitor_mode, "min_epochs": self.min_epochs,
                       "bad_epochs": 0, "history": [], "partial": {},
                       "run_id": run_id, "done": False, "config_hash": self.config_hash,
                       "created_utc": datetime.now(timezone.utc).isoformat()}
@@ -803,6 +812,12 @@ class Trainer:
             den_y = np.sqrt(np.sum((y - y.mean(1, keepdims=True)) ** 2, axis=1))
             den_p = np.sqrt(np.sum((p - p.mean(1, keepdims=True)) ** 2, axis=1))
             cc = np.sum((y-y.mean(1, keepdims=True))*(p-p.mean(1, keepdims=True)), axis=1) / (den_y*den_p+1e-12)
+            rec.update(val_window_CC_temporal_mean=float(100 * np.mean(cc)),
+                       val_window_CC_temporal_median=float(100 * np.median(cc)),
+                       val_window_CC_temporal_std=float(100 * np.std(cc)),
+                       val_window_CC_temporal_p05=float(100 * np.percentile(cc, 5)),
+                       val_window_MAE_mean=float(np.mean(np.abs(y-p))),
+                       val_window_MSE_mean=float(np.mean((y-p)**2)))
             win = {"epoch": np.full(len(y), epoch + 1), "window": np.arange(len(y)),
                    "mae": np.mean(np.abs(y-p), 1), "mse": np.mean((y-p)**2, 1),
                    "cc_temporal": 100*cc}
@@ -951,13 +966,24 @@ class Trainer:
                     rec["model_parameter_l2"] = math.sqrt(sum(
                         float(torch.sum(p.detach().float() ** 2)) for p in self.raw_model.parameters()))
                 va = float(rec["val_total"])
-                improved = va < float(self.state["best"]) - 1e-6
+                if self.monitor not in rec:
+                    raise KeyError(f"configured monitor '{self.monitor}' is absent from validation metrics")
+                monitored = float(rec[self.monitor])
+                if not math.isfinite(monitored):
+                    raise FloatingPointError(
+                        f"non-finite monitor {self.monitor} at epoch {ep+1}: {monitored}")
+                best_so_far = float(self.state["best"])
+                improved = ((monitored < best_so_far - 1e-6) if self.monitor_mode == "min"
+                            else (monitored > best_so_far + 1e-6))
                 if improved:
-                    self.state["best"] = va; self.state["best_epoch"] = ep+1
+                    self.state["best"] = monitored; self.state["best_epoch"] = ep+1
                     self.state["bad_epochs"] = 0
                 else:
                     self.state["bad_epochs"] = int(self.state.get("bad_epochs", 0)) + 1
-                rec.update(improved=bool(improved), best_val=float(self.state["best"]),
+                rec.update(improved=bool(improved), monitor=self.monitor,
+                           monitor_mode=self.monitor_mode, monitor_value=monitored,
+                           best_monitor=float(self.state["best"]),
+                           best_val=float(self.state["best"]),
                            best_epoch=int(self.state["best_epoch"]),
                            bad_epochs=int(self.state["bad_epochs"]))
                 self.state["epoch"] = ep+1; self.state["active_epoch"] = ep+1
@@ -972,10 +998,12 @@ class Trainer:
                                   hr_mae_bpm=rec.get("val_hrv_abs_error_mean_hr_bpm"), improved=improved)
                 eta = rec["epoch_seconds"] * max(self.epochs-ep-1, 0) / 3600
                 print(f"  ep {ep+1:>3}/{self.epochs} train {rec['train_total']:.5f} "
-                      f"val {va:.5f} CCt {rec.get('val_CC_temporal', float('nan')):.1f} "
+                      f"val {va:.5f} CCt-win {rec.get('val_window_CC_temporal_mean', float('nan')):.1f} "
+                      f"CCt-global {rec.get('val_CC_temporal', float('nan')):.1f} "
                       f"CCs {rec.get('val_CC_spectral', float('nan')):.1f} "
                       f"{'*' if improved else ''} {rec['epoch_seconds']:.0f}s ETA {eta:.1f}h")
-                if int(self.state["bad_epochs"]) >= self.patience:
+                if ((ep + 1) >= self.min_epochs and
+                        int(self.state["bad_epochs"]) >= self.patience):
                     self.state["stop_reason"] = "early_stopping"; break
             self.state["done"] = True
             self.state["finished_utc"] = datetime.now(timezone.utc).isoformat()

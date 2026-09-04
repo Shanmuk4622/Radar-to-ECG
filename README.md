@@ -6,8 +6,9 @@ Medicine* 176:108555, 2024) on the Schellenberger **CR-RVS** dataset with a new 
 **Start here: [`00_admin/PLAN.md`](00_admin/PLAN.md)**
 
 **Run the rewritten Kaggle workflow:** [`03_notebooks/README.md`](03_notebooks/README.md).
-The five v2 notebooks use chained Kaggle Notebook Outputs, dual T4 where training is required,
-atomic mid-epoch recovery, conservative Hugging Face uploads, and comprehensive epoch telemetry.
+The five-stage v2 workflow plus its one-time baseline cleanup notebook use chained Kaggle Notebook
+Outputs, dual T4 where training is required, atomic mid-epoch recovery, conservative Hugging Face
+uploads, and comprehensive epoch telemetry.
 The file-by-file audit and v1 failure analysis are in
 [`00_admin/REPOSITORY_AUDIT_V2.md`](00_admin/REPOSITORY_AUDIT_V2.md).
 

@@ -91,8 +91,13 @@ Four notebooks added: `02_preprocess_to_hf` (CPU), `03_baselines` (2×T4), `04_c
   NB04 has the 10-rung ablation ladder plus the full model on every experiment. Each notebook
   checks Hugging Face for completed runs, works through as many as fit in `TIME_BUDGET_H`, then
   stops cleanly. Re-running in a new session continues. Resumption is per run *and* per epoch.
-- **`QUICK = True` by default** in NB03/NB04: one fold, 25 epochs. Proves the whole path in about
-  an hour before committing a full session.
+- **Canonical training by default.** NB03 runs its complete 80-run queue, and NB04 runs its
+  complete 100-run queue with the headline full-model folds first. Architecture smoke tests occur
+  before training; optional NB04 `QUICK=True` runs use a `quick__` prefix and never enter NB05's
+  canonical tables.
+- **NB04 queue sharding.** Four external Kaggle notebook sessions use fixed worker IDs 0–3. A
+  queue-index modulo assignment gives each run one owner, while each owner still uses its two T4s
+  for the current model. Per-worker state/history paths avoid last-writer-wins resume metadata.
 
 ### Two protocol decisions, both declared in the paper
 

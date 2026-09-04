@@ -3,6 +3,7 @@
 import sys
 from nb_lib_a import NB, HF_SYNC_SRC, CRVS_DATA_SRC, CRVS_METRICS_SRC
 from nb_lib_b import CRVS_MODELS_SRC, CRVS_CMNET_SRC, CRVS_LOSS_SRC, CRVS_ENGINE_SRC
+from nb04_worker import NB04_WORKER_SRC
 
 n = NB(); md, code = n.md, n.code
 
@@ -50,8 +51,24 @@ architecture":
 10. Full, Transformer bottleneck instead of SSM — the fair-fight control for C3
 
 Same queue machinery as NB03: completed runs are skipped, the session stops cleanly at the time
-budget, and re-running continues. **`QUICK = True` first** — the full model, one fold, 10 epochs,
-roughly 30–75 minutes. The earlier smoke cells exercise every ladder variant before this run.
+budget, and re-running continues. **Canonical mode is now the default (`QUICK = False`)**. It
+trains the five full-model headline folds first, then the remaining ablations and generalisation
+experiments. `QUICK = True` remains available only as a 10-epoch architecture smoke test.
+
+## Four-way parallel queue
+
+Run four separate Kaggle copies of this same notebook. Keep `QUEUE_WORKERS = 4` in every copy and
+set `WORKER_ID` to `0`, `1`, `2`, or `3` respectively. Queue position modulo four gives every
+worker a fixed, non-overlapping shard, so restarts cannot reshuffle work or train a run twice.
+Each Kaggle worker still uses both local T4 GPUs for one model; do not launch four training
+subprocesses inside one kernel. Per-worker state/history paths prevent concurrent HF commits from
+overwriting another worker's resume bookkeeping.
+
+Each run may train for 150 epochs, cannot early-stop before epoch 40, and saves `best.pt` using
+mean per-window validation temporal correlation — the same primary quantity reported at test
+time. Test data is never used for checkpoint selection. These choices remove the old 10-epoch
+under-training and loss/test-metric mismatch; they improve the validity of the comparison but do
+not predetermine which architecture wins.
 
 ## On `mamba-ssm`
 
@@ -94,7 +111,8 @@ CFG = {
     "WORK":    "/kaggle/working/nb04",
     "SCRATCH": "/kaggle/temp/nb04",
     "PUSH_INTERVAL_S": 30 * 60,
-    "HF_MAX_UPLOADS_HOUR": 24,
+    # Four simultaneous notebooks => at most 48 upload-folder calls/hour account-wide.
+    "HF_MAX_UPLOADS_HOUR": 12,
 
     # ---- architecture (target: < 5 M params, < 1.5 GFLOPs per 8 s window) ----
     "CHANNELS_FULL": ["I", "Q", "phi", "dy", "vel", "acc", "amp", "cardiac"],   # C1
@@ -116,8 +134,14 @@ CFG = {
     # ---- training ------------------------------------------------------------
     "EPOCHS":   150,
     "PATIENCE": 25,
+    # Select the checkpoint on the same per-window temporal correlation used by the
+    # headline evaluation. Do not allow patience to stop a full run before epoch 40.
+    "MONITOR": "val_window_CC_temporal_mean",
+    "MONITOR_MODE": "max",
+    "MIN_EPOCHS": 40,
     "BATCH":    48,
-    "WORKERS":  2,
+    "WORKERS":  0,
+    "PIN_MEMORY": False,
     "LR":       8e-4,
     "WEIGHT_DECAY": 1e-4,
     "AMP":      True,
@@ -125,8 +149,10 @@ CFG = {
     "REQUIRE_DUAL_T4": True,
     "SEED":     1337,
     "LOG_EVERY": 25,
-    "CHECKPOINT_EVERY_STEPS": 50,
+    "CHECKPOINT_EVERY_STEPS": 1000,
     "CHECKPOINT_EVERY_S": 300,
+    "EPOCHS_PER_PROCESS": 5,    # hard OS-level RAM/CUDA reset every five epochs
+    "PROCESS_ISOLATION": True,  # required for long Kaggle queues
 
     # ---- queue ---------------------------------------------------------------
     "EXPERIMENT":  "B_rva",      # the ablation ladder runs on the headline experiment
@@ -135,16 +161,24 @@ CFG = {
     "RUN_CROSS_SCENARIO": True,       # Experiment F: one held-out scenario per run
     "N_FOLDS":     5,
     "TIME_BUDGET_H": 10.5,
-    "QUICK": True,
+    "QUEUE_WORKERS": 4,   # identical in all four Kaggle notebook copies
+    "WORKER_ID": 0,       # set to 0, 1, 2, or 3 in the corresponding copy
+    # Canonical training is the default. QUICK remains available only for architecture smoke tests.
+    "QUICK": False,
     "QUICK_EPOCHS": 10,
     "QUICK_FOLDS": 1,
+    # NB03 is a scientific gate, not just a dependency. QUICK validation is still allowed
+    # when it fails; the expensive full queue requires an explicit, visible override.
+    # NB03's 80 runs completed, but its published-value reproduction gate did not pass.
+    # Proceed knowingly so the canonical CardioMamba queue can be trained on the same splits.
+    "ALLOW_FAILED_BASELINE_GATE": True,
 }
 import json
 print(json.dumps(CFG, indent=2))
 ''')
 
 code(r'''
-import os, sys, gc, json, math, time, warnings, subprocess, platform
+import os, sys, gc, json, math, time, warnings, subprocess, platform, shutil, signal
 from pathlib import Path
 from datetime import datetime, timezone
 warnings.filterwarnings("ignore")
@@ -160,9 +194,19 @@ _pip("pyarrow", "huggingface_hub")
 
 import numpy as np, pandas as pd, torch
 WORK = Path(CFG["WORK"]); SCRATCH = Path(CFG["SCRATCH"])
-for d in (WORK, SCRATCH, WORK / "runs", WORK / "results", WORK / "figures"):
+QUEUE_WORKERS = int(CFG["QUEUE_WORKERS"])
+WORKER_ID = int(CFG["WORKER_ID"])
+if QUEUE_WORKERS < 1 or not 0 <= WORKER_ID < QUEUE_WORKERS:
+    raise ValueError(f"WORKER_ID must be in 0..{QUEUE_WORKERS-1}; got {WORKER_ID}")
+SHARD_TAG = f"worker_{WORKER_ID}_of_{QUEUE_WORKERS}"
+SHARD_META = WORK / "queue_workers" / SHARD_TAG
+SHARD_RESULTS = WORK / "results" / "workers" / SHARD_TAG
+SHARD_FIGURES = WORK / "figures" / "workers" / SHARD_TAG
+for d in (WORK, SCRATCH, WORK / "runs", WORK / "results", WORK / "figures",
+          SHARD_META, SHARD_RESULTS, SHARD_FIGURES):
     d.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(WORK))
+print(f"queue worker {WORKER_ID}/{QUEUE_WORKERS-1} | namespace {SHARD_TAG}")
 
 print("torch", torch.__version__, "| cuda", torch.cuda.is_available())
 if torch.cuda.is_available():
@@ -247,9 +291,15 @@ except Exception:
 
 from crvs_sync import HFSync
 sync = HFSync(repo_id=CFG["DST_REPO"], local_dir=WORK, token=HF_TOKEN, repo_type="model",
-              private=CFG["HF_PRIVATE"], run_id=CFG["RUN_ID"],
+              private=CFG["HF_PRIVATE"], run_id=f"{CFG['RUN_ID']}__{SHARD_TAG}",
               push_interval_s=CFG["PUSH_INTERVAL_S"],
               max_upload_calls_hour=CFG["HF_MAX_UPLOADS_HOUR"])
+# The uploader owns the whole local folder, but each parallel queue worker keeps independent
+# durable bookkeeping. Only immutable/non-overlapping run directories are shared on HF.
+sync.history = SHARD_META / "sync_history.jsonl"
+sync.state_path = SHARD_META / "sync_state.json"
+sync.log("queue_worker_ready", worker_id=WORKER_ID, queue_workers=QUEUE_WORKERS,
+         namespace=SHARD_TAG)
 print("\nresults repo:", sync.url, "(public)")
 
 _M = {"f": False, "n": ""}
@@ -265,11 +315,32 @@ except Exception as e:
     print("hook unavailable:", e)
 
 sync.pull(allow_patterns=["*.json", "*.jsonl", "*.csv", "*.md",
-                          "runs/**/summary.json", "runs/**/state.json", "results/*"])
-STATE = sync.load_state({"completed": [], "sessions": 0, "version": 2})
+                          "runs/**/summary.json", "runs/**/state.json",
+                          f"queue_workers/{SHARD_TAG}/*", "results/*"])
+STATE = sync.load_state({"completed": [], "sessions": 0, "version": 3,
+                         "worker_id": WORKER_ID, "queue_workers": QUEUE_WORKERS})
 STATE["sessions"] = STATE.get("sessions", 0) + 1
+STATE["worker_id"] = WORKER_ID
+STATE["queue_workers"] = QUEUE_WORKERS
 sync.save_state(STATE)
-print(f"session #{STATE['sessions']}  |  {len(STATE['completed'])} run(s) already complete")
+print(f"{SHARD_TAG} session #{STATE['sessions']} | "
+      f"{len(STATE['completed'])} recorded run(s) complete in this shard")
+
+from huggingface_hub import hf_hub_download
+try:
+    gate_path = hf_hub_download(
+        CFG["BASELINE_REPO"], "results/reproduction_gate.json", repo_type="model",
+        token=HF_TOKEN, local_dir=str(SCRATCH / "baseline_gate"))
+    BASELINE_GATE = json.loads(Path(gate_path).read_text(encoding="utf-8"))
+    print("baseline reproduction gate:",
+          f"complete={BASELINE_GATE.get('complete')} passed={BASELINE_GATE.get('passed')}")
+    print("  ranking:", " > ".join(BASELINE_GATE.get("ranking", [])))
+    print("  MultiResLinkNet CC_t:", BASELINE_GATE.get("multireslinknet_cc_temporal"),
+          "| published:", BASELINE_GATE.get("published_cc_temporal"))
+except Exception as e:
+    BASELINE_GATE = {"complete": False, "passed": False,
+                     "read_error": f"{type(e).__name__}: {e}"}
+    print("WARNING: could not verify NB03 reproduction gate:", BASELINE_GATE["read_error"])
 MAJOR("00_setup")
 ''')
 
@@ -399,7 +470,7 @@ for nm, spec in VARIANTS.items():
 
 B = pd.DataFrame(budget)
 BUDGET_BY_VARIANT = B.set_index("variant").to_dict("index")
-B.to_csv(WORK / "results" / "variant_budget.csv", index=False)
+B.to_csv(SHARD_RESULTS / "variant_budget.csv", index=False)
 if not B["ok"].all():
     raise RuntimeError("a variant failed its smoke test:\n" + B.to_string(index=False))
 
@@ -440,19 +511,33 @@ for i, cl, wl, cc, wc in lens:
 if any(cl != wl for _, cl, wl, _, _ in lens):
     raise RuntimeError("wavelet branch is not octave-aligned with the convolution branch")
 
-oo["wave"].sum().backward()
-dead = [n_ for n_, p_ in m.named_parameters()
-        if p_.grad is None or float(p_.grad.abs().sum()) == 0.0]
+# Reachability must be tested through the loss used for training. Backpropagating only
+# `oo["wave"]` correctly leaves the independent RR head untouched and used to produce a
+# false failure here. Positive synthetic RR targets exercise all three task heads.
+yy = torch.randn(2, 1, 1024, device=dev).clamp(-1, 1)
+pp = torch.rand(2, 1, 1024, device=dev)
+rr_target = torch.rand(2, 1, 1024, device=dev) + 0.5
+reach_loss, _ = CompositeLoss(
+    **{f"w_{k}": v for k, v in CFG["W"].items()},
+    huber_delta=CFG["HUBER_DELTA"], peak_weight=CFG["PEAK_WEIGHT"]
+)(oo, yy, pp, rr_target)
+reach_loss.backward()
+dead = [n_ for n_, p_ in m.named_parameters() if p_.grad is None]
+nonfinite = [n_ for n_, p_ in m.named_parameters()
+             if p_.grad is not None and not torch.isfinite(p_.grad).all()]
 n_dead = sum(p_.numel() for n_, p_ in m.named_parameters() if n_ in set(dead))
-print(f"\n  parameters receiving no gradient: {len(dead)} tensors / {n_dead:,} values")
-if dead:
+print(f"\n  parameters unreachable from composite loss: {len(dead)} tensors / {n_dead:,} values")
+if dead or nonfinite:
     from collections import Counter
-    print("  by submodule:", dict(Counter(d.split(".")[0] for d in dead)))
+    if dead:
+        print("  unreachable by submodule:", dict(Counter(d.split(".")[0] for d in dead)))
+    if nonfinite:
+        print("  non-finite gradients:", nonfinite[:12])
     raise RuntimeError(
-        "some parameters get no gradient — they cost compute and learn nothing. "
-        "A dropped skip connection is the usual cause.")
-print("  every parameter is reachable by the loss.")
-del m, oo
+        "some parameters are unreachable from the real composite loss, or have non-finite "
+        "gradients. Inspect the named submodules above.")
+print("  every parameter is reachable through the real composite loss.")
+del m, oo, reach_loss, yy, pp, rr_target
 gc.collect()
 if dev.type == "cuda":
     torch.cuda.empty_cache()
@@ -527,7 +612,7 @@ for term in ("MSE", "huber", "stft", "peakw", "corr"):
 print("\nThis is the argument for C5 in one table: smoothing the QRS barely moves MSE,")
 print("but the peak-weighted and spectral terms react strongly. A model trained on MSE")
 print("alone has almost no incentive to keep the R peak sharp.")
-D.to_csv(WORK / "results" / "loss_probe.csv", index=False)
+D.to_csv(SHARD_RESULTS / "loss_probe.csv", index=False)
 
 m = make_model(VARIANTS["L9_full"]).to(dev); m.train()
 x = torch.randn(2, 8, 1024, device=dev)
@@ -567,7 +652,8 @@ folds = list(range(CFG["QUICK_FOLDS"] if CFG["QUICK"] else CFG["N_FOLDS"]))
 EPOCHS = CFG["QUICK_EPOCHS"] if CFG["QUICK"] else CFG["EPOCHS"]
 
 QUEUE = []
-queue_variants = ["L9_full"] if CFG["QUICK"] else list(VARIANTS)
+queue_variants = (["L9_full"] if CFG["QUICK"] else
+                  ["L9_full"] + [v for v in VARIANTS if v != "L9_full"])
 for vname in queue_variants:                            # ladder on B_rva
     for f in folds:
         prefix = "quick__" if CFG["QUICK"] else ""
@@ -588,12 +674,34 @@ if not CFG["QUICK"]:                                    # full model everywhere 
             QUEUE.append({"run_id": f"F_cross_{safe}__L9_full", "exp": f"F_cross:{sc}",
                           "variant": "L9_full", "fold": 0})
 
-done = set(STATE.get("completed", []))
+GLOBAL_QUEUE = list(QUEUE)
+QUEUE = [q for queue_index, q in enumerate(GLOBAL_QUEUE)
+         if queue_index % QUEUE_WORKERS == WORKER_ID]
+completed_from_summaries = {
+    p.parent.name for p in (WORK / "runs").glob("*/summary.json")
+}
+global_queue_ids = {q["run_id"] for q in GLOBAL_QUEUE}
+global_done_at_start = completed_from_summaries & global_queue_ids
+queue_ids = {q["run_id"] for q in QUEUE}
+completed_all = ((set(STATE.get("completed", [])) | completed_from_summaries) & queue_ids)
+done = set(completed_all)
 todo = [q for q in QUEUE if q["run_id"] not in done]
-print(f"queue: {len(QUEUE)} run(s) | {len(done)} done | {len(todo)} remaining")
+print(f"global queue: {len(GLOBAL_QUEUE)} run(s) | at least {len(global_done_at_start)} already done")
+print(f"{SHARD_TAG}: {len(QUEUE)} assigned | {len(done)} done | {len(todo)} remaining")
 print(f"epochs {EPOCHS} | folds {folds} | budget {CFG['TIME_BUDGET_H']} h")
 if CFG["QUICK"]:
     print("\n>>> QUICK MODE: full model only, 1 fold, 10 epochs. Then set QUICK=False.")
+if not BASELINE_GATE.get("passed", False):
+    print("\n>>> BASELINE REPRODUCTION GATE HAS NOT PASSED.")
+    if CFG["QUICK"]:
+        print("    QUICK architecture validation may run, but full training is blocked.")
+    elif not CFG["ALLOW_FAILED_BASELINE_GATE"]:
+        raise RuntimeError(
+            "NB03 is complete but its reproduction gate failed. Review/fix NB03 before spending "
+            "GPU time on the full NB04 queue. To proceed knowingly, set "
+            "CFG['ALLOW_FAILED_BASELINE_GATE']=True.")
+    else:
+        print("    WARNING: explicit override enabled; downstream comparisons are not validated.")
 print("\nnext up:")
 for q in todo[:10]:
     print("   ", q["run_id"])
@@ -690,112 +798,206 @@ def evaluate(Y, P, index, out_dir):
 
 md(r"""
 ---
-# 6 · Train the ladder
+# 6 · Train the canonical queue
 
-Interrupt-safe and resumable at the epoch level, exactly as in NB03. Watch `CC_t` in the summary
-line after each run — the rungs should climb: rung 2 (loss only) should already beat the NB03
-baseline, and rung 9 (full) should be the best of the ladder. If rung 9 is *not* the best, the
-ablation is telling you something real and the paper should report it honestly rather than the
-architecture being quietly retuned until it wins.
+Interrupt-safe and resumable inside an isolated worker process, exactly as in the repaired NB03.
+Every five epochs the worker exits and Linux reclaims all of its RAM and CUDA state; the parent
+immediately launches the next chunk. The five headline folds for `L9_full` run first, so a
+scientifically usable full-model result is produced as early as possible. Checkpoint selection and
+early stopping use `val_window_CC_temporal_mean`, with at least 40 epochs of training. Watch both
+`CCt-win` and `CCt-global` in each epoch line. If another rung ultimately beats rung 9, the
+ablation is evidence and must be reported honestly; the notebook never tunes on the test set.
 """)
 
 code(r'''
-t_start = time.time(); budget_s = CFG["TIME_BUDGET_H"] * 3600
-completed_now = []
+# The parent notebook never constructs training datasets or models. Each child handles at most
+# EPOCHS_PER_PROCESS epochs and exits, so Linux reclaims every Python/Arrow/CUDA allocation.
+WORKER_SRC = r"""
+__WORKER__
+"""
+WORKER_PATH = WORK / "nb04_run_worker.py"
+WORKER_PATH.write_text(WORKER_SRC, encoding="utf-8")
+MEMORY_RUNTIME_VERSION = "nb04-process-isolated-v1"
+worker_cfg = dict(CFG)
+worker_cfg["ACTIVE_EPOCHS"] = EPOCHS
+WORKER_CONTEXT = SHARD_META / "worker_context.json"
+WORKER_STATUS = SHARD_META / "worker_status.json"
+WORKER_CONTEXT.write_text(json.dumps({
+    "cfg": worker_cfg, "variants": VARIANTS, "work": str(WORK), "data": str(DATA),
+    "status_path": str(WORKER_STATUS),
+    "data_hash": DATA_HASH, "module_hashes": MODULE_HASHES,
+    "budget_by_variant": BUDGET_BY_VARIANT,
+    "memory_runtime_version": MEMORY_RUNTIME_VERSION,
+}, indent=2, default=str), encoding="utf-8")
 
-for qi, q in enumerate(todo, 1):
-    el = time.time() - t_start
-    if el > budget_s:
-        print(f"\n=== time budget reached ({el/3600:.2f} h). Stopping cleanly. ===")
-        print(f"    {len(todo)-qi+1} run(s) left -- start a new session and re-run.")
-        break
-    rid, exp, vname, fold = q["run_id"], q["exp"], q["variant"], q["fold"]
-    spec = VARIANTS[vname]
-    out = WORK / "runs" / rid; out.mkdir(parents=True, exist_ok=True)
-    print("\n" + "=" * 78)
-    print(f"[{qi}/{len(todo)}]  {rid}   ({el/3600:.2f} h elapsed)")
-    print("=" * 78)
+def _linux_memory_gb():
+    result = {"process_rss_gb": float("nan"), "host_ram_available_gb": float("nan")}
     try:
-        if (out / "state.json").exists() and not (out / "state.pt").exists():
-            print("  interrupted remote run found; restoring exact checkpoint...")
-            sync.pull(allow_patterns=[f"runs/{rid}/state.pt", f"runs/{rid}/best.pt",
-                                      f"runs/{rid}/state.json", f"runs/{rid}/run_config.json",
-                                      f"runs/{rid}/environment.json", f"runs/{rid}/*.jsonl",
-                                      f"runs/{rid}/*.csv", f"runs/{rid}/validation_windows/*",
-                                      f"runs/{rid}/validation_recordings/*"])
-        tr_ds, va_ds, te_ds, (tri, vai, tei) = make_datasets(exp, fold, spec["channels"])
-        print(f"  in_ch {len(spec['channels'])} | train {len(tr_ds):,} val {len(va_ds):,} "
-              f"test {len(te_ds):,} | test subjects {sorted(tei['subject'].unique())}")
-        seed_all(CFG["SEED"] + fold)
-        model = make_model(spec)
-        loss_fn = (CompositeLoss(**{f"w_{k}": v for k, v in CFG["W"].items()},
-                                 huber_delta=CFG["HUBER_DELTA"],
-                                 peak_weight=CFG["PEAK_WEIGHT"])
-                   if spec["loss"] == "composite" else MSEOnly())
-        tr = Trainer(model, loss_fn, out, rid, sync=sync, lr=CFG["LR"],
-                     weight_decay=CFG["WEIGHT_DECAY"], epochs=EPOCHS,
-                     patience=CFG["PATIENCE"], batch_size=CFG["BATCH"],
-                     num_workers=CFG["WORKERS"], amp=CFG["AMP"], multi_gpu=CFG["MULTI_GPU"],
-                     log_every=CFG["LOG_EVERY"],
-                     checkpoint_every_steps=CFG["CHECKPOINT_EVERY_STEPS"],
-                     checkpoint_every_s=CFG["CHECKPOINT_EVERY_S"], seed=CFG["SEED"] + fold,
-                     require_dual_gpu=CFG["REQUIRE_DUAL_T4"],
-                     run_config={"experiment": exp, "variant": vname, "fold": fold,
-                                 "epochs": EPOCHS, "spec": spec, "base": CFG["BASE"],
-                                 "d_ssm": CFG["D_SSM"], "ssm_blocks": CFG["SSM_BLOCKS"],
-                                 "d_state": CFG["D_STATE"], "levels": CFG["LEVELS"],
-                                 "dropout": CFG["DROPOUT"], "loss_weights": CFG["W"],
-                                 "lr": CFG["LR"], "batch": CFG["BATCH"],
-                                 "seed": CFG["SEED"] + fold,
-                                 "data_index_sha256": DATA_HASH, "library_sha256": MODULE_HASHES,
-                                 "train_subjects": sorted(map(str, tri["subject"].unique())),
-                                 "val_subjects": sorted(map(str, vai["subject"].unique())),
-                                 "test_subjects": sorted(map(str, tei["subject"].unique()))})
-        tr.load(); tr.fit(tr_ds, va_ds)
-        Y, P = tr.predict(te_ds)
-        agg, dfw = evaluate(Y, P, tei, out)
-        keep = min(200, len(Y)); sel = np.linspace(0, len(Y) - 1, keep).astype(int)
-        np.savez_compressed(out / "preds_sample.npz", y=Y[sel].astype(np.float32),
-                            p=P[sel].astype(np.float32),
-                            subject=tei["subject"].to_numpy()[sel].astype(str))
-        (out / "summary.json").write_text(json.dumps({
-            "run_id": rid, "experiment": exp, "variant": vname, "fold": fold,
-            "spec": {k: v for k, v in spec.items()},
-            "params": count_params(tr.raw_model), "epochs_run": tr.state["epoch"],
-            "gflops_per_window": BUDGET_BY_VARIANT.get(vname, {}).get("gflops_per_window"),
-            "forward_ms_batch2": BUDGET_BY_VARIANT.get(vname, {}).get("fwd_ms_batch2"),
-            "best_epoch": tr.state["best_epoch"], "best_val": tr.state["best"],
-            "n_train": len(tr_ds), "n_val": len(va_ds), "n_test": len(te_ds),
-            "test_subjects": sorted(map(str, tei["subject"].unique())),
-            "metrics": agg, "finished_utc": datetime.now(timezone.utc).isoformat()},
-            indent=2, default=str))
-        print(f"  --> CC_t {agg['CC_temporal']:.2f}  CC_s {agg['CC_spectral']:.2f}  "
-              f"MAE {agg['MAE']:.5f}  RRMSE_t {agg['RRMSE_temporal']:.4f}  "
-              f"F1 {agg.get('peak_F1', float('nan')):.3f}  "
-              f"dRMSSD {agg.get('MAE_rmssd_ms', float('nan')):.1f} ms")
-        done.add(rid); completed_now.append(rid)
-        STATE["completed"] = sorted(done); sync.save_state(STATE)
-        pushed = sync.flush(force=True, msg=f"{rid} complete CCt={agg['CC_temporal']:.2f}")
-        if pushed:
-            for name in ("state.pt", "best.pt"):
-                p = out / name
-                if p.exists(): p.unlink()
-            sync.log("local_checkpoints_pruned", run_id=rid, remote_copy=True)
-        del tr, model, tr_ds, va_ds, te_ds, Y, P
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-    except KeyboardInterrupt:
-        print("\ninterrupted -- checkpoint saved and pushed; re-run to resume this run.")
-        raise
-    except Exception as e:
-        import traceback
-        print(f"  !! {type(e).__name__}: {e}")
-        (out / "error.txt").write_text(traceback.format_exc())
-        sync.log("run_failed", run=rid, err=f"{type(e).__name__}: {e}")
+        for line in Path("/proc/self/status").read_text().splitlines():
+            if line.startswith("VmRSS:"):
+                result["process_rss_gb"] = float(line.split()[1]) / 2**20
+                break
+    except Exception:
+        pass
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                result["host_ram_available_gb"] = float(line.split()[1]) / 2**20
+                break
+    except Exception:
+        pass
+    return result
 
-print(f"\ncompleted this session: {len(completed_now)}  |  total {len(done)}/{len(QUEUE)}")
-MAJOR("03_training")
+def release_runtime_memory(label=None):
+    gc.collect()
+    try:
+        import pyarrow as pa
+        pa.default_memory_pool().release_unused()
+    except Exception:
+        pass
+    try:
+        import ctypes
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:
+        pass
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        try:
+            torch.cuda.ipc_collect()
+        except Exception:
+            pass
+    stats = _linux_memory_gb()
+    if label:
+        print(f"  RAM after {label}: {stats['process_rss_gb']:.2f} GB RSS | "
+              f"{stats['host_ram_available_gb']:.2f} GB host available")
+    return stats
+
+t_start = time.time()
+budget_s = CFG["TIME_BUDGET_H"] * 3600
+completed_now = []
+failed_now = []
+session_stop_reason = None
+_active_worker = {"proc": None, "run_id": None}
+
+def _stop_active_worker():
+    proc = _active_worker.get("proc")
+    if proc is None or proc.poll() is not None:
+        return
+    print(f"\n  stopping isolated worker {_active_worker.get('run_id')} safely...", flush=True)
+    try:
+        proc.send_signal(signal.SIGINT)
+        proc.wait(timeout=120)
+    except Exception:
+        # Never force-kill while a checkpoint may be moving into place. The parent interrupt
+        # hook uploads the latest complete atomic checkpoint that exists.
+        pass
+
+def _pull_active_checkpoint(rid, out):
+    if (out / "state.json").exists() and not (out / "state.pt").exists():
+        print("  interrupted remote run found; restoring exact checkpoint...")
+        return sync.pull(allow_patterns=[f"runs/{rid}/state.pt", f"runs/{rid}/best.pt",
+                                         f"runs/{rid}/state.json", f"runs/{rid}/run_config.json",
+                                         f"runs/{rid}/environment.json", f"runs/{rid}/*.jsonl",
+                                         f"runs/{rid}/*.csv", f"runs/{rid}/validation_windows/*",
+                                         f"runs/{rid}/validation_recordings/*"])
+    return True
+
+def _launch_chunk(q):
+    rid = q["run_id"]
+    status_path = WORKER_STATUS
+    if status_path.exists():
+        status_path.unlink()
+    cmd = [sys.executable, "-u", str(WORKER_PATH), "--context", str(WORKER_CONTEXT),
+           "--run-id", rid, "--experiment", q["exp"], "--variant", q["variant"],
+           "--fold", str(q["fold"])]
+    env = os.environ.copy()
+    env["PYTHONUNBUFFERED"] = "1"
+    sync.mark_dirty(f"{rid}:isolated-worker-active")
+    proc = subprocess.Popen(cmd, cwd=str(WORK), env=env)
+    _active_worker.update(proc=proc, run_id=rid)
+    sync.set_before_final_flush(_stop_active_worker)
+    try:
+        return_code = proc.wait()
+    finally:
+        _active_worker.update(proc=None, run_id=None)
+        sync.set_before_final_flush(None)
+    try:
+        status = json.loads(status_path.read_text(encoding="utf-8"))
+    except Exception:
+        status = {"status": "failed", "run_id": rid,
+                  "error": f"worker exited {return_code} without a status file"}
+    status["return_code"] = return_code
+    sync.mark_dirty(f"{rid}:isolated-worker-{status.get('status')}")
+    parent_ram = release_runtime_memory(f"worker {rid} exited")
+    sync.log("worker_process_reaped", run_id=rid, pid=status.get("pid"),
+             worker_status=status.get("status"), epoch=status.get("epoch"),
+             worker_rss_gb=status.get("rss_gb"),
+             parent_rss_gb=parent_ram.get("process_rss_gb"),
+             policy=MEMORY_RUNTIME_VERSION)
+    return status
+
+if not CFG.get("PROCESS_ISOLATION", True):
+    raise RuntimeError("PROCESS_ISOLATION must stay enabled for this Kaggle workload")
+
+for qi, q in enumerate(list(todo), 1):
+    rid = q["run_id"]
+    out = WORK / "runs" / rid
+    out.mkdir(parents=True, exist_ok=True)
+    if not _pull_active_checkpoint(rid, out):
+        failed_now.append({"run_id": rid, "error": "remote checkpoint download failed"})
+        continue
+    print("\n" + "=" * 78)
+    print(f"[{qi}/{len(todo)}] {rid} — isolated process chunks of "
+          f"{CFG['EPOCHS_PER_PROCESS']} epoch(s)")
+    print("=" * 78)
+    while True:
+        if time.time() - t_start >= budget_s:
+            session_stop_reason = "time_budget"
+            print(f"\n=== {CFG['TIME_BUDGET_H']:.2f} h budget reached; pushing and pausing. ===")
+            break
+        try:
+            status = _launch_chunk(q)
+        except KeyboardInterrupt:
+            _stop_active_worker()
+            sync.mark_dirty(f"{rid}:parent-interrupt")
+            sync.flush(final=True, force=True, msg=f"{rid} interrupted; isolated checkpoint")
+            print("\ninterrupted — the latest atomic child checkpoint was pushed.")
+            raise
+        worker_state = status.get("status")
+        if worker_state == "chunk_complete":
+            print(f"  worker exited cleanly at epoch {status.get('epoch')}; "
+                  "OS RAM/CUDA state reclaimed; launching the next chunk.")
+            continue
+        if worker_state == "run_complete" and (out / "summary.json").exists():
+            summary = json.loads((out / "summary.json").read_text(encoding="utf-8"))
+            metrics = summary.get("metrics", {})
+            done.add(rid)
+            completed_all.add(rid)
+            completed_now.append(rid)
+            STATE["completed"] = sorted(completed_all)
+            sync.save_state(STATE)
+            pushed = sync.flush(force=True, msg=(
+                f"{rid} complete CCt={metrics.get('CC_temporal', float('nan')):.2f}"))
+            if pushed:
+                for name in ("state.pt", "best.pt"):
+                    checkpoint = out / name
+                    if checkpoint.exists():
+                        checkpoint.unlink()
+                sync.log("local_checkpoints_pruned", run_id=rid, remote_copy=True)
+            break
+        error = status.get("error", f"worker returned {status.get('return_code')}")
+        print(f"  !! isolated worker failed: {error}")
+        failed_now.append({"run_id": rid, "error": error})
+        sync.flush(force=True, msg=f"{rid} worker failure checkpoint")
+        break
+    if session_stop_reason:
+        break
+
+print(f"\ncompleted this session: {len(completed_now)}  |  "
+      f"{SHARD_TAG}: {len(done)}/{len(QUEUE)}")
+print(f"worker failures this session: {len(failed_now)}")
+print("Every worker exited; Linux reclaimed its full RAM and CUDA context.")
+MAJOR("03_training_isolated")
 ''')
 
 md(r"""
@@ -814,6 +1016,9 @@ rows = []
 for p in sorted((WORK / "runs").glob("*/summary.json")):
     try:
         s = json.loads(p.read_text())
+        is_quick = str(s.get("run_id", p.parent.name)).startswith("quick__")
+        if is_quick != bool(CFG["QUICK"]):
+            continue
         rows.append({"experiment": s["experiment"], "variant": s.get("variant", s.get("model")),
                      "fold": s["fold"], "params": s.get("params"),
                      **{k: v for k, v in s["metrics"].items() if not k.endswith("_std")}})
@@ -840,7 +1045,7 @@ R = pd.DataFrame(rows)
 if not len(R):
     print("no completed runs yet -- run the training cell.")
 else:
-    R.to_csv(WORK / "results" / "runs_raw.csv", index=False)
+    R.to_csv(SHARD_RESULTS / "runs_raw.csv", index=False)
     LADDER = ["L1_baseline_mse", "L2_loss_only", "L3_c1_only", "L4_c1_c5", "L5_no_wavelet",
               "L6_no_ssm", "L7_singletask", "L8_no_film", "L9_full", "L10_transformer"]
     LABEL = {
@@ -869,7 +1074,7 @@ else:
     print(f"ABLATION LADDER  —  experiment {CFG['EXPERIMENT']}  (mean over folds)")
     print("=" * 118)
     print(A.round(5).to_string())
-    A.to_csv(WORK / "results" / "ablation.csv")
+    A.to_csv(SHARD_RESULTS / "ablation.csv")
 
     print("\n" + "-" * 118)
     print("TARGETS FROM PLAN.md")
@@ -902,7 +1107,7 @@ plt.rcParams.update({"figure.dpi": 130, "savefig.dpi": 160, "savefig.bbox": "tig
                      "axes.grid": True, "grid.color": S["grid"], "grid.linewidth": .6,
                      "axes.spines.top": False, "axes.spines.right": False,
                      "font.size": 8.5, "axes.titlesize": 10, "axes.titleweight": "bold"})
-FIG = WORK / "figures"
+FIG = SHARD_FIGURES
 
 if len(R):
     b = R[R["experiment"] == CFG["EXPERIMENT"]]
@@ -944,7 +1149,9 @@ if len(R):
     fig.savefig(FIG / "nb04_fig2_curves.png"); plt.close(fig)
     print("  wrote nb04_fig2_curves.png")
 
-    fullp = sorted((WORK / "runs").glob(f"{CFG['EXPERIMENT']}__L9_full__f*/preds_sample.npz"))
+    full_prefix = "quick__" if CFG["QUICK"] else ""
+    fullp = sorted((WORK / "runs").glob(
+        f"{full_prefix}{CFG['EXPERIMENT']}__L9_full__f*/preds_sample.npz"))
     basep = sorted(Path(CFG["WORK"]).parent.glob(
         "nb03/runs/B_rva__multireslinknet__f*/preds_sample.npz"))
     if fullp:
@@ -971,27 +1178,46 @@ MAJOR("05_figures")
 ''')
 
 code(r'''
-ok = sync.flush(final=True, msg=f"{CFG['RUN_ID']} — {len(done)}/{len(QUEUE)} runs complete")
+known_global_done = global_done_at_start | set(completed_now)
+ok = sync.flush(final=True, msg=(
+    f"{CFG['RUN_ID']} {SHARD_TAG} — {len(done)}/{len(QUEUE)} assigned runs complete"))
 print("\n" + "=" * 76)
 print("  SESSION COMPLETE" if ok else "  SESSION COMPLETE (final push had a problem)")
 print("=" * 76)
 print(f"  repo      : {sync.url}")
-print(f"  runs done : {len(done)}/{len(QUEUE)}   this session: {len(completed_now)}")
+print(f"  worker    : {WORKER_ID}/{QUEUE_WORKERS-1} ({SHARD_TAG})")
+print(f"  shard done: {len(done)}/{len(QUEUE)}   this session: {len(completed_now)}")
+print(f"  global    : at least {len(known_global_done)}/{len(GLOBAL_QUEUE)} visible to this session")
 print(f"  elapsed   : {(time.time()-t_start)/3600:.2f} h")
 print("=" * 76)
-if len(done) < len(QUEUE):
-    print(f"\n  {len(QUEUE)-len(done)} run(s) remain. Start a NEW session and re-run this")
-    print("  notebook -- it resumes from Hugging Face and skips finished runs.")
+if CFG["QUICK"] and len(QUEUE) and len(done) == len(QUEUE):
+    print("\n  QUICK validation complete.")
+    if BASELINE_GATE.get("passed", False):
+        print("  Set CFG['QUICK'] = False, restart, and Run All for the full queue.")
+    else:
+        print("  NB03's reproduction gate is still failed; review it before full training.")
+        print("  Full mode remains blocked unless ALLOW_FAILED_BASELINE_GATE=True is set knowingly.")
+elif len(done) < len(QUEUE):
+    print(f"\n  {len(QUEUE)-len(done)} run(s) remain for {SHARD_TAG}.")
+    print("  Start a NEW session with the SAME WORKER_ID; it resumes this exact shard.")
 else:
-    print("\n  Ladder complete. Next: 05_evaluate_and_figures.ipynb")
+    print(f"\n  {SHARD_TAG} is complete. Do not reuse this WORKER_ID.")
+    if QUEUE_WORKERS == 1 or len(known_global_done) == len(GLOBAL_QUEUE):
+        print("  All canonical runs are visible. Next: 05_evaluate_and_figures.ipynb")
+    else:
+        print("  Continue workers with the other IDs. Run NB05 only after all four shards finish.")
 ''')
 
 md(r"""
 ---
 # 8 · Troubleshooting
 
-**CUDA out of memory** — lower `CFG["BATCH"]` to 32 or 24. The wavelet branch roughly doubles
-encoder activations. If it persists, drop `CFG["D_SSM"]` to 192.
+**Notebook says it allocated too much memory / kernel restarted** — this version uses
+`WORKERS=0`, disables pinned host pages, and trains only five epochs in each isolated child
+process. The child exits after an atomic checkpoint, so Linux reclaims all RAM and CUDA state.
+Do not disable `PROCESS_ISOLATION`, raise `EPOCHS_PER_PROCESS`, raise `WORKERS`, or enable
+`PIN_MEMORY` in a long Kaggle session. If a *single batch* runs out of GPU memory, lower
+`CFG["BATCH"]` to 32 or 24; if necessary, lower `CFG["D_SSM"]` to 192 and use a new run ID.
 
 **S4D produces NaN** — the kernel is computed in float32 outside autocast on purpose. If NaNs
 still appear, lower `CFG["LR"]` to 5e-4 and check `nb04_fig2_curves.png` for the epoch it began.
@@ -1007,6 +1233,16 @@ and the paper is more interesting for saying so.
 smoke cell before training.
 
 **Session ended mid-queue** — expected and handled. New session, run again, it resumes.
+
+**Four-way parallel launch** — make four Kaggle copies. Keep `QUEUE_WORKERS=4` everywhere and set
+exactly one `WORKER_ID` per copy: 0, 1, 2, 3. On restart, keep that copy's same ID. Never run two
+copies with the same ID at the same time. Each copy uses both of its T4 GPUs for one assigned run;
+`WORKER_ID` partitions the queue, not the GPUs inside a notebook.
+
+**`NB03 ... reproduction gate failed`** — NB03 completed all 80 runs, but its scientific check did
+not reproduce the paper's published value. This notebook visibly proceeds because
+`ALLOW_FAILED_BASELINE_GATE=True`; comparisons against our NB03 re-runs still use the same split,
+but must not be described as a validated reproduction of the published baseline.
 """)
 
 out = sys.argv[1] if len(sys.argv) > 1 else "04_cardiomamba_train.ipynb"
@@ -1022,4 +1258,6 @@ for i, c in enumerate(n.cells):
                   .replace("__LOSSES__", CRVS_LOSS_SRC.strip("\n"))
                   .replace("__ENGINE__", CRVS_ENGINE_SRC.strip("\n")))
             n.cells[i]["source"] = n._src(s)
+        if "__WORKER__" in s:
+            n.cells[i]["source"] = n._src(s.replace("__WORKER__", NB04_WORKER_SRC.strip("\n")))
 n.write(out, accelerator="nvidiaTeslaT4")

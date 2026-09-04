@@ -8,7 +8,8 @@ but v2 uses new Hugging Face repositories and does not treat any v1 model as com
 |---|---|---|---|---|
 | 01 | `01_verify_and_download.ipynb` | Verify raw mirror; census; 128 Hz derivative | CPU | 25–70 min |
 | 02 | `02_preprocess_to_hf.ipynb` | Targets, quality audit, folds, LOSO/cross-scenario norms | CPU | 25–75 min |
-| 03 | `03_baselines.ipynb` | Four published baselines and reproduction gate | **T4 x2** | quick 20–45 min; full queue spans sessions |
+| 02b | `02b_cleanup_baselines_hf_once.ipynb` | One-time guarded reset of old baseline artefacts | CPU | 2–4 min, run once |
+| 03 | `03_baselines.ipynb` | Four published baselines and reproduction gate | **T4 x2** | full queue spans sessions |
 | 04 | `04_cardiomamba_train.ipynb` | C1–C5, ablations, experiments A–F | **T4 x2** | quick 30–75 min; full queue spans sessions |
 | 05 | `05_evaluate_and_figures.ipynb` | Tables, subject-paired statistics, figures, robustness | CPU or **T4 x2** | 10–45 min; +20–90 min robustness |
 
@@ -19,7 +20,8 @@ Every notebook contains its own cell-by-cell description and time estimate.
 1. NB01: add Kaggle dataset `pedababugaddala/datasets-file`.
 2. After NB01 completes, **Save Version**. Attach that Notebook Output to NB02.
 3. After NB02 completes, **Save Version**. Attach that Notebook Output to NB03, NB04, and NB05.
-4. Attach the Kaggle secret `HF_TOKEN` with write access to all five notebooks.
+4. Run `02b_cleanup_baselines_hf_once.ipynb` once; it needs no attached input.
+5. Attach the Kaggle secret `HF_TOKEN` with write access to all notebooks.
 
 The notebook-output chain is the primary, fast path. Hugging Face is the durable backup and
 automatic recovery path.
@@ -64,13 +66,26 @@ JSONL, per-epoch JSONL/CSV, and per-window/per-recording validation Parquet file
 
 ## Training sequence
 
-Keep `QUICK=True` for the first successful run:
+NB03 has no saved quick-training mode. Its forward/backward cell smoke-tests all four models, then
+the canonical queue starts immediately: 4 models × 4 experiments × 5 folds. This prevents trial
+weights from entering the aggregate tables. Each model/experiment/fold ID is trained once and then
+only resumed from its exact checkpoint.
 
-- NB03 trains one MultiResLinkNet/RVA fold for 10 epochs.
-- NB04 trains one full CardioMamba/RVA fold for 10 epochs; the smoke cells exercise all variants.
+NB04 starts directly in canonical mode (`QUICK=False`). It trains the five headline
+CardioMamba/RVA folds first, then the ablation and generalisation queue. Each run plans 150 epochs,
+cannot early-stop before epoch 40, and selects `best.pt` by mean per-window validation temporal
+correlation. `QUICK=True` is retained only for a manual architecture smoke test and its `quick__`
+runs are excluded from NB05 by default.
 
-Then set `QUICK=False` and Run All in fresh Kaggle sessions. Each queue works for at most 10.5
-hours, uploads, exits cleanly, and continues next session.
+NB04 can be run in four parallel Kaggle sessions. Use the same notebook in all four, keep
+`QUEUE_WORKERS=4`, and assign distinct `WORKER_ID` values 0, 1, 2, and 3. The assignment is fixed
+by queue position, so every canonical run belongs to exactly one worker and restarts keep the same
+shard. Each notebook still uses both of its local T4s; do not start four training processes inside
+one Kaggle kernel.
+
+Each full queue works for at most 10.5 hours, uploads, exits cleanly, and continues in a fresh
+Kaggle session. NB05 clears restored partial result artifacts, rebuilds the canonical tables and
+figures from the current completed runs, and force-pushes them to the same Hugging Face paths.
 
 ## Source of truth
 
@@ -79,6 +94,7 @@ Edit the generators and shared libraries in `04_src/utils`, not notebook JSON by
 ```powershell
 python 04_src/utils/build_nb01.py 03_notebooks/01_verify_and_download.ipynb
 python 04_src/utils/build_nb02.py 03_notebooks/02_preprocess_to_hf.ipynb
+python 04_src/utils/build_nb02b_cleanup_baselines.py 03_notebooks/02b_cleanup_baselines_hf_once.ipynb
 python 04_src/utils/build_nb03.py 03_notebooks/03_baselines.ipynb
 python 04_src/utils/build_nb04.py 03_notebooks/04_cardiomamba_train.ipynb
 python 04_src/utils/build_nb05.py 03_notebooks/05_evaluate_and_figures.ipynb
