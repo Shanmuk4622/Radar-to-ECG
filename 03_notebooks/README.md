@@ -83,6 +83,11 @@ by queue position, so every canonical run belongs to exactly one worker and rest
 shard. Each notebook still uses both of its local T4s; do not start four training processes inside
 one Kaggle kernel.
 
+NB04 engine v6 repairs numerical failures without discarding good training: a failed v5 state is
+rolled back to its finite `best.pt`, the effective learning rate is reduced, AMP is disabled after
+a second recovery, and non-finite gradients are skipped before the optimizer step. Every recovery
+is recorded. Canonical mode rejects `QUEUE_WORKERS=1` or `2`; use only the four `*_of_4` workers.
+
 Each full queue works for at most 10.5 hours, uploads, exits cleanly, and continues in a fresh
 Kaggle session. NB05 clears restored partial result artifacts, rebuilds the canonical tables and
 figures from the current completed runs, and force-pushes them to the same Hugging Face paths.

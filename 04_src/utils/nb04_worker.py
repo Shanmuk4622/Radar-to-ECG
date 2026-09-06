@@ -275,6 +275,12 @@ def main():
             "lr": cfg["LR"], "batch": cfg["BATCH"],
             "monitor": cfg["MONITOR"], "monitor_mode": cfg["MONITOR_MODE"],
             "min_epochs": cfg["MIN_EPOCHS"],
+            "recovery_policy": {
+                "lr_factor": cfg["RECOVERY_LR_FACTOR"],
+                "max_recoveries": cfg["MAX_NUMERICAL_RECOVERIES"],
+                "disable_amp_after": cfg["DISABLE_AMP_AFTER_RECOVERIES"],
+                "max_nonfinite_grad_batches": cfg["MAX_NONFINITE_GRAD_BATCHES"],
+            },
             "seed": cfg["SEED"] + args.fold,
             "data_index_sha256": ctx["data_hash"],
             "library_sha256": ctx["module_hashes"],
@@ -291,7 +297,11 @@ def main():
             checkpoint_every_s=cfg["CHECKPOINT_EVERY_S"], seed=cfg["SEED"] + args.fold,
             require_dual_gpu=cfg["REQUIRE_DUAL_T4"], run_config=run_config,
             monitor=cfg["MONITOR"], monitor_mode=cfg["MONITOR_MODE"],
-            min_epochs=cfg["MIN_EPOCHS"])
+            min_epochs=cfg["MIN_EPOCHS"],
+            recovery_lr_factor=cfg["RECOVERY_LR_FACTOR"],
+            max_numerical_recoveries=cfg["MAX_NUMERICAL_RECOVERIES"],
+            disable_amp_after_recoveries=cfg["DISABLE_AMP_AFTER_RECOVERIES"],
+            max_nonfinite_grad_batches=cfg["MAX_NONFINITE_GRAD_BATCHES"])
         trainer.load()
         for rec in trainer.state.get("history", []):
             migrate_metric_names(rec)
@@ -345,6 +355,14 @@ def main():
             "epochs_run": trainer.state["epoch"], "best_epoch": trainer.state["best_epoch"],
             "monitor": trainer.monitor, "monitor_mode": trainer.monitor_mode,
             "best_monitor": trainer.state["best"],
+            "stop_reason": trainer.state.get("stop_reason", "epochs_complete"),
+            "recovery_count": int(trainer.state.get("recovery_count", 0) or 0),
+            "recovery_events": trainer.state.get("recovery_events", []),
+            "amp_final": bool(trainer.amp),
+            "effective_lr_final": float(trainer.opt.param_groups[0]["lr"]),
+            "nonfinite_gradient_skips": int(sum(
+                int(h.get("train_nonfinite_grad_skips", 0) or 0)
+                for h in trainer.state.get("history", []))),
             # Kept for compatibility with old readers; it now means the selected monitor value.
             "best_val": trainer.state["best"],
             "gflops_per_window": budget.get("gflops_per_window"),

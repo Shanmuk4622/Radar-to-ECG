@@ -574,7 +574,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-ENGINE_VERSION = 5
+ENGINE_VERSION = 6
 
 def _autocast(device_type, enabled):
     try:
@@ -661,7 +661,9 @@ class Trainer:
                  multi_gpu=True, grad_clip=1.0, min_lr=1e-6, log_every=25,
                  checkpoint_every_steps=50, checkpoint_every_s=300, seed=42,
                  require_dual_gpu=False, run_config=None, monitor="val_total",
-                 monitor_mode="min", min_epochs=0):
+                 monitor_mode="min", min_epochs=0, recovery_lr_factor=0.25,
+                 max_numerical_recoveries=3, disable_amp_after_recoveries=2,
+                 max_nonfinite_grad_batches=8):
         self.device, self.ngpu, self.gpu_names = pick_device()
         if require_dual_gpu and self.ngpu < 2:
             raise RuntimeError("This training notebook requires Kaggle GPU T4 x2. "
@@ -678,6 +680,13 @@ class Trainer:
         if self.monitor_mode not in ("min", "max"):
             raise ValueError("monitor_mode must be 'min' or 'max'")
         self.min_epochs = max(0, int(min_epochs))
+        self.recovery_lr_factor = float(recovery_lr_factor)
+        if not 0.0 < self.recovery_lr_factor < 1.0:
+            raise ValueError("recovery_lr_factor must be between 0 and 1")
+        self.max_numerical_recoveries = max(1, int(max_numerical_recoveries))
+        self.disable_amp_after_recoveries = max(1, int(disable_amp_after_recoveries))
+        self.max_nonfinite_grad_batches = max(1, int(max_nonfinite_grad_batches))
+        self.initial_lr = float(lr)
         self.bs = int(batch_size); self.nw = int(num_workers); self.seed = int(seed)
         self.amp = bool(amp and self.device.type == "cuda"); self.grad_clip = grad_clip
         self.opt = torch.optim.AdamW(self.raw_model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -690,7 +699,7 @@ class Trainer:
         self.config = dict(run_config or {})
         self.config_hash = hashlib.sha256(json.dumps(
             self.config, sort_keys=True, default=str).encode()).hexdigest()
-        self.state = {"schema_version": 4, "engine_version": ENGINE_VERSION,
+        self.state = {"schema_version": 5, "engine_version": ENGINE_VERSION,
                       "epoch": 0, "active_epoch": 0, "batch_in_epoch": 0,
                       "global_step": 0,
                       "best": float("inf") if self.monitor_mode == "min" else -float("inf"),
@@ -705,7 +714,11 @@ class Trainer:
         _atomic_json(self.out / "environment.json", {
             "engine_version": ENGINE_VERSION, "torch": torch.__version__,
             "cuda": torch.version.cuda, "gpu_count": self.ngpu, "gpu_names": self.gpu_names,
-            "amp": self.amp, "python": os.sys.version, "config_hash": self.config_hash})
+            "amp": self.amp, "python": os.sys.version, "config_hash": self.config_hash,
+            "recovery_lr_factor": self.recovery_lr_factor,
+            "max_numerical_recoveries": self.max_numerical_recoveries,
+            "disable_amp_after_recoveries": self.disable_amp_after_recoveries,
+            "max_nonfinite_grad_batches": self.max_nonfinite_grad_batches})
 
     @property
     def ckpt(self):
@@ -733,25 +746,123 @@ class Trainer:
         if self._active:
             self.save("state", reason="interrupt-emergency")
 
+    @staticmethod
+    def _resume_config_view(config):
+        # Library hashes and the recovery policy may change only to repair the runtime. Model,
+        # data, split, loss and optimizer semantics must remain byte-for-byte compatible.
+        clean = dict(config or {})
+        clean.pop("library_sha256", None)
+        clean.pop("recovery_policy", None)
+        return json.dumps(clean, sort_keys=True, default=str)
+
+    def _check_resume_config(self, payload):
+        got_hash = payload.get("config_hash", payload.get("state", {}).get("config_hash"))
+        if not got_hash or got_hash == self.config_hash:
+            return
+        old = self._resume_config_view(payload.get("config", {}))
+        new = self._resume_config_view(self.config)
+        if old != new:
+            raise RuntimeError("checkpoint training configuration differs from this run. "
+                               "Use a new RUN_ID or restore the original configuration.")
+        print("  compatible engine/recovery-policy upgrade detected; preserving the run")
+
+    @staticmethod
+    def _model_payload_is_finite(payload):
+        for value in payload.get("model", {}).values():
+            if torch.is_tensor(value) and not bool(torch.isfinite(value).all()):
+                return False
+        return True
+
+    def _restore_payload(self, payload):
+        self.raw_model.load_state_dict(payload["model"], strict=True)
+        self.opt.load_state_dict(payload["opt"])
+        self.sched.load_state_dict(payload["sched"])
+        self.scaler.load_state_dict(payload["scaler"])
+        self.state = payload["state"]
+        if payload.get("torch_rng") is not None:
+            torch.set_rng_state(payload["torch_rng"].cpu())
+        if payload.get("np_rng") is not None:
+            np.random.set_state(payload["np_rng"])
+        if payload.get("python_rng") is not None:
+            random.setstate(payload["python_rng"])
+        if torch.cuda.is_available() and payload.get("cuda_rng"):
+            torch.cuda.set_rng_state_all([x.cpu() for x in payload["cuda_rng"]])
+
     def load(self):
         if not self.ckpt.exists():
             return False
         try:
-            d = torch.load(self.ckpt, map_location=self.device, weights_only=False)
-            got_hash = d.get("config_hash", d.get("state", {}).get("config_hash"))
-            if got_hash and got_hash != self.config_hash:
-                raise RuntimeError("checkpoint configuration differs from this run. "
-                                   "Use a new RUN_ID or restore the original configuration.")
-            self.raw_model.load_state_dict(d["model"], strict=True)
-            self.opt.load_state_dict(d["opt"]); self.sched.load_state_dict(d["sched"])
-            self.scaler.load_state_dict(d["scaler"]); self.state = d["state"]
-            torch.set_rng_state(d["torch_rng"].cpu()); np.random.set_state(d["np_rng"])
-            random.setstate(d["python_rng"])
-            if torch.cuda.is_available() and d.get("cuda_rng"):
-                torch.cuda.set_rng_state_all([x.cpu() for x in d["cuda_rng"]])
-            print(f"  resumed {self.run_id}: completed_epoch={self.state['epoch']}, "
-                  f"active_epoch={self.state.get('active_epoch')}, "
-                  f"completed_batches={self.state.get('batch_in_epoch', 0)}")
+            current = torch.load(self.ckpt, map_location=self.device, weights_only=False)
+            self._check_resume_config(current)
+            failed_state = dict(current.get("state", {}))
+            last_error = str(failed_state.get("last_error", ""))
+            numerical_error = ("non-finite" in last_error.lower() or
+                               "floatingpointerror" in last_error.lower())
+            poisoned_model = not self._model_payload_is_finite(current)
+            recovery_needed = numerical_error or poisoned_model
+            if recovery_needed:
+                prior_count = int(failed_state.get("recovery_count", 0) or 0)
+                if prior_count >= self.max_numerical_recoveries:
+                    raise RuntimeError(
+                        f"numerical recovery limit ({self.max_numerical_recoveries}) reached; "
+                        "do not silently finalize this run")
+                best_path = self.out / "best.pt"
+                if not best_path.exists():
+                    raise RuntimeError("numerical checkpoint failure and best.pt is unavailable")
+                chosen = torch.load(best_path, map_location=self.device, weights_only=False)
+                self._check_resume_config(chosen)
+                if not self._model_payload_is_finite(chosen):
+                    raise RuntimeError("best.pt also contains non-finite model parameters")
+                self._restore_payload(chosen)
+                recovery_count = prior_count + 1
+                eta_min = float(getattr(self.sched, "eta_min", 1e-6))
+                target_lr = max(eta_min, self.initial_lr *
+                                (self.recovery_lr_factor ** recovery_count))
+                for group in self.opt.param_groups:
+                    group["lr"] = min(float(group["lr"]), target_lr)
+                if hasattr(self.sched, "base_lrs"):
+                    self.sched.base_lrs = [min(float(v), target_lr)
+                                           for v in self.sched.base_lrs]
+                if hasattr(self.sched, "_last_lr"):
+                    self.sched._last_lr = [float(g["lr"]) for g in self.opt.param_groups]
+                amp_disabled = recovery_count >= self.disable_amp_after_recoveries
+                if amp_disabled:
+                    self.amp = False
+                    self.scaler = _grad_scaler(self.device.type, False)
+                event = {
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "reason": last_error or "non-finite model parameters",
+                    "failed_epoch": failed_state.get("active_epoch", failed_state.get("epoch")),
+                    "failed_batch": failed_state.get("batch_in_epoch", 0),
+                    "rollback_epoch": int(self.state.get("epoch", 0)),
+                    "rollback_best_epoch": int(self.state.get("best_epoch", -1)),
+                    "recovery_count": recovery_count,
+                    "effective_lr": float(self.opt.param_groups[0]["lr"]),
+                    "amp_disabled": bool(amp_disabled),
+                    "engine_version": ENGINE_VERSION,
+                }
+                previous_events = list(failed_state.get("recovery_events", []))
+                self.state["recovery_events"] = previous_events + [event]
+                self.state["recovery_count"] = recovery_count
+                self.state["last_recovered_error"] = event["reason"]
+                self.state.pop("last_error", None)
+                self.state.pop("stop_reason", None)
+                self.state.pop("finished_utc", None)
+                self.state.update(done=False, active_epoch=int(self.state.get("epoch", 0)),
+                                  batch_in_epoch=0, partial={}, engine_version=ENGINE_VERSION,
+                                  config_hash=self.config_hash)
+                _append_jsonl(self.out / "recovery_events.jsonl", event)
+                self.save("state", reason="numerical-rollback-to-best")
+                print(f"  RECOVERED {self.run_id}: epoch "
+                      f"{event['failed_epoch']} -> best epoch {event['rollback_best_epoch']}; "
+                      f"lr={event['effective_lr']:.2e}; AMP={'off' if amp_disabled else 'on'}")
+            else:
+                self._restore_payload(current)
+                self.state.update(engine_version=ENGINE_VERSION, config_hash=self.config_hash)
+                self.state.pop("last_error", None)
+                print(f"  resumed {self.run_id}: completed_epoch={self.state['epoch']}, "
+                      f"active_epoch={self.state.get('active_epoch')}, "
+                      f"completed_batches={self.state.get('batch_in_epoch', 0)}")
             return True
         except Exception as e:
             raise RuntimeError(f"Checkpoint exists but cannot be resumed safely: "
@@ -910,6 +1021,7 @@ class Trainer:
                 sums = {k: float(v) for k, v in partial.get("sums", {}).items()}
                 n = int(partial.get("n", 0)); samples = int(partial.get("samples", 0))
                 grad_sum = float(partial.get("grad_sum", 0)); clip_events = int(partial.get("clip_events", 0))
+                nonfinite_grad_skips = int(partial.get("nonfinite_grad_skips", 0))
                 epoch_t0 = time.time(); data_t = 0.0; compute_t = 0.0; last_end = time.time()
                 self.state.update(active_epoch=ep, batch_in_epoch=resume_batch, done=False)
                 self.model.train()
@@ -925,6 +1037,33 @@ class Trainer:
                     self.scaler.scale(loss).backward(); self.scaler.unscale_(self.opt)
                     grad = float(torch.nn.utils.clip_grad_norm_(
                         self.raw_model.parameters(), self.grad_clip or float("inf")))
+                    if not math.isfinite(grad):
+                        # GradScaler normally skips this update. Make that behavior explicit,
+                        # checkpointable and bounded so a bad batch cannot poison model weights.
+                        self.opt.zero_grad(set_to_none=True)
+                        self.scaler.update()
+                        nonfinite_grad_skips += 1
+                        self.state["batch_in_epoch"] = i + 1
+                        self.state["partial"] = {
+                            "sums": sums, "n": n, "samples": samples,
+                            "grad_sum": grad_sum, "clip_events": clip_events,
+                            "nonfinite_grad_skips": nonfinite_grad_skips,
+                        }
+                        self._write_batch({
+                            "ts": datetime.now(timezone.utc).isoformat(),
+                            "run_id": self.run_id, "epoch": ep+1, "batch": i+1,
+                            "batches": len(tl), "event": "nonfinite_gradient_skipped",
+                            "grad_norm": grad, "lr": self.opt.param_groups[0]["lr"],
+                            "amp_scale": float(self.scaler.get_scale()),
+                            "skip_count_epoch": nonfinite_grad_skips,
+                        })
+                        compute_t += time.time() - step_t0
+                        if nonfinite_grad_skips >= self.max_nonfinite_grad_batches:
+                            raise FloatingPointError(
+                                f"{nonfinite_grad_skips} non-finite gradient batches at "
+                                f"epoch {ep+1}; rolling back to best checkpoint")
+                        last_end = time.time()
+                        continue
                     if self.grad_clip and grad > self.grad_clip: clip_events += 1
                     self.scaler.step(self.opt); self.scaler.update()
                     compute_t += time.time() - step_t0
@@ -934,7 +1073,8 @@ class Trainer:
                     self.state["global_step"] = int(self.state.get("global_step", 0)) + 1
                     self.state["batch_in_epoch"] = i + 1
                     self.state["partial"] = {"sums": sums, "n": n, "samples": samples,
-                                             "grad_sum": grad_sum, "clip_events": clip_events}
+                                             "grad_sum": grad_sum, "clip_events": clip_events,
+                                             "nonfinite_grad_skips": nonfinite_grad_skips}
                     if (i + 1) % self.log_every == 0 or i + 1 == len(tl):
                         brec = {"ts": datetime.now(timezone.utc).isoformat(), "run_id": self.run_id,
                                 "epoch": ep+1, "batch": i+1, "batches": len(tl),
@@ -955,6 +1095,7 @@ class Trainer:
                        "global_step": self.state["global_step"], "train_batches": n,
                        "train_windows": samples, "train_grad_norm_mean": grad_sum/max(n,1),
                        "train_grad_clip_events": clip_events,
+                       "train_nonfinite_grad_skips": nonfinite_grad_skips,
                        "train_data_seconds": data_t, "train_compute_seconds": compute_t,
                        "train_windows_per_s": samples/max(compute_t, 1e-9),
                        "epoch_seconds": time.time()-epoch_t0,

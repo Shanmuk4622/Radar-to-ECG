@@ -70,6 +70,15 @@ time. Test data is never used for checkpoint selection. These choices remove the
 under-training and loss/test-metric mismatch; they improve the validity of the comparison but do
 not predetermine which architecture wins.
 
+### Numerical recovery (engine v6)
+
+The earlier run left valid `best.pt` files but 58 current checkpoints stopped on NaN/Inf. This
+version detects those v5 error states, rolls back to the last finite best checkpoint, and resumes
+with a learning-rate reduction. A second recovery disables AMP; non-finite gradients are skipped
+before the optimizer can corrupt weights. Recovery is bounded and fully logged in
+`recovery_events.jsonl` and the final summary—after the configured limit the run stops visibly
+rather than being silently accepted. Existing runs with `summary.json` are never retrained.
+
 ## On `mamba-ssm`
 
 The SSM here is **pure PyTorch** (S4D-Lin as an FFT convolution). It needs no `nvcc`, no custom
@@ -153,6 +162,12 @@ CFG = {
     "CHECKPOINT_EVERY_S": 300,
     "EPOCHS_PER_PROCESS": 5,    # hard OS-level RAM/CUDA reset every five epochs
     "PROCESS_ISOLATION": True,  # required for long Kaggle queues
+    # Numerical fail-safe: restore best.pt, reduce LR, and eventually disable AMP.
+    "RECOVERY_LR_FACTOR": 0.25,
+    "MAX_NUMERICAL_RECOVERIES": 3,
+    "DISABLE_AMP_AFTER_RECOVERIES": 2,
+    "MAX_NONFINITE_GRAD_BATCHES": 8,
+    "SAME_SESSION_RECOVERY_RETRIES": 3,
 
     # ---- queue ---------------------------------------------------------------
     "EXPERIMENT":  "B_rva",      # the ablation ladder runs on the headline experiment
@@ -198,6 +213,9 @@ QUEUE_WORKERS = int(CFG["QUEUE_WORKERS"])
 WORKER_ID = int(CFG["WORKER_ID"])
 if QUEUE_WORKERS < 1 or not 0 <= WORKER_ID < QUEUE_WORKERS:
     raise ValueError(f"WORKER_ID must be in 0..{QUEUE_WORKERS-1}; got {WORKER_ID}")
+if not CFG["QUICK"] and QUEUE_WORKERS != 4:
+    raise RuntimeError("Canonical NB04 is locked to QUEUE_WORKERS=4. Use four notebook copies "
+                       "with WORKER_ID 0, 1, 2, and 3; do not use *_of_1 or *_of_2.")
 SHARD_TAG = f"worker_{WORKER_ID}_of_{QUEUE_WORKERS}"
 SHARD_META = WORK / "queue_workers" / SHARD_TAG
 SHARD_RESULTS = WORK / "results" / "workers" / SHARD_TAG
@@ -817,7 +835,7 @@ __WORKER__
 """
 WORKER_PATH = WORK / "nb04_run_worker.py"
 WORKER_PATH.write_text(WORKER_SRC, encoding="utf-8")
-MEMORY_RUNTIME_VERSION = "nb04-process-isolated-v1"
+MEMORY_RUNTIME_VERSION = "nb04-process-isolated-numerical-recovery-v2"
 worker_cfg = dict(CFG)
 worker_cfg["ACTIVE_EPOCHS"] = EPOCHS
 WORKER_CONTEXT = SHARD_META / "worker_context.json"
@@ -950,6 +968,7 @@ for qi, q in enumerate(list(todo), 1):
     print(f"[{qi}/{len(todo)}] {rid} — isolated process chunks of "
           f"{CFG['EPOCHS_PER_PROCESS']} epoch(s)")
     print("=" * 78)
+    numerical_retry_count = 0
     while True:
         if time.time() - t_start >= budget_s:
             session_stop_reason = "time_budget"
@@ -987,8 +1006,18 @@ for qi, q in enumerate(list(todo), 1):
             break
         error = status.get("error", f"worker returned {status.get('return_code')}")
         print(f"  !! isolated worker failed: {error}")
-        failed_now.append({"run_id": rid, "error": error})
         sync.flush(force=True, msg=f"{rid} worker failure checkpoint")
+        is_numerical = ("non-finite" in str(error).lower() or
+                        "floatingpointerror" in str(error).lower())
+        if (is_numerical and
+                numerical_retry_count < int(CFG["SAME_SESSION_RECOVERY_RETRIES"])):
+            numerical_retry_count += 1
+            print(f"  automatic numerical recovery {numerical_retry_count}/"
+                  f"{CFG['SAME_SESSION_RECOVERY_RETRIES']}: launching a fresh process; "
+                  "it will roll back to best.pt and lower the learning rate")
+            continue
+        failed_now.append({"run_id": rid, "error": error,
+                           "recovery_retries": numerical_retry_count})
         break
     if session_stop_reason:
         break
@@ -1220,7 +1249,13 @@ Do not disable `PROCESS_ISOLATION`, raise `EPOCHS_PER_PROCESS`, raise `WORKERS`,
 `CFG["BATCH"]` to 32 or 24; if necessary, lower `CFG["D_SSM"]` to 192 and use a new run ID.
 
 **S4D produces NaN** — the kernel is computed in float32 outside autocast on purpose. If NaNs
-still appear, lower `CFG["LR"]` to 5e-4 and check `nb04_fig2_curves.png` for the epoch it began.
+appear, engine v6 automatically reloads the last finite `best.pt`, reduces the effective learning
+rate to 25%, and retries in a fresh process. On the second recovery it disables AMP. Keep the
+original `CFG["LR"]` unchanged so existing checkpoints remain scientifically traceable.
+
+**Old run stops at the same NaN batch** — upload this revised notebook. It recognizes the v5
+`last_error`, performs a compatible engine-only migration, and restarts from `best_epoch` instead
+of replaying the poisoned/failing batch. Look for a `RECOVERED ...` line before training resumes.
 
 **`L10_transformer` much slower than `L9_full`** — expected. Attention is quadratic in sequence
 length; the SSM is linear. That gap is itself a result worth reporting.
