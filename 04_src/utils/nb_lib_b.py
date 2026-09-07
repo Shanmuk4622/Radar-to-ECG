@@ -574,7 +574,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-ENGINE_VERSION = 6
+ENGINE_VERSION = 7
 
 def _autocast(device_type, enabled):
     try:
@@ -727,6 +727,7 @@ class Trainer:
     def _payload(self):
         return {"model": self.raw_model.state_dict(), "opt": self.opt.state_dict(),
                 "sched": self.sched.state_dict(), "scaler": self.scaler.state_dict(),
+                "amp_enabled": bool(self.amp),
                 "state": self.state, "torch_rng": torch.get_rng_state(),
                 "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else [],
                 "np_rng": np.random.get_state(), "python_rng": random.getstate(),
@@ -777,7 +778,19 @@ class Trainer:
         self.raw_model.load_state_dict(payload["model"], strict=True)
         self.opt.load_state_dict(payload["opt"])
         self.sched.load_state_dict(payload["sched"])
-        self.scaler.load_state_dict(payload["scaler"])
+        # A disabled GradScaler intentionally serializes to {}. Older engine-v6
+        # checkpoints did not persist the AMP flag, so loading that empty state into
+        # a newly enabled scaler raises "source state dict is empty" before the run
+        # can resume. Treat an old empty scaler as proof that AMP had been disabled;
+        # new checkpoints also carry the explicit flag.
+        scaler_state = payload.get("scaler") or {}
+        saved_amp = payload.get("amp_enabled")
+        if saved_amp is None:
+            saved_amp = bool(scaler_state)
+        self.amp = bool(saved_amp and self.device.type == "cuda")
+        self.scaler = _grad_scaler(self.device.type, self.amp)
+        if self.amp and scaler_state:
+            self.scaler.load_state_dict(scaler_state)
         self.state = payload["state"]
         if payload.get("torch_rng") is not None:
             torch.set_rng_state(payload["torch_rng"].cpu())
@@ -825,8 +838,8 @@ class Trainer:
                                            for v in self.sched.base_lrs]
                 if hasattr(self.sched, "_last_lr"):
                     self.sched._last_lr = [float(g["lr"]) for g in self.opt.param_groups]
-                amp_disabled = recovery_count >= self.disable_amp_after_recoveries
-                if amp_disabled:
+                amp_disabled_by_policy = recovery_count >= self.disable_amp_after_recoveries
+                if amp_disabled_by_policy:
                     self.amp = False
                     self.scaler = _grad_scaler(self.device.type, False)
                 event = {
@@ -838,7 +851,7 @@ class Trainer:
                     "rollback_best_epoch": int(self.state.get("best_epoch", -1)),
                     "recovery_count": recovery_count,
                     "effective_lr": float(self.opt.param_groups[0]["lr"]),
-                    "amp_disabled": bool(amp_disabled),
+                    "amp_disabled": bool(not self.amp),
                     "engine_version": ENGINE_VERSION,
                 }
                 previous_events = list(failed_state.get("recovery_events", []))
@@ -855,7 +868,7 @@ class Trainer:
                 self.save("state", reason="numerical-rollback-to-best")
                 print(f"  RECOVERED {self.run_id}: epoch "
                       f"{event['failed_epoch']} -> best epoch {event['rollback_best_epoch']}; "
-                      f"lr={event['effective_lr']:.2e}; AMP={'off' if amp_disabled else 'on'}")
+                      f"lr={event['effective_lr']:.2e}; AMP={'on' if self.amp else 'off'}")
             else:
                 self._restore_payload(current)
                 self.state.update(engine_version=ENGINE_VERSION, config_hash=self.config_hash)

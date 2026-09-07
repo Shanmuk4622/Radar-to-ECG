@@ -55,14 +55,17 @@ budget, and re-running continues. **Canonical mode is now the default (`QUICK = 
 trains the five full-model headline folds first, then the remaining ablations and generalisation
 experiments. `QUICK = True` remains available only as a 10-epoch architecture smoke test.
 
-## Four-way parallel queue
+## Queue mode — one worker by default
 
-Run four separate Kaggle copies of this same notebook. Keep `QUEUE_WORKERS = 4` in every copy and
-set `WORKER_ID` to `0`, `1`, `2`, or `3` respectively. Queue position modulo four gives every
-worker a fixed, non-overlapping shard, so restarts cannot reshuffle work or train a run twice.
-Each Kaggle worker still uses both local T4 GPUs for one model; do not launch four training
-subprocesses inside one kernel. Per-worker state/history paths prevent concurrent HF commits from
-overwriting another worker's resume bookkeeping.
+The safe default is one Kaggle notebook: keep `QUEUE_WORKERS = 1` and `WORKER_ID = 0`. That worker
+owns the entire queue, restores the current Hugging Face summaries/checkpoints, skips completed
+runs, and continues every unfinished run. This is the mode to use when only one Kaggle session is
+available.
+
+Four external Kaggle copies are still optional: set `QUEUE_WORKERS = 4` in every copy and use a
+distinct `WORKER_ID` from 0 through 3. Do not mix the one-worker and four-worker modes at the same
+time, because they intentionally describe different ownership of the same canonical run IDs. Each
+notebook uses both of its local T4 GPUs for one model; worker IDs partition experiments, not GPUs.
 
 Each run may train for 150 epochs, cannot early-stop before epoch 40, and saves `best.pt` using
 mean per-window validation temporal correlation — the same primary quantity reported at test
@@ -70,12 +73,13 @@ time. Test data is never used for checkpoint selection. These choices remove the
 under-training and loss/test-metric mismatch; they improve the validity of the comparison but do
 not predetermine which architecture wins.
 
-### Numerical recovery (engine v6)
+### Numerical recovery and legacy checkpoint repair (engine v7)
 
 The earlier run left valid `best.pt` files but 58 current checkpoints stopped on NaN/Inf. This
 version detects those v5 error states, rolls back to the last finite best checkpoint, and resumes
-with a learning-rate reduction. A second recovery disables AMP; non-finite gradients are skipped
-before the optimizer can corrupt weights. Recovery is bounded and fully logged in
+with a learning-rate reduction. A second recovery disables AMP; engine v7 also correctly restores
+those older disabled-AMP checkpoints whose scaler state is intentionally empty. Non-finite
+gradients are skipped before the optimizer can corrupt weights. Recovery is bounded and logged in
 `recovery_events.jsonl` and the final summary—after the configured limit the run stops visibly
 rather than being silently accepted. Existing runs with `summary.json` are never retrained.
 
@@ -176,8 +180,8 @@ CFG = {
     "RUN_CROSS_SCENARIO": True,       # Experiment F: one held-out scenario per run
     "N_FOLDS":     5,
     "TIME_BUDGET_H": 10.5,
-    "QUEUE_WORKERS": 4,   # identical in all four Kaggle notebook copies
-    "WORKER_ID": 0,       # set to 0, 1, 2, or 3 in the corresponding copy
+    "QUEUE_WORKERS": 1,   # default: one notebook owns every unfinished canonical run
+    "WORKER_ID": 0,       # keep 0 in one-worker mode; use unique IDs 0..3 only with four copies
     # Canonical training is the default. QUICK remains available only for architecture smoke tests.
     "QUICK": False,
     "QUICK_EPOCHS": 10,
@@ -213,9 +217,11 @@ QUEUE_WORKERS = int(CFG["QUEUE_WORKERS"])
 WORKER_ID = int(CFG["WORKER_ID"])
 if QUEUE_WORKERS < 1 or not 0 <= WORKER_ID < QUEUE_WORKERS:
     raise ValueError(f"WORKER_ID must be in 0..{QUEUE_WORKERS-1}; got {WORKER_ID}")
-if not CFG["QUICK"] and QUEUE_WORKERS != 4:
-    raise RuntimeError("Canonical NB04 is locked to QUEUE_WORKERS=4. Use four notebook copies "
-                       "with WORKER_ID 0, 1, 2, and 3; do not use *_of_1 or *_of_2.")
+if not CFG["QUICK"] and QUEUE_WORKERS not in (1, 4):
+    raise RuntimeError("Canonical NB04 supports QUEUE_WORKERS=1 (one notebook, WORKER_ID=0) "
+                       "or QUEUE_WORKERS=4 (four copies, IDs 0..3). Do not mix modes.")
+if QUEUE_WORKERS == 1 and WORKER_ID != 0:
+    raise ValueError("One-worker mode requires WORKER_ID=0.")
 SHARD_TAG = f"worker_{WORKER_ID}_of_{QUEUE_WORKERS}"
 SHARD_META = WORK / "queue_workers" / SHARD_TAG
 SHARD_RESULTS = WORK / "results" / "workers" / SHARD_TAG
@@ -701,7 +707,13 @@ completed_from_summaries = {
 global_queue_ids = {q["run_id"] for q in GLOBAL_QUEUE}
 global_done_at_start = completed_from_summaries & global_queue_ids
 queue_ids = {q["run_id"] for q in QUEUE}
-completed_all = ((set(STATE.get("completed", [])) | completed_from_summaries) & queue_ids)
+# A final summary is the completion authority. Old worker state is advisory only: if it says a
+# run completed but summary.json is absent, that run must be resumed instead of silently skipped.
+recorded_completed = set(STATE.get("completed", [])) & queue_ids
+stale_completed = recorded_completed - completed_from_summaries
+if stale_completed:
+    print(f"ignoring {len(stale_completed)} stale completion marker(s) without summary.json")
+completed_all = completed_from_summaries & queue_ids
 done = set(completed_all)
 todo = [q for q in QUEUE if q["run_id"] not in done]
 print(f"global queue: {len(GLOBAL_QUEUE)} run(s) | at least {len(global_done_at_start)} already done")
@@ -835,7 +847,7 @@ __WORKER__
 """
 WORKER_PATH = WORK / "nb04_run_worker.py"
 WORKER_PATH.write_text(WORKER_SRC, encoding="utf-8")
-MEMORY_RUNTIME_VERSION = "nb04-process-isolated-numerical-recovery-v2"
+MEMORY_RUNTIME_VERSION = "nb04-process-isolated-numerical-recovery-v3"
 worker_cfg = dict(CFG)
 worker_cfg["ACTIVE_EPOCHS"] = EPOCHS
 WORKER_CONTEXT = SHARD_META / "worker_context.json"
@@ -1249,13 +1261,17 @@ Do not disable `PROCESS_ISOLATION`, raise `EPOCHS_PER_PROCESS`, raise `WORKERS`,
 `CFG["BATCH"]` to 32 or 24; if necessary, lower `CFG["D_SSM"]` to 192 and use a new run ID.
 
 **S4D produces NaN** — the kernel is computed in float32 outside autocast on purpose. If NaNs
-appear, engine v6 automatically reloads the last finite `best.pt`, reduces the effective learning
+appear, engine v7 automatically reloads the last finite `best.pt`, reduces the effective learning
 rate to 25%, and retries in a fresh process. On the second recovery it disables AMP. Keep the
 original `CFG["LR"]` unchanged so existing checkpoints remain scientifically traceable.
 
-**Old run stops at the same NaN batch** — upload this revised notebook. It recognizes the v5
-`last_error`, performs a compatible engine-only migration, and restarts from `best_epoch` instead
-of replaying the poisoned/failing batch. Look for a `RECOVERED ...` line before training resumes.
+**Old run fails with `source state dict is empty`** — upload this revised notebook. Engine v7
+recognizes the intentionally empty scaler state written after AMP was disabled and resumes that
+checkpoint in float32. It does not discard the trained weights or restart the run.
+
+**Old run stops at the same NaN batch** — this version recognizes the prior `last_error`, performs
+a compatible engine-only migration, and restarts from `best_epoch` instead of replaying the
+poisoned/failing batch. Look for a `RECOVERED ...` line before training resumes.
 
 **`L10_transformer` much slower than `L9_full`** — expected. Attention is quadratic in sequence
 length; the SSM is linear. That gap is itself a result worth reporting.
@@ -1269,10 +1285,13 @@ smoke cell before training.
 
 **Session ended mid-queue** — expected and handled. New session, run again, it resumes.
 
-**Four-way parallel launch** — make four Kaggle copies. Keep `QUEUE_WORKERS=4` everywhere and set
-exactly one `WORKER_ID` per copy: 0, 1, 2, 3. On restart, keep that copy's same ID. Never run two
-copies with the same ID at the same time. Each copy uses both of its T4 GPUs for one assigned run;
-`WORKER_ID` partitions the queue, not the GPUs inside a notebook.
+**One-worker launch (default)** — keep `QUEUE_WORKERS=1`, `WORKER_ID=0`, and run one notebook. It
+will see all 100 canonical IDs, skip every ID with a remote `summary.json`, and resume the rest.
+
+**Optional four-worker launch** — make four Kaggle copies. Keep `QUEUE_WORKERS=4` everywhere and
+set exactly one `WORKER_ID` per copy: 0, 1, 2, 3. On restart, keep that copy's same ID. Never run two
+copies with the same ID, and never run a one-worker copy concurrently with these four. Each copy
+uses both local T4 GPUs for one assigned run; `WORKER_ID` partitions the queue, not the GPUs.
 
 **`NB03 ... reproduction gate failed`** — NB03 completed all 80 runs, but its scientific check did
 not reproduce the paper's published value. This notebook visibly proceeds because

@@ -77,16 +77,17 @@ cannot early-stop before epoch 40, and selects `best.pt` by mean per-window vali
 correlation. `QUICK=True` is retained only for a manual architecture smoke test and its `quick__`
 runs are excluded from NB05 by default.
 
-NB04 can be run in four parallel Kaggle sessions. Use the same notebook in all four, keep
-`QUEUE_WORKERS=4`, and assign distinct `WORKER_ID` values 0, 1, 2, and 3. The assignment is fixed
-by queue position, so every canonical run belongs to exactly one worker and restarts keep the same
-shard. Each notebook still uses both of its local T4s; do not start four training processes inside
-one Kaggle kernel.
+NB04 now defaults to one Kaggle session: use `QUEUE_WORKERS=1`, `WORKER_ID=0`. That notebook owns
+the full queue and resumes every run that does not yet have a remote `summary.json`. Four parallel
+Kaggle copies remain optional: use `QUEUE_WORKERS=4` in all four and distinct IDs 0, 1, 2, and 3.
+Do not mix one-worker and four-worker modes concurrently. Each notebook still uses both local T4s;
+do not start four training processes inside one Kaggle kernel.
 
-NB04 engine v6 repairs numerical failures without discarding good training: a failed v5 state is
+NB04 engine v7 repairs numerical failures without discarding good training: a failed v5 state is
 rolled back to its finite `best.pt`, the effective learning rate is reduced, AMP is disabled after
-a second recovery, and non-finite gradients are skipped before the optimizer step. Every recovery
-is recorded. Canonical mode rejects `QUEUE_WORKERS=1` or `2`; use only the four `*_of_4` workers.
+a second recovery, and non-finite gradients are skipped before the optimizer step. It also resumes
+legacy disabled-AMP checkpoints with an empty scaler state. Every recovery is recorded. Canonical
+mode accepts either one worker or four workers; values 2 and 3 are rejected to avoid stale modes.
 
 Each full queue works for at most 10.5 hours, uploads, exits cleanly, and continues in a fresh
 Kaggle session. NB05 clears restored partial result artifacts, rebuilds the canonical tables and

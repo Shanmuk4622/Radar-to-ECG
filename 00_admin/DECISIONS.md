@@ -95,14 +95,16 @@ Four notebooks added: `02_preprocess_to_hf` (CPU), `03_baselines` (2×T4), `04_c
   complete 100-run queue with the headline full-model folds first. Architecture smoke tests occur
   before training; optional NB04 `QUICK=True` runs use a `quick__` prefix and never enter NB05's
   canonical tables.
-- **NB04 queue sharding.** Four external Kaggle notebook sessions use fixed worker IDs 0–3. A
-  queue-index modulo assignment gives each run one owner, while each owner still uses its two T4s
-  for the current model. Per-worker state/history paths avoid last-writer-wins resume metadata.
-- **Bounded numerical recovery.** NB04 engine v6 never resumes a checkpoint marked with a
+- **NB04 queue execution.** One external Kaggle session (`QUEUE_WORKERS=1`, `WORKER_ID=0`) is the
+  default and owns every unfinished run. Four fixed worker IDs 0–3 remain an optional parallel
+  mode. Modes must not run concurrently; each notebook still uses its two T4s for the current
+  model. Per-worker state/history paths avoid last-writer-wins resume metadata.
+- **Bounded numerical recovery.** NB04 engine v7 never resumes a checkpoint marked with a
   non-finite error at the same failing batch. It restores the last finite `best.pt`, reduces the
   effective learning rate by 4× per recovery, disables AMP after the second recovery, and records
-  the rollback. Completed summaries remain immutable; reaching the recovery limit is a visible
-  failure, never a silently accepted result.
+  the rollback. It treats an empty legacy scaler state as disabled AMP, allowing those valid
+  checkpoints to resume. Completed summaries remain immutable; reaching the recovery limit is a
+  visible failure, never a silently accepted result.
 
 ### Two protocol decisions, both declared in the paper
 
