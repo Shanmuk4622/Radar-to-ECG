@@ -1,0 +1,16 @@
+{
+  "key": "wavegan",
+  "doi": "10.1109/ICASSP40776.2020.9053795",
+  "title": "Parallel Wavegan: A Fast Waveform Generation Model Based on Generative Adversarial Networks with Multi-Resolution Spectrogram",
+  "authors": [
+    "Yamamoto, Ryuichi",
+    "Song, Eunwoo",
+    "Kim, Jae-Min"
+  ],
+  "year": 2020,
+  "venue": "ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)",
+  "volume": "",
+  "pages": "6199-6203",
+  "source": "https://api.crossref.org/works/10.1109/ICASSP40776.2020.9053795",
+  "type": "proceedings-article"
+}

@@ -1,0 +1,19 @@
+{
+  "key": "eca",
+  "doi": "10.1109/CVPR42600.2020.01155",
+  "title": "ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks",
+  "authors": [
+    "Wang, Qilong",
+    "Wu, Banggu",
+    "Zhu, Pengfei",
+    "Li, Peihua",
+    "Zuo, Wangmeng",
+    "Hu, Qinghua"
+  ],
+  "year": 2020,
+  "venue": "2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
+  "volume": "",
+  "pages": "11531-11539",
+  "source": "https://api.crossref.org/works/10.1109/CVPR42600.2020.01155",
+  "type": "proceedings-article"
+}

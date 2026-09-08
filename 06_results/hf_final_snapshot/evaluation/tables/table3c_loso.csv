@@ -1,0 +1,2 @@
+experiment,variant,MAE,MSE,CC_temporal,CC_spectral,RRMSE_temporal,RRMSE_spectral,folds
+D_loso,CardioMamba-Net (ours),0.17793,0.04798,54.94034,86.90485,0.9777,0.64524,30

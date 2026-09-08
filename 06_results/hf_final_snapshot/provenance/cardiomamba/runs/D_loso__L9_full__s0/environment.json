@@ -1,0 +1,17 @@
+{
+  "engine_version": 6,
+  "torch": "2.10.0+cu128",
+  "cuda": "12.8",
+  "gpu_count": 2,
+  "gpu_names": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "amp": true,
+  "python": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+  "config_hash": "bd3fde02e7fe1578b7ab57e6274b23ecb1c8d2a7ce04b745de3cdc79e7bfdd8e",
+  "recovery_lr_factor": 0.25,
+  "max_numerical_recoveries": 3,
+  "disable_amp_after_recoveries": 2,
+  "max_nonfinite_grad_batches": 8
+}

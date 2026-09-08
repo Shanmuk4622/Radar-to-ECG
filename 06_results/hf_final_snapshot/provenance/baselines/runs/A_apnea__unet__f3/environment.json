@@ -1,0 +1,13 @@
+{
+  "engine_version": 4,
+  "torch": "2.10.0+cu128",
+  "cuda": "12.8",
+  "gpu_count": 2,
+  "gpu_names": [
+    "Tesla T4",
+    "Tesla T4"
+  ],
+  "amp": true,
+  "python": "3.12.13 (main, Mar  4 2026, 09:23:07) [GCC 11.4.0]",
+  "config_hash": "a438c0795f106c01fe9e91abd110229181c16bd6f0b40b8e3ae07554e53e22e9"
+}

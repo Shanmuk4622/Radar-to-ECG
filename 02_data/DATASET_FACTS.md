@@ -1,5 +1,11 @@
 # CR-RVS dataset — verified facts
 
+> **Time-base correction identified during manuscript preparation (2026-09-07):** NB01 decimates
+> the 2,000-Hz source by 16, yielding 125 Hz, while the processed metadata says 128 Hz. All 134
+> retained recording lengths independently confirm this. Window counts below remain valid,
+> but 1,024 samples span 8.192 seconds and archived HR/HRV uses nominal timing. See
+> `../07_paper/MANUSCRIPT_AUDIT.md` for evidence and implications.
+
 Confirmed by running NB01 against the Kaggle mirror `pedababugaddala/datasets-file`
 on 2026-09-01. **These override the dataset paper where they disagree.**
 
@@ -93,6 +99,27 @@ probably biased against exactly the scenario where the baseline is weakest. See
 
 The clean-run destination is **`Shanmuk4622/cr-rvs-radar-ecg-processed-v2`**. It rebuilds
 uncompressed mmap-ready `.npy` arrays, does not exclude on beat coupling, and adds normalisation
-sets for five-fold experiments, subject-level LOSO, and held-out-scenario testing. Counts are
-intentionally left pending until NB02 v2 is run on Kaggle; no v1 number is copied forward as a v2
-result.
+sets for five-fold experiments, subject-level LOSO, and held-out-scenario testing.
+
+### Final verified V2 counts (2026-09-07)
+
+| | |
+|---|---:|
+| Inventoried recordings | 135 |
+| Retained recordings | **134** |
+| Subjects | **30** |
+| Overlapping windows | **20,757** |
+| Non-overlapping windows | **10,411** |
+
+| Scenario | Recordings | Windows | Non-overlapping windows |
+|---|---:|---:|---:|
+| Apnea | 24 | 1,115 | 563 |
+| Resting | 30 | 4,609 | 2,311 |
+| Tilt-down | 27 | 4,198 | 2,106 |
+| Tilt-up | 26 | 4,044 | 2,027 |
+| Valsalva | 27 | 6,791 | 3,404 |
+
+The sole exclusion is `GDN0030_4_TiltUp.mat`, whose ECG is a flatline. No recording was excluded
+using beat-coupling score. These values come from the final processed-data revision
+`be14c2a90442d38235c5095d7d4eac07dfa9adcd` and replace the v1 retained-corpus counts above for
+all final experiments.

@@ -1,0 +1,62 @@
+{
+  "protocol_id": "baseline-v3-subjectwise-5fold-dy-mse-target01",
+  "experiment": "A_resting",
+  "model": "fpn",
+  "fold": 1,
+  "epochs": 120,
+  "channels": [
+    "dy"
+  ],
+  "target_01": true,
+  "base": 64,
+  "levels": 4,
+  "loss": "mse",
+  "lr": 0.0005,
+  "batch": 64,
+  "seed": 1338,
+  "data_index_sha256": "6b587be3775ef07a9369631b1b3bc7082e95f927b3b448b5b24486de467e05fa",
+  "library_sha256": {
+    "crvs_sync.py": "27d32aefcbec06d63b54244b3f8180bfc956d05afef56e1cf2bea72a0dac83e5",
+    "crvs_data.py": "7a5f62721c54219bd0a4dc69458534d9f1d3b2257f242ef5ec9a1a0b5832ccf4",
+    "crvs_metrics.py": "8d095b7f31c0844e18148e297f787a901b24e43cfcea2b224bcbd4a8d1b61758",
+    "crvs_models.py": "609d214f7b0ab6dc909ca0532501d07f9003d295d936b5fbfd266d8dcbce33ba",
+    "crvs_losses.py": "eee632a2fee0f10e5e90a3bd5cdad41f33e804e7e57a6f7784047983748b1b16",
+    "crvs_engine.py": "c3141f88a429cc90967f193ef445087877f989c6aa4811f4a5dc0044e1160d7e"
+  },
+  "train_subjects": [
+    "GDN0001",
+    "GDN0002",
+    "GDN0008",
+    "GDN0009",
+    "GDN0010",
+    "GDN0011",
+    "GDN0014",
+    "GDN0015",
+    "GDN0017",
+    "GDN0019",
+    "GDN0021",
+    "GDN0022",
+    "GDN0023",
+    "GDN0024",
+    "GDN0028",
+    "GDN0029",
+    "GDN0030",
+    "GND0006"
+  ],
+  "val_subjects": [
+    "GDN0003",
+    "GDN0007",
+    "GDN0013",
+    "GDN0018",
+    "GDN0020",
+    "GDN0025_no02"
+  ],
+  "test_subjects": [
+    "GDN0004",
+    "GDN0005",
+    "GDN0012",
+    "GDN0016",
+    "GDN0026",
+    "GDN0027"
+  ]
+}

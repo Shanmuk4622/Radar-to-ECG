@@ -77,3 +77,16 @@ Everything our paper must beat. Copied verbatim from Tables 1-5 of the PDF.
 6. **Loss is plain MSE**, no spectral / morphological / peak-aware term.
 7. **The I/Q pair is collapsed to one channel** before the network; amplitude and higher-harmonic information is discarded.
 8. **No statistical significance testing, no Bland-Altman, no ablation study, no parameter/FLOP budget.**
+
+## Final v2 comparison (verified 2026-09-07)
+
+Our strict subject-wise MultiResLinkNet rerun reached temporal/spectral CC of **44.611/73.702%**,
+well below the paper's **61.863/79.962%**. The reproduction gate therefore failed. Its fold-level
+temporal CC was highly variable (SD 21.39 points) and collapsed to 8.69% in one fold.
+
+Full L9 CardioMamba reached **57.464/87.442%**, peak F1 0.808, HR MAE 3.498 bpm and RMSSD MAE
+200.830 ms with 4.091 M parameters and 1.245 GFLOPs. This is a substantial improvement over our
+strict rerun, but it does not establish superiority over the published result and does not satisfy
+the clinical targets. The no-FiLM and single-task ablations achieved the strongest correlations
+(61.985/89.159% and 61.739/88.814%, respectively). See
+`../../06_results/RESULTS_AND_INSIGHTS.md` for the full evidence and caveats.

@@ -1,0 +1,16 @@
+{
+  "key": "unet",
+  "doi": "10.1007/978-3-319-24574-4_28",
+  "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+  "authors": [
+    "Ronneberger, Olaf",
+    "Fischer, Philipp",
+    "Brox, Thomas"
+  ],
+  "year": 2015,
+  "venue": "Lecture Notes in Computer Science",
+  "volume": "",
+  "pages": "234-241",
+  "source": "https://api.crossref.org/works/10.1007/978-3-319-24574-4_28",
+  "type": "book-chapter"
+}

@@ -1,0 +1,15 @@
+{
+  "key": "adamw",
+  "doi": "10.48550/arXiv.1711.05101",
+  "title": "Decoupled Weight Decay Regularization",
+  "authors": [
+    "Loshchilov, Ilya",
+    "Hutter, Frank"
+  ],
+  "year": 2017,
+  "venue": "arXiv preprint arXiv:1711.05101",
+  "volume": "",
+  "pages": "",
+  "source": "https://arxiv.org/abs/1711.05101",
+  "type": "preprint"
+}

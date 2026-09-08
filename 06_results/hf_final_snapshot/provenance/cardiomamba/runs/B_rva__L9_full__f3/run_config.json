@@ -1,0 +1,86 @@
+{
+  "experiment": "B_rva",
+  "variant": "L9_full",
+  "fold": 3,
+  "epochs": 150,
+  "spec": {
+    "kind": "cmnet",
+    "channels": [
+      "I",
+      "Q",
+      "phi",
+      "dy",
+      "vel",
+      "acc",
+      "amp",
+      "cardiac"
+    ],
+    "loss": "composite"
+  },
+  "base": 32,
+  "d_ssm": 256,
+  "ssm_blocks": 3,
+  "d_state": 64,
+  "levels": 4,
+  "dropout": 0.1,
+  "loss_weights": {
+    "huber": 1.0,
+    "stft": 0.5,
+    "peak": 0.3,
+    "rr": 0.1,
+    "peakw": 0.5,
+    "corr": 0.3
+  },
+  "lr": 0.0008,
+  "batch": 48,
+  "monitor": "val_window_CC_temporal_mean",
+  "monitor_mode": "max",
+  "min_epochs": 40,
+  "seed": 1340,
+  "data_index_sha256": "6b587be3775ef07a9369631b1b3bc7082e95f927b3b448b5b24486de467e05fa",
+  "library_sha256": {
+    "crvs_sync.py": "27d32aefcbec06d63b54244b3f8180bfc956d05afef56e1cf2bea72a0dac83e5",
+    "crvs_data.py": "7a5f62721c54219bd0a4dc69458534d9f1d3b2257f242ef5ec9a1a0b5832ccf4",
+    "crvs_metrics.py": "8d095b7f31c0844e18148e297f787a901b24e43cfcea2b224bcbd4a8d1b61758",
+    "crvs_models.py": "609d214f7b0ab6dc909ca0532501d07f9003d295d936b5fbfd266d8dcbce33ba",
+    "crvs_cmnet.py": "e08c78b3dc6e52337bb3e79913999f0b27a5a4096b8c62658d0065f1c7570c21",
+    "crvs_losses.py": "eee632a2fee0f10e5e90a3bd5cdad41f33e804e7e57a6f7784047983748b1b16",
+    "crvs_engine.py": "9c29625811077308db0aebeb9a636c7b0556780af7cc463900d3dd7b4b324abd"
+  },
+  "train_subjects": [
+    "GDN0001",
+    "GDN0003",
+    "GDN0004",
+    "GDN0005",
+    "GDN0007",
+    "GDN0010",
+    "GDN0012",
+    "GDN0013",
+    "GDN0016",
+    "GDN0017",
+    "GDN0018",
+    "GDN0020",
+    "GDN0022",
+    "GDN0025_no02",
+    "GDN0026",
+    "GDN0027",
+    "GDN0029",
+    "GND0006"
+  ],
+  "val_subjects": [
+    "GDN0008",
+    "GDN0019",
+    "GDN0023",
+    "GDN0024",
+    "GDN0028",
+    "GDN0030"
+  ],
+  "test_subjects": [
+    "GDN0002",
+    "GDN0009",
+    "GDN0011",
+    "GDN0014",
+    "GDN0015",
+    "GDN0021"
+  ]
+}

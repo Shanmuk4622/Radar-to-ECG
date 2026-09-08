@@ -1,0 +1,18 @@
+{
+  "key": "film",
+  "doi": "10.1609/aaai.v32i1.11671",
+  "title": "FiLM: Visual Reasoning with a General Conditioning Layer",
+  "authors": [
+    "Perez, Ethan",
+    "Strub, Florian",
+    "De Vries, Harm",
+    "Dumoulin, Vincent",
+    "Courville, Aaron"
+  ],
+  "year": 2018,
+  "venue": "Proceedings of the AAAI Conference on Artificial Intelligence",
+  "volume": "32",
+  "pages": "",
+  "source": "https://api.crossref.org/works/10.1609/aaai.v32i1.11671",
+  "type": "journal-article"
+}

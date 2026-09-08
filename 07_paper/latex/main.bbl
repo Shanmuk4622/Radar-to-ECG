@@ -1,0 +1,199 @@
+\begin{thebibliography}{25}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Schellenberger et~al.(2020)Schellenberger, Shi, Steigleder, Malessa,
+  Michler, Hameyer, Neumann, Lurz, Weigel, Ostgathe, and
+  Koelpin]{schellenberger2020}
+Sven Schellenberger, Kilin Shi, Tobias Steigleder, Anke Malessa, Fabian
+  Michler, Laura Hameyer, Nina Neumann, Fabian Lurz, Robert Weigel, Christoph
+  Ostgathe, and Alexander Koelpin.
+\newblock {A dataset of clinically recorded radar vital signs with synchronised
+  reference sensor signals}.
+\newblock \emph{Scientific Data}, 7:\penalty0 291, 2020.
+\newblock \doi{10.1038/s41597-020-00629-5}.
+
+\bibitem[Chowdhury et~al.(2024)Chowdhury, Hosain, Bin~Islam, Hossain, Basak,
+  Mahmud, Murugappan, and Chowdhury]{chowdhury2024}
+Farhana~Ahmed Chowdhury, Md~Kamal Hosain, Md~Sakib Bin~Islam, Md~Shafayet
+  Hossain, Promit Basak, Sakib Mahmud, M.~Murugappan, and Muhammad~E.H.
+  Chowdhury.
+\newblock {ECG waveform generation from radar signals: A deep learning
+  perspective}.
+\newblock \emph{Computers in Biology and Medicine}, 176:\penalty0 108555, 2024.
+\newblock \doi{10.1016/j.compbiomed.2024.108555}.
+
+\bibitem[Zhang et~al.(2024{\natexlab{a}})Zhang, Guan, Li, Yang, Yue, and
+  Lim]{radarode}
+Yuanyuan Zhang, Runwei Guan, Lingxiao Li, Rui Yang, Yutao Yue, and Eng~Gee Lim.
+\newblock {radarODE: An ODE-Embedded Deep Learning Model for Contactless ECG
+  Reconstruction from Millimeter-Wave Radar}.
+\newblock \emph{arXiv preprint arXiv:2408.01672}, 2024{\natexlab{a}}.
+\newblock \doi{10.48550/arXiv.2408.01672}.
+
+\bibitem[Zhang et~al.(2024{\natexlab{b}})Zhang, Yang, Yue, and Lim]{radarodemt}
+Yuanyuan Zhang, Rui Yang, Yutao Yue, and Eng~Gee Lim.
+\newblock {radarODE-MTL: A Multi-Task Learning Framework with Eccentric
+  Gradient Alignment for Robust Radar-Based ECG Reconstruction}.
+\newblock \emph{arXiv preprint arXiv:2410.08656}, 2024{\natexlab{b}}.
+\newblock \doi{10.48550/arXiv.2410.08656}.
+
+\bibitem[Kundu et~al.(2025)Kundu, Panda, Bhattacharya, Routray, and
+  Guha]{lifwavnet}
+Soumitra Kundu, Gargi Panda, Saumik Bhattacharya, Aurobinda Routray, and
+  Rajlakshmi Guha.
+\newblock {LifWavNet: Lifting Wavelet-based Network for Non-contact ECG
+  Reconstruction from Radar}.
+\newblock \emph{arXiv preprint arXiv:2510.27692}, 2025.
+\newblock \doi{10.48550/arXiv.2510.27692}.
+
+\bibitem[{Task Force of the European Society of Cardiology and the North
+  American Society of Pacing and Electrophysiology}(1996)]{hrvstandards}
+{Task Force of the European Society of Cardiology and the North American
+  Society of Pacing and Electrophysiology}.
+\newblock {Heart rate variability: standards of measurement, physiological
+  interpretation and clinical use}.
+\newblock \emph{Circulation}, 93:\penalty0 1043--1065, 1996.
+\newblock \doi{10.1161/01.CIR.93.5.1043}.
+
+\bibitem[Shaffer and Ginsberg(2017)]{hrvoverview}
+Fred Shaffer and J.~P. Ginsberg.
+\newblock {An Overview of Heart Rate Variability Metrics and Norms}.
+\newblock \emph{Frontiers in Public Health}, 5:\penalty0 258, 2017.
+\newblock \doi{10.3389/fpubh.2017.00258}.
+
+\bibitem[Gu et~al.(2022)Gu, Gupta, Goel, and Ré]{s4d}
+Albert Gu, Ankit Gupta, Karan Goel, and Christopher Ré.
+\newblock {On the Parameterization and Initialization of Diagonal State Space
+  Models}.
+\newblock \emph{arXiv preprint arXiv:2206.11893}, 2022.
+\newblock \doi{10.48550/arXiv.2206.11893}.
+
+\bibitem[Gu and Dao(2023)]{mamba}
+Albert Gu and Tri Dao.
+\newblock {Mamba: Linear-Time Sequence Modeling with Selective State Spaces}.
+\newblock \emph{arXiv preprint arXiv:2312.00752}, 2023.
+\newblock \doi{10.48550/arXiv.2312.00752}.
+
+\bibitem[Ibtehaz and Rahman(2020)]{multiresunet}
+Nabil Ibtehaz and M.~Sohel Rahman.
+\newblock {MultiResUNet : Rethinking the U-Net architecture for multimodal
+  biomedical image segmentation}.
+\newblock \emph{Neural Networks}, 121:\penalty0 74--87, 2020.
+\newblock \doi{10.1016/j.neunet.2019.08.025}.
+
+\bibitem[Ronneberger et~al.(2015)Ronneberger, Fischer, and Brox]{unet}
+Olaf Ronneberger, Philipp Fischer, and Thomas Brox.
+\newblock {U-Net: Convolutional Networks for Biomedical Image Segmentation}.
+\newblock In \emph{Lecture Notes in Computer Science}, pages 234--241, 2015.
+\newblock \doi{10.1007/978-3-319-24574-4_28}.
+
+\bibitem[Chaurasia and Culurciello(2017)]{linknet}
+Abhishek Chaurasia and Eugenio Culurciello.
+\newblock {LinkNet: Exploiting encoder representations for efficient semantic
+  segmentation}.
+\newblock In \emph{2017 IEEE Visual Communications and Image Processing
+  (VCIP)}, pages 1--4, 2017.
+\newblock \doi{10.1109/VCIP.2017.8305148}.
+
+\bibitem[Lin et~al.(2017{\natexlab{a}})Lin, Dollar, Girshick, He, Hariharan,
+  and Belongie]{fpn}
+Tsung-Yi Lin, Piotr Dollar, Ross Girshick, Kaiming He, Bharath Hariharan, and
+  Serge Belongie.
+\newblock {Feature Pyramid Networks for Object Detection}.
+\newblock In \emph{2017 IEEE Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, pages 936--944, 2017{\natexlab{a}}.
+\newblock \doi{10.1109/CVPR.2017.106}.
+
+\bibitem[Vaswani et~al.(2017)Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez,
+  Kaiser, and Polosukhin]{attention}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+  Aidan~N. Gomez, Lukasz Kaiser, and Illia Polosukhin.
+\newblock {Attention Is All You Need}.
+\newblock \emph{arXiv preprint arXiv:1706.03762}, 2017.
+\newblock \doi{10.48550/arXiv.1706.03762}.
+
+\bibitem[Sweldens(1998)]{lifting}
+Wim Sweldens.
+\newblock {The Lifting Scheme: A Construction of Second Generation Wavelets}.
+\newblock \emph{SIAM Journal on Mathematical Analysis}, 29:\penalty0 511--546,
+  1998.
+\newblock \doi{10.1137/S0036141095289051}.
+
+\bibitem[Wang et~al.(2020)Wang, Wu, Zhu, Li, Zuo, and Hu]{eca}
+Qilong Wang, Banggu Wu, Pengfei Zhu, Peihua Li, Wangmeng Zuo, and Qinghua Hu.
+\newblock {ECA-Net: Efficient Channel Attention for Deep Convolutional Neural
+  Networks}.
+\newblock In \emph{2020 IEEE/CVF Conference on Computer Vision and Pattern
+  Recognition (CVPR)}, pages 11531--11539, 2020.
+\newblock \doi{10.1109/CVPR42600.2020.01155}.
+
+\bibitem[Perez et~al.(2018)Perez, Strub, De~Vries, Dumoulin, and
+  Courville]{film}
+Ethan Perez, Florian Strub, Harm De~Vries, Vincent Dumoulin, and Aaron
+  Courville.
+\newblock {FiLM: Visual Reasoning with a General Conditioning Layer}.
+\newblock \emph{Proceedings of the AAAI Conference on Artificial Intelligence},
+  32, 2018.
+\newblock \doi{10.1609/aaai.v32i1.11671}.
+
+\bibitem[Welch(1967)]{welch}
+P.~Welch.
+\newblock {The use of fast Fourier transform for the estimation of power
+  spectra: A method based on time averaging over short, modified periodograms}.
+\newblock \emph{IEEE Transactions on Audio and Electroacoustics}, 15:\penalty0
+  70--73, 1967.
+\newblock \doi{10.1109/TAU.1967.1161901}.
+
+\bibitem[Bland and Altman(1986)]{blandaltman}
+J.~Martin Bland and Douglas~G. Altman.
+\newblock {Statistical methods for assessing agreement between two methods of
+  clinical measurement}.
+\newblock \emph{The Lancet}, 327:\penalty0 307--310, 1986.
+\newblock \doi{10.1016/S0140-6736(86)90837-8}.
+
+\bibitem[Wilcoxon(1945)]{wilcoxon}
+Frank Wilcoxon.
+\newblock {Individual Comparisons by Ranking Methods}.
+\newblock \emph{Biometrics Bulletin}, 1:\penalty0 80, 1945.
+\newblock \doi{10.2307/3001968}.
+
+\bibitem[Holm(1979)]{holm}
+Sture Holm.
+\newblock {A Simple Sequentially Rejective Multiple Test Procedure}.
+\newblock \emph{Scandinavian Journal of Statistics}, 6:\penalty0 65--70, 1979.
+\newblock URL \url{https://www.jstor.org/stable/4615733}.
+
+\bibitem[Huber(1964)]{huber}
+Peter~J. Huber.
+\newblock {Robust Estimation of a Location Parameter}.
+\newblock \emph{The Annals of Mathematical Statistics}, 35:\penalty0 73--101,
+  1964.
+\newblock \doi{10.1214/aoms/1177703732}.
+
+\bibitem[Yamamoto et~al.(2020)Yamamoto, Song, and Kim]{wavegan}
+Ryuichi Yamamoto, Eunwoo Song, and Jae-Min Kim.
+\newblock {Parallel Wavegan: A Fast Waveform Generation Model Based on
+  Generative Adversarial Networks with Multi-Resolution Spectrogram}.
+\newblock In \emph{ICASSP 2020 - 2020 IEEE International Conference on
+  Acoustics, Speech and Signal Processing (ICASSP)}, pages 6199--6203, 2020.
+\newblock \doi{10.1109/ICASSP40776.2020.9053795}.
+
+\bibitem[Lin et~al.(2017{\natexlab{b}})Lin, Goyal, Girshick, He, and
+  Dollar]{focal}
+Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and Piotr Dollar.
+\newblock {Focal Loss for Dense Object Detection}.
+\newblock In \emph{2017 IEEE International Conference on Computer Vision
+  (ICCV)}, pages 2999--3007, 2017{\natexlab{b}}.
+\newblock \doi{10.1109/ICCV.2017.324}.
+
+\bibitem[Loshchilov and Hutter(2017)]{adamw}
+Ilya Loshchilov and Frank Hutter.
+\newblock {Decoupled Weight Decay Regularization}.
+\newblock \emph{arXiv preprint arXiv:1711.05101}, 2017.
+\newblock \doi{10.48550/arXiv.1711.05101}.
+
+\end{thebibliography}

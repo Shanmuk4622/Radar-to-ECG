@@ -1,0 +1,51 @@
+{
+  "run_id": "nb01_inventory_v2",
+  "started_utc": "2026-09-02T12:40:28.314358+00:00",
+  "python": "3.12.13",
+  "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+  "cpu_count": 4,
+  "versions": {
+    "numpy": "2.0.2",
+    "scipy": "1.16.3",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.0",
+    "h5py": "3.16.0",
+    "pyarrow": "24.0.0",
+    "huggingface_hub": "1.11.0"
+  },
+  "config": {
+    "KAGGLE_DATASET": "pedababugaddala/datasets-file",
+    "HF_USER": "Shanmuk4622",
+    "HF_REPO": "Shanmuk4622/cr-rvs-radar-ecg-inventory-v2",
+    "HF_REPO_TYPE": "dataset",
+    "HF_PRIVATE": false,
+    "RUN_ID": "nb01_inventory_v2",
+    "WORK": "/kaggle/working/nb01",
+    "SCRATCH": "/kaggle/temp/nb01",
+    "PUSH_INTERVAL_S": 1800,
+    "HF_MAX_UPLOADS_HOUR": 24,
+    "HF_RETRY_MAX": 6,
+    "TARGET_FS": 128,
+    "WINDOW": 1024,
+    "OVERLAP": 0.5,
+    "ECG_BAND": [
+      0.5,
+      40.0
+    ],
+    "CARDIAC_BAND": [
+      0.8,
+      20.0
+    ],
+    "LAMBDA_MM": 12.491352416666667,
+    "PREVIEW_SECONDS": 60,
+    "SAVE_DECIMATED": true,
+    "CHECKPOINT_EVERY": 1,
+    "SMOKE_TEST": false,
+    "SMOKE_N": 6,
+    "SEED": 1337
+  },
+  "hf_repo": "https://huggingface.co/datasets/Shanmuk4622/cr-rvs-radar-ecg-inventory-v2",
+  "finished_utc": "2026-09-02T12:48:09.807679+00:00",
+  "verdict": "RAW_MAT_TREE",
+  "n_records": 135
+}

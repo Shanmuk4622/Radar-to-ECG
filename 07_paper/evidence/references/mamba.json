@@ -1,0 +1,15 @@
+{
+  "key": "mamba",
+  "doi": "10.48550/arXiv.2312.00752",
+  "title": "Mamba: Linear-Time Sequence Modeling with Selective State Spaces",
+  "authors": [
+    "Gu, Albert",
+    "Dao, Tri"
+  ],
+  "year": 2023,
+  "venue": "arXiv preprint arXiv:2312.00752",
+  "volume": "",
+  "pages": "",
+  "source": "https://arxiv.org/abs/2312.00752",
+  "type": "preprint"
+}

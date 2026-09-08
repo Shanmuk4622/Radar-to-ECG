@@ -1,0 +1,18 @@
+{
+  "key": "focal",
+  "doi": "10.1109/ICCV.2017.324",
+  "title": "Focal Loss for Dense Object Detection",
+  "authors": [
+    "Lin, Tsung-Yi",
+    "Goyal, Priya",
+    "Girshick, Ross",
+    "He, Kaiming",
+    "Dollar, Piotr"
+  ],
+  "year": 2017,
+  "venue": "2017 IEEE International Conference on Computer Vision (ICCV)",
+  "volume": "",
+  "pages": "2999-3007",
+  "source": "https://api.crossref.org/works/10.1109/ICCV.2017.324",
+  "type": "proceedings-article"
+}

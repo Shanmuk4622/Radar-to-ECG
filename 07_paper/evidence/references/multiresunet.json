@@ -1,0 +1,15 @@
+{
+  "key": "multiresunet",
+  "doi": "10.1016/j.neunet.2019.08.025",
+  "title": "MultiResUNet : Rethinking the U-Net architecture for multimodal biomedical image segmentation",
+  "authors": [
+    "Ibtehaz, Nabil",
+    "Rahman, M. Sohel"
+  ],
+  "year": 2020,
+  "venue": "Neural Networks",
+  "volume": "121",
+  "pages": "74-87",
+  "source": "https://api.crossref.org/works/10.1016/j.neunet.2019.08.025",
+  "type": "journal-article"
+}

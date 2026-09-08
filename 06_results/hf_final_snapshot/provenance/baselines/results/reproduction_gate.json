@@ -1,0 +1,17 @@
+{
+  "protocol_id": "baseline-v3-subjectwise-5fold-dy-mse-target01",
+  "complete": true,
+  "passed": false,
+  "expected_b_rva_runs": 20,
+  "completed_b_rva_runs": 20,
+  "updated_utc": "2026-09-03T18:06:22.102912+00:00",
+  "missing": [],
+  "ranking": [
+    "fpn",
+    "linknet",
+    "multireslinknet",
+    "unet"
+  ],
+  "multireslinknet_cc_temporal": 44.61144,
+  "published_cc_temporal": 61.86
+}

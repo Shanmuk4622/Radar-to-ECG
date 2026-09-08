@@ -3,7 +3,22 @@
 Research project aiming to beat **MultiResLinkNet** (Chowdhury et al., *Computers in Biology and
 Medicine* 176:108555, 2024) on the Schellenberger **CR-RVS** dataset with a new architecture.
 
-**Start here: [`00_admin/PLAN.md`](00_admin/PLAN.md)**
+**Final experimental status (2026-09-07):** all 80 baseline and 100 CardioMamba canonical runs
+were completed and NB05 generated its full evaluation package. The experiment is scientifically
+useful, but the original full-model/SOTA hypothesis was not confirmed: full L9 improves strongly
+over the strict baseline rerun, while no-FiLM and single-task variants obtain the best correlation.
+
+**Start with the final evidence:** [`06_results/RESULTS_AND_INSIGHTS.md`](06_results/RESULTS_AND_INSIGHTS.md)
+and [`07_paper/PAPER_DIRECTION.md`](07_paper/PAPER_DIRECTION.md).
+
+The pinned Hugging Face download and integrity manifest are documented in
+[`06_results/hf_final_snapshot/README.md`](06_results/hf_final_snapshot/README.md).
+
+The original plan and audit trail remain in [`00_admin/PLAN.md`](00_admin/PLAN.md).
+
+**Complete manuscript:** [`07_paper/README.md`](07_paper/README.md) links the LaTeX, compiled PDF,
+and source package. A deeper manuscript audit found a 125-Hz stream labelled 128 Hz; physiological
+reevaluation is needed before submission. See [`07_paper/MANUSCRIPT_AUDIT.md`](07_paper/MANUSCRIPT_AUDIT.md).
 
 **Run the rewritten Kaggle workflow:** [`03_notebooks/README.md`](03_notebooks/README.md).
 The five-stage v2 workflow plus its one-time baseline cleanup notebook use chained Kaggle Notebook

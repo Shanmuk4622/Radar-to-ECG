@@ -1,0 +1,29 @@
+{
+  "baseline_runs": 80,
+  "expected_baseline_runs": 80,
+  "nb04_full_runs": 100,
+  "expected_nb04_full_runs": 100,
+  "quick_runs_excluded": [
+    "quick__B_rva__L9_full__f0"
+  ],
+  "core_ladder_counts": {
+    "L2_loss_only": 5,
+    "L3_c1_only": 5,
+    "L4_c1_c5": 5,
+    "L5_no_wavelet": 5,
+    "L6_no_ssm": 5,
+    "L7_singletask": 5,
+    "L8_no_film": 5,
+    "L9_full": 5,
+    "L10_transformer": 5
+  },
+  "core_ladder_complete": true,
+  "baseline_gate_complete": true,
+  "baseline_gate_passed": false,
+  "evaluation_inputs_complete": true,
+  "evaluation_validated": false,
+  "robustness_requested": true,
+  "robustness_effective": true,
+  "mae_mse_comparison_scale": "[0,1]",
+  "rrmse_temporal_note": "retained as recorded; target-offset dependent across NB03/NB04"
+}

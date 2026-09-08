@@ -4,6 +4,11 @@ Run these notebooks in order. They are self-contained, Kaggle-compatible, output
 start in smoke-test mode where training is involved. The earlier v1 run remains useful evidence,
 but v2 uses new Hugging Face repositories and does not treat any v1 model as complete.
 
+**Final run status (2026-09-07):** NB01–NB05 are complete. NB03 supplied 80/80 baseline runs,
+NB04 supplied 100/100 canonical CardioMamba runs, and NB05 regenerated 23/23 declared result
+artifacts. Its status `inputs-complete-gate-failed` records the failed published-baseline
+reproduction gate, not an incomplete notebook run. See `../06_results/RESULTS_AND_INSIGHTS.md`.
+
 | # | Notebook | Purpose | Accelerator | Typical runtime |
 |---|---|---|---|---|
 | 01 | `01_verify_and_download.ipynb` | Verify raw mirror; census; 128 Hz derivative | CPU | 25–70 min |

@@ -1,0 +1,103 @@
+{
+  "archive": "radar_ecg_manuscript.zip",
+  "pdf_pages": 22,
+  "references": 25,
+  "zip_sha256": "107a7da945ba2dcf3602ae684ce9d0563470df87cd1459a2f6086a93619f4f51",
+  "files": [
+    {
+      "path": "main.tex",
+      "bytes": 60608,
+      "sha256": "790f8a2ebbfb9ef5a2b4647d7bb1a923b4144920989930f1ff19d8dc2b6e0182"
+    },
+    {
+      "path": "references.bib",
+      "bytes": 8389,
+      "sha256": "fa3a0391de498bf29d1efd698679b2af492c376a586581089a089058b5b4440b"
+    },
+    {
+      "path": "main.bbl",
+      "bytes": 8947,
+      "sha256": "af164d770c8ed7e233d5fd5381fe91e682f5a3d4868e34a30d6037400e4d45c4"
+    },
+    {
+      "path": "main.pdf",
+      "bytes": 302530,
+      "sha256": "0d434d6d22749b32261acdea18745ef7d5475990420dfdbf369f2833a6a27f77"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1107,
+      "sha256": "9ab68f3be90a37e34f704128f25a8f84c03065dd7703ae061aab8fd62496d2f9"
+    },
+    {
+      "path": "generated/agreement.csv",
+      "bytes": 373,
+      "sha256": "ed37881a24b574f3712be1fef803f560ba31042e273106ef017a41b21adffac2"
+    },
+    {
+      "path": "generated/analysis_audit.json",
+      "bytes": 5266,
+      "sha256": "6efd9c1fcbcfc70bdef19aaf38558cf71b343cd4b46f6834ddcde187ddb98ae8"
+    },
+    {
+      "path": "generated/clinical_rows.tex",
+      "bytes": 403,
+      "sha256": "e38ac27093ccb2f23e25e3060efabc99593e3d3add51308572332ecc5c355b19"
+    },
+    {
+      "path": "generated/primary_rows.tex",
+      "bytes": 1190,
+      "sha256": "54c0cf5b003985e178e24060173b43ef5cb6b2db15fc11835b63da48c5629e05"
+    },
+    {
+      "path": "generated/qualitative_selection.csv",
+      "bytes": 454,
+      "sha256": "2a2f1a1a60346aff1919c508e228495e3ef8cf6b0cdff129d7fd42e4514fe5cb"
+    },
+    {
+      "path": "generated/sampling_rate_audit.csv",
+      "bytes": 7051,
+      "sha256": "ac4b69ee70170fff0a4b9d87d63b40d7208a62d739de807484034780b72cdc64"
+    },
+    {
+      "path": "generated/statistics_rows.tex",
+      "bytes": 770,
+      "sha256": "a16add98d824f7962c571bd62f54e311bfdd447551f3d9ef9435ca6b07c1e7c2"
+    },
+    {
+      "path": "generated/subject_correlations.csv",
+      "bytes": 7500,
+      "sha256": "feaa3c8b9553bb531aa150d2a870927692f64428d2cf80148372a2066b9d4c3d"
+    },
+    {
+      "path": "generated/subject_effects.csv",
+      "bytes": 1249,
+      "sha256": "3c69efbed2d09406135667bb12414f79f43d2488870fd3233614a8e95ec02791"
+    },
+    {
+      "path": "figures/agreement.pdf",
+      "bytes": 19153,
+      "sha256": "efe170edcff3a3a94dbf2cd302b9daea4382a476387b5bb792c69ae97cc2c90c"
+    },
+    {
+      "path": "figures/fold_performance.pdf",
+      "bytes": 21101,
+      "sha256": "a041f61d28ce79ab35ed6e47c0999efe5ffc76bca13b36161955aade8b73bf3f"
+    },
+    {
+      "path": "figures/qualitative.pdf",
+      "bytes": 103260,
+      "sha256": "d8001460d8b119e770f28ab7414c45b5b7fcfccc97a6b232bd456b5e797b66e8"
+    },
+    {
+      "path": "figures/robustness.pdf",
+      "bytes": 16852,
+      "sha256": "92fbbdc738def5c081196dba5af9dd8de2adc2ffc19ae5599e9cd128e9ee2131"
+    },
+    {
+      "path": "figures/subject_pairs.pdf",
+      "bytes": 14194,
+      "sha256": "df1322bce59177fa329357604650a203b192f5f5b0269994d0d086255a8f5f74"
+    }
+  ]
+}

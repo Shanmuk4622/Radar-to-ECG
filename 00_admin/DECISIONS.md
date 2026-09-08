@@ -2,6 +2,10 @@
 
 | Date | Decision | Rationale |
 |---|---|---|
+| 2026-09-07 | **Frame the first paper as strict benchmarking, ablation, robustness and negative results—not as a full-model SOTA claim.** | All 180 canonical runs completed, but full L9 misses the preregistered targets; no-FiLM and single-task lead correlation, and single-task significantly outperforms full L9 after Holm correction. |
+| 2026-09-07 | **Treat L8 no-FiLM as a post-hoc candidate requiring prospective confirmation.** | It has the best mean temporal/spectral CC, but promoting it directly after inspecting all ablations would bias the primary claim. |
+| 2026-09-07 | **Do not make a clinical HRV claim until the detector/unit/aggregation audit is complete.** | Full L9 improves RMSSD error over the strict baseline, but its error remains about 201 ms and the evaluated ground-truth RMSSD disagrees sharply with the published table. |
+| 2026-09-07 | **Repeat robustness across all five folds before treating it as confirmatory.** | The selected-fold result is very strong but currently uses only 800 windows from one fold. |
 | 2026-09-02 | **Do not exclude recordings by beat-coupling score in v2.** Retain it as a difficulty covariate and exclude only unusable signals. | The v1 threshold disproportionately removed Apnea, where reduced motion is physiological. Thresholding would select an easier, scenario-biased cohort and weaken comparison with the baseline. |
 | 2026-09-02 | **Restart training as v2 in five stage-specific HF repos.** Do not promote v1 checkpoints into the v2 queue. | The audit found that v1 did not restore `state.pt`, preprocessing could trust missing local arrays, and best-epoch uploads produced an unsafe commit burst. Separate repos also prevent notebook-level state collisions. |
 | 2026-09-02 | **Resume inside an epoch using deterministic replay.** Save active epoch, completed batch cursor, partial aggregates and every RNG state atomically every 50 steps/5 minutes. | A Kaggle session restart must not silently replay a different shuffle/augmentation stream or lose an epoch. |

@@ -1,0 +1,15 @@
+{
+  "key": "linknet",
+  "doi": "10.1109/VCIP.2017.8305148",
+  "title": "LinkNet: Exploiting encoder representations for efficient semantic segmentation",
+  "authors": [
+    "Chaurasia, Abhishek",
+    "Culurciello, Eugenio"
+  ],
+  "year": 2017,
+  "venue": "2017 IEEE Visual Communications and Image Processing (VCIP)",
+  "volume": "",
+  "pages": "1-4",
+  "source": "https://api.crossref.org/works/10.1109/VCIP.2017.8305148",
+  "type": "proceedings-article"
+}

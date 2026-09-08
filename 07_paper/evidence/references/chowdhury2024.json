@@ -1,0 +1,21 @@
+{
+  "key": "chowdhury2024",
+  "doi": "10.1016/j.compbiomed.2024.108555",
+  "title": "ECG waveform generation from radar signals: A deep learning perspective",
+  "authors": [
+    "Chowdhury, Farhana Ahmed",
+    "Hosain, Md Kamal",
+    "Bin Islam, Md Sakib",
+    "Hossain, Md Shafayet",
+    "Basak, Promit",
+    "Mahmud, Sakib",
+    "Murugappan, M.",
+    "Chowdhury, Muhammad E.H."
+  ],
+  "year": 2024,
+  "venue": "Computers in Biology and Medicine",
+  "volume": "176",
+  "pages": "108555",
+  "source": "https://api.crossref.org/works/10.1016/j.compbiomed.2024.108555",
+  "type": "journal-article"
+}

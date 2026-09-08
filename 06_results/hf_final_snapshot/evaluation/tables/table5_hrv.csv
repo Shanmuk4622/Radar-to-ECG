@@ -1,0 +1,40 @@
+variant,signal,mu_RR_ms,sd_RR_ms,mu_HR_bpm,sd_HR_bpm,RMSSD_ms
+FPN,ground truth,943.8,94.46,65.67,7.45,85.04
+FPN,predicted,986.59,297.59,69.46,22.28,405.01
+FPN,|error|,102.47,,9.34,,319.97
+UNet,ground truth,943.8,94.46,65.67,7.45,85.04
+UNet,predicted,1006.82,250.24,66.79,16.7,344.11
+UNet,|error|,88.37,,8.77,,263.52
+LinkNet,ground truth,943.8,94.46,65.67,7.45,85.04
+LinkNet,predicted,957.91,313.63,72.57,26.75,429.95
+LinkNet,|error|,111.5,,12.45,,344.91
+MultiResLinkNet,ground truth,943.8,94.46,65.67,7.45,85.04
+MultiResLinkNet,predicted,973.43,263.98,71.39,18.65,356.32
+MultiResLinkNet,|error|,134.34,,13.61,,271.28
+L2_loss_only,ground truth,943.8,94.46,65.67,7.45,85.04
+L2_loss_only,predicted,972.64,200.61,65.52,13.68,272.15
+L2_loss_only,|error|,46.27,,3.77,,187.11
+L3_c1_only,ground truth,943.8,94.46,65.67,7.45,85.04
+L3_c1_only,predicted,1037.75,247.5,61.58,12.27,338.05
+L3_c1_only,|error|,100.07,,5.42,,253.01
+L4_c1_c5,ground truth,943.8,94.46,65.67,7.45,85.04
+L4_c1_c5,predicted,990.61,256.08,66.29,18.85,347.15
+L4_c1_c5,|error|,64.33,,4.77,,262.11
+L5_no_wavelet,ground truth,943.8,94.46,65.67,7.45,85.04
+L5_no_wavelet,predicted,993.16,227.39,64.83,15.68,301.87
+L5_no_wavelet,|error|,56.36,,3.76,,219.11
+L6_no_ssm,ground truth,943.8,94.46,65.67,7.45,85.04
+L6_no_ssm,predicted,983.87,220.96,65.67,16.6,290.79
+L6_no_ssm,|error|,47.7,,3.69,,205.75
+L7_singletask,ground truth,943.8,94.46,65.67,7.45,85.04
+L7_singletask,predicted,983.46,199.57,64.8,14.33,262.7
+L7_singletask,|error|,42.25,,2.98,,179.24
+L8_no_film,ground truth,943.8,94.46,65.67,7.45,85.04
+L8_no_film,predicted,988.84,192.89,64.04,12.73,253.2
+L8_no_film,|error|,45.03,,2.79,,169.01
+CardioMamba-Net (ours),ground truth,943.8,94.46,65.67,7.45,85.04
+CardioMamba-Net (ours),predicted,995.71,215.66,64.27,15.07,283.77
+CardioMamba-Net (ours),|error|,54.89,,3.2,,201.42
+CardioMamba-Net (Transformer),ground truth,943.8,94.46,65.67,7.45,85.04
+CardioMamba-Net (Transformer),predicted,986.06,240.93,65.93,18.13,322.35
+CardioMamba-Net (Transformer),|error|,61.56,,4.53,,238.13

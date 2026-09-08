@@ -1,0 +1,17 @@
+{
+  "key": "radarodemt",
+  "doi": "10.48550/arXiv.2410.08656",
+  "title": "radarODE-MTL: A Multi-Task Learning Framework with Eccentric Gradient Alignment for Robust Radar-Based ECG Reconstruction",
+  "authors": [
+    "Zhang, Yuanyuan",
+    "Yang, Rui",
+    "Yue, Yutao",
+    "Lim, Eng Gee"
+  ],
+  "year": 2024,
+  "venue": "arXiv preprint arXiv:2410.08656",
+  "volume": "",
+  "pages": "",
+  "source": "https://arxiv.org/abs/2410.08656",
+  "type": "preprint"
+}

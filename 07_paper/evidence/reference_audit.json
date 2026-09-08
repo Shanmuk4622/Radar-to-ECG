@@ -1,0 +1,421 @@
+[
+  {
+    "key": "schellenberger2020",
+    "doi": "10.1038/s41597-020-00629-5",
+    "title": "A dataset of clinically recorded radar vital signs with synchronised reference sensor signals",
+    "authors": [
+      "Schellenberger, Sven",
+      "Shi, Kilin",
+      "Steigleder, Tobias",
+      "Malessa, Anke",
+      "Michler, Fabian",
+      "Hameyer, Laura",
+      "Neumann, Nina",
+      "Lurz, Fabian",
+      "Weigel, Robert",
+      "Ostgathe, Christoph",
+      "Koelpin, Alexander"
+    ],
+    "year": 2020,
+    "venue": "Scientific Data",
+    "volume": "7",
+    "pages": "291",
+    "source": "https://api.crossref.org/works/10.1038/s41597-020-00629-5",
+    "type": "journal-article"
+  },
+  {
+    "key": "chowdhury2024",
+    "doi": "10.1016/j.compbiomed.2024.108555",
+    "title": "ECG waveform generation from radar signals: A deep learning perspective",
+    "authors": [
+      "Chowdhury, Farhana Ahmed",
+      "Hosain, Md Kamal",
+      "Bin Islam, Md Sakib",
+      "Hossain, Md Shafayet",
+      "Basak, Promit",
+      "Mahmud, Sakib",
+      "Murugappan, M.",
+      "Chowdhury, Muhammad E.H."
+    ],
+    "year": 2024,
+    "venue": "Computers in Biology and Medicine",
+    "volume": "176",
+    "pages": "108555",
+    "source": "https://api.crossref.org/works/10.1016/j.compbiomed.2024.108555",
+    "type": "journal-article"
+  },
+  {
+    "key": "unet",
+    "doi": "10.1007/978-3-319-24574-4_28",
+    "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+    "authors": [
+      "Ronneberger, Olaf",
+      "Fischer, Philipp",
+      "Brox, Thomas"
+    ],
+    "year": 2015,
+    "venue": "Lecture Notes in Computer Science",
+    "volume": "",
+    "pages": "234-241",
+    "source": "https://api.crossref.org/works/10.1007/978-3-319-24574-4_28",
+    "type": "book-chapter"
+  },
+  {
+    "key": "fpn",
+    "doi": "10.1109/CVPR.2017.106",
+    "title": "Feature Pyramid Networks for Object Detection",
+    "authors": [
+      "Lin, Tsung-Yi",
+      "Dollar, Piotr",
+      "Girshick, Ross",
+      "He, Kaiming",
+      "Hariharan, Bharath",
+      "Belongie, Serge"
+    ],
+    "year": 2017,
+    "venue": "2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)",
+    "volume": "",
+    "pages": "936-944",
+    "source": "https://api.crossref.org/works/10.1109/CVPR.2017.106",
+    "type": "proceedings-article"
+  },
+  {
+    "key": "linknet",
+    "doi": "10.1109/VCIP.2017.8305148",
+    "title": "LinkNet: Exploiting encoder representations for efficient semantic segmentation",
+    "authors": [
+      "Chaurasia, Abhishek",
+      "Culurciello, Eugenio"
+    ],
+    "year": 2017,
+    "venue": "2017 IEEE Visual Communications and Image Processing (VCIP)",
+    "volume": "",
+    "pages": "1-4",
+    "source": "https://api.crossref.org/works/10.1109/VCIP.2017.8305148",
+    "type": "proceedings-article"
+  },
+  {
+    "key": "multiresunet",
+    "doi": "10.1016/j.neunet.2019.08.025",
+    "title": "MultiResUNet : Rethinking the U-Net architecture for multimodal biomedical image segmentation",
+    "authors": [
+      "Ibtehaz, Nabil",
+      "Rahman, M. Sohel"
+    ],
+    "year": 2020,
+    "venue": "Neural Networks",
+    "volume": "121",
+    "pages": "74-87",
+    "source": "https://api.crossref.org/works/10.1016/j.neunet.2019.08.025",
+    "type": "journal-article"
+  },
+  {
+    "key": "film",
+    "doi": "10.1609/aaai.v32i1.11671",
+    "title": "FiLM: Visual Reasoning with a General Conditioning Layer",
+    "authors": [
+      "Perez, Ethan",
+      "Strub, Florian",
+      "De Vries, Harm",
+      "Dumoulin, Vincent",
+      "Courville, Aaron"
+    ],
+    "year": 2018,
+    "venue": "Proceedings of the AAAI Conference on Artificial Intelligence",
+    "volume": "32",
+    "pages": "",
+    "source": "https://api.crossref.org/works/10.1609/aaai.v32i1.11671",
+    "type": "journal-article"
+  },
+  {
+    "key": "eca",
+    "doi": "10.1109/CVPR42600.2020.01155",
+    "title": "ECA-Net: Efficient Channel Attention for Deep Convolutional Neural Networks",
+    "authors": [
+      "Wang, Qilong",
+      "Wu, Banggu",
+      "Zhu, Pengfei",
+      "Li, Peihua",
+      "Zuo, Wangmeng",
+      "Hu, Qinghua"
+    ],
+    "year": 2020,
+    "venue": "2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
+    "volume": "",
+    "pages": "11531-11539",
+    "source": "https://api.crossref.org/works/10.1109/CVPR42600.2020.01155",
+    "type": "proceedings-article"
+  },
+  {
+    "key": "focal",
+    "doi": "10.1109/ICCV.2017.324",
+    "title": "Focal Loss for Dense Object Detection",
+    "authors": [
+      "Lin, Tsung-Yi",
+      "Goyal, Priya",
+      "Girshick, Ross",
+      "He, Kaiming",
+      "Dollar, Piotr"
+    ],
+    "year": 2017,
+    "venue": "2017 IEEE International Conference on Computer Vision (ICCV)",
+    "volume": "",
+    "pages": "2999-3007",
+    "source": "https://api.crossref.org/works/10.1109/ICCV.2017.324",
+    "type": "proceedings-article"
+  },
+  {
+    "key": "wavegan",
+    "doi": "10.1109/ICASSP40776.2020.9053795",
+    "title": "Parallel Wavegan: A Fast Waveform Generation Model Based on Generative Adversarial Networks with Multi-Resolution Spectrogram",
+    "authors": [
+      "Yamamoto, Ryuichi",
+      "Song, Eunwoo",
+      "Kim, Jae-Min"
+    ],
+    "year": 2020,
+    "venue": "ICASSP 2020 - 2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)",
+    "volume": "",
+    "pages": "6199-6203",
+    "source": "https://api.crossref.org/works/10.1109/ICASSP40776.2020.9053795",
+    "type": "proceedings-article"
+  },
+  {
+    "key": "lifting",
+    "doi": "10.1137/S0036141095289051",
+    "title": "The Lifting Scheme: A Construction of Second Generation Wavelets",
+    "authors": [
+      "Sweldens, Wim"
+    ],
+    "year": 1998,
+    "venue": "SIAM Journal on Mathematical Analysis",
+    "volume": "29",
+    "pages": "511-546",
+    "source": "https://api.crossref.org/works/10.1137/S0036141095289051",
+    "type": "journal-article"
+  },
+  {
+    "key": "welch",
+    "doi": "10.1109/TAU.1967.1161901",
+    "title": "The use of fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms",
+    "authors": [
+      "Welch, P."
+    ],
+    "year": 1967,
+    "venue": "IEEE Transactions on Audio and Electroacoustics",
+    "volume": "15",
+    "pages": "70-73",
+    "source": "https://api.crossref.org/works/10.1109/TAU.1967.1161901",
+    "type": "journal-article"
+  },
+  {
+    "key": "wilcoxon",
+    "doi": "10.2307/3001968",
+    "title": "Individual Comparisons by Ranking Methods",
+    "authors": [
+      "Wilcoxon, Frank"
+    ],
+    "year": 1945,
+    "venue": "Biometrics Bulletin",
+    "volume": "1",
+    "pages": "80",
+    "source": "https://api.crossref.org/works/10.2307/3001968",
+    "type": "journal-article"
+  },
+  {
+    "key": "blandaltman",
+    "doi": "10.1016/S0140-6736(86)90837-8",
+    "title": "Statistical methods for assessing agreement between two methods of clinical measurement",
+    "authors": [
+      "Bland, J. Martin",
+      "Altman, Douglas G."
+    ],
+    "year": 1986,
+    "venue": "The Lancet",
+    "volume": "327",
+    "pages": "307-310",
+    "source": "https://api.crossref.org/works/10.1016/S0140-6736(86)90837-8",
+    "type": "journal-article",
+    "verification_note": "Normalised author fields checked against PubMed PMID 2868172."
+  },
+  {
+    "key": "hrvstandards",
+    "doi": "10.1161/01.CIR.93.5.1043",
+    "title": "Heart rate variability: standards of measurement, physiological interpretation and clinical use",
+    "authors": [
+      "{Task Force of the European Society of Cardiology and the North American Society of Pacing and Electrophysiology}"
+    ],
+    "year": 1996,
+    "venue": "Circulation",
+    "volume": "93",
+    "pages": "1043-1065",
+    "source": "https://api.crossref.org/works/10.1161/01.CIR.93.5.1043",
+    "type": "journal-article",
+    "verification_note": "Expanded corporate author and title checked against PubMed PMID 8598068."
+  },
+  {
+    "key": "hrvoverview",
+    "doi": "10.3389/fpubh.2017.00258",
+    "title": "An Overview of Heart Rate Variability Metrics and Norms",
+    "authors": [
+      "Shaffer, Fred",
+      "Ginsberg, J. P."
+    ],
+    "year": 2017,
+    "venue": "Frontiers in Public Health",
+    "volume": "5",
+    "pages": "258",
+    "source": "https://api.crossref.org/works/10.3389/fpubh.2017.00258",
+    "type": "journal-article"
+  },
+  {
+    "key": "huber",
+    "doi": "10.1214/aoms/1177703732",
+    "title": "Robust Estimation of a Location Parameter",
+    "authors": [
+      "Huber, Peter J."
+    ],
+    "year": 1964,
+    "venue": "The Annals of Mathematical Statistics",
+    "volume": "35",
+    "pages": "73-101",
+    "source": "https://api.crossref.org/works/10.1214/aoms/1177703732",
+    "type": "journal-article"
+  },
+  {
+    "key": "s4d",
+    "doi": "10.48550/arXiv.2206.11893",
+    "title": "On the Parameterization and Initialization of Diagonal State Space Models",
+    "authors": [
+      "Gu, Albert",
+      "Gupta, Ankit",
+      "Goel, Karan",
+      "Ré, Christopher"
+    ],
+    "year": 2022,
+    "venue": "arXiv preprint arXiv:2206.11893",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/2206.11893",
+    "type": "preprint"
+  },
+  {
+    "key": "mamba",
+    "doi": "10.48550/arXiv.2312.00752",
+    "title": "Mamba: Linear-Time Sequence Modeling with Selective State Spaces",
+    "authors": [
+      "Gu, Albert",
+      "Dao, Tri"
+    ],
+    "year": 2023,
+    "venue": "arXiv preprint arXiv:2312.00752",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/2312.00752",
+    "type": "preprint"
+  },
+  {
+    "key": "radarode",
+    "doi": "10.48550/arXiv.2408.01672",
+    "title": "radarODE: An ODE-Embedded Deep Learning Model for Contactless ECG Reconstruction from Millimeter-Wave Radar",
+    "authors": [
+      "Zhang, Yuanyuan",
+      "Guan, Runwei",
+      "Li, Lingxiao",
+      "Yang, Rui",
+      "Yue, Yutao",
+      "Lim, Eng Gee"
+    ],
+    "year": 2024,
+    "venue": "arXiv preprint arXiv:2408.01672",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/2408.01672",
+    "type": "preprint"
+  },
+  {
+    "key": "radarodemt",
+    "doi": "10.48550/arXiv.2410.08656",
+    "title": "radarODE-MTL: A Multi-Task Learning Framework with Eccentric Gradient Alignment for Robust Radar-Based ECG Reconstruction",
+    "authors": [
+      "Zhang, Yuanyuan",
+      "Yang, Rui",
+      "Yue, Yutao",
+      "Lim, Eng Gee"
+    ],
+    "year": 2024,
+    "venue": "arXiv preprint arXiv:2410.08656",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/2410.08656",
+    "type": "preprint"
+  },
+  {
+    "key": "lifwavnet",
+    "doi": "10.48550/arXiv.2510.27692",
+    "title": "LifWavNet: Lifting Wavelet-based Network for Non-contact ECG Reconstruction from Radar",
+    "authors": [
+      "Kundu, Soumitra",
+      "Panda, Gargi",
+      "Bhattacharya, Saumik",
+      "Routray, Aurobinda",
+      "Guha, Rajlakshmi"
+    ],
+    "year": 2025,
+    "venue": "arXiv preprint arXiv:2510.27692",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/2510.27692",
+    "type": "preprint"
+  },
+  {
+    "key": "adamw",
+    "doi": "10.48550/arXiv.1711.05101",
+    "title": "Decoupled Weight Decay Regularization",
+    "authors": [
+      "Loshchilov, Ilya",
+      "Hutter, Frank"
+    ],
+    "year": 2017,
+    "venue": "arXiv preprint arXiv:1711.05101",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/1711.05101",
+    "type": "preprint"
+  },
+  {
+    "key": "attention",
+    "doi": "10.48550/arXiv.1706.03762",
+    "title": "Attention Is All You Need",
+    "authors": [
+      "Vaswani, Ashish",
+      "Shazeer, Noam",
+      "Parmar, Niki",
+      "Uszkoreit, Jakob",
+      "Jones, Llion",
+      "Gomez, Aidan N.",
+      "Kaiser, Lukasz",
+      "Polosukhin, Illia"
+    ],
+    "year": 2017,
+    "venue": "arXiv preprint arXiv:1706.03762",
+    "volume": "",
+    "pages": "",
+    "source": "https://arxiv.org/abs/1706.03762",
+    "type": "preprint"
+  },
+  {
+    "key": "holm",
+    "doi": "",
+    "title": "A Simple Sequentially Rejective Multiple Test Procedure",
+    "authors": [
+      "Holm, Sture"
+    ],
+    "year": 1979,
+    "venue": "Scandinavian Journal of Statistics",
+    "volume": "6",
+    "pages": "65--70",
+    "source": "https://www.jstor.org/stable/4615733",
+    "type": "journal-article"
+  }
+]

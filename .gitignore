@@ -3,6 +3,14 @@
 02_data/processed/
 05_experiments/checkpoints/
 05_experiments/logs/*.jsonl
+06_results/hf_final_snapshot/checkpoints/
+06_results/hf_final_snapshot/**/.cache/
+07_paper/.tools/
+07_paper/latex/*.aux
+07_paper/latex/*.log
+07_paper/latex/*.blg
+07_paper/latex/*.out
+07_paper/qa/
 **/__pycache__/
 *.pyc
 .ipynb_checkpoints/

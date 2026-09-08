@@ -1,0 +1,10 @@
+a,b,n_subjects,p,median_delta_cc_t,p_holm,significant
+9. CardioMamba-Net (full),"7. CardioMamba, single-task (-C4)",30,0.0021877754479646683,-2.2624968062259043,0.019689979031682014,True
+9. CardioMamba-Net (full),10. Transformer bottleneck (control),30,0.012047622352838516,5.01184845512957,0.09638097882270813,False
+9. CardioMamba-Net (full),1. MultiResLinkNet + MSE (baseline),30,0.01453801617026329,3.206717460122544,0.10176611319184303,False
+9. CardioMamba-Net (full),"8. CardioMamba, no FiLM",30,0.022098854184150696,-3.6159258722128236,0.13259312510490417,False
+9. CardioMamba-Net (full),"6. CardioMamba, no SSM (-C3)",30,0.054921628907322884,5.338193016171537,0.2746081445366144,False
+9. CardioMamba-Net (full),2. + composite loss (C5),30,0.06056523136794567,3.8435921508963347,0.2746081445366144,False
+9. CardioMamba-Net (full),4. + C1 + C5,30,0.6263462882488966,1.2721960331622881,1.0,False
+9. CardioMamba-Net (full),3. + 8-channel input (C1),30,0.6120056137442589,0.3119898849611715,1.0,False
+9. CardioMamba-Net (full),"5. CardioMamba, no wavelet (-C2)",30,0.7765688337385654,-0.5229802509765165,1.0,False

@@ -1,0 +1,3074 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-07T13:58:32.536216+00:00",
+  "source_revisions": {
+    "Shanmuk4622/cardiomamba-results-v2": "bb25560143d1044dc8671ef487160cc0049f7282",
+    "Shanmuk4622/cardiomamba-net-v2": "dd5764c51031f5d9415ecddbe64ff10ab0d02348",
+    "Shanmuk4622/cardiomamba-baselines-v2": "84bf3e7992a33aecacfb30ab860872c620ca7699",
+    "Shanmuk4622/cr-rvs-radar-ecg-processed-v2": "be14c2a90442d38235c5095d7d4eac07dfa9adcd"
+  },
+  "file_count": 612,
+  "total_bytes": 250981240,
+  "files": [
+    {
+      "path": "checkpoints/cardiomamba_l9/runs/B_rva__L9_full__f0/best.pt",
+      "bytes": 49798928,
+      "sha256": "07a4d75d15418129b47ea0af84e8dab792663bb7c151ff080c7231702b26e90e"
+    },
+    {
+      "path": "checkpoints/cardiomamba_l9/runs/B_rva__L9_full__f1/best.pt",
+      "bytes": 49742800,
+      "sha256": "13316564f55c41e819d352a1ba3bc902aeb10470700d6207d15e5001674197b9"
+    },
+    {
+      "path": "checkpoints/cardiomamba_l9/runs/B_rva__L9_full__f2/best.pt",
+      "bytes": 49829264,
+      "sha256": "481dfe7dceb2287564cf73791f66e214e1f85db05a598b148345b2eaf852ce6b"
+    },
+    {
+      "path": "checkpoints/cardiomamba_l9/runs/B_rva__L9_full__f3/best.pt",
+      "bytes": 49669712,
+      "sha256": "5cbf77c99cc7731347b5591b17bc6dc519881a132062d0ec12cdeff431fe4c31"
+    },
+    {
+      "path": "checkpoints/cardiomamba_l9/runs/B_rva__L9_full__f4/best.pt",
+      "bytes": 49684944,
+      "sha256": "04578401ae35772f02f0f1327d83c01f78d2496842f76b044166eda0c280130f"
+    },
+    {
+      "path": "evaluation/figures/fig01_ours_vs_published.png",
+      "bytes": 47295,
+      "sha256": "0990d9028119d70fd7ce0b2c960454764fc2c8705fd01705256d870ae23cc940"
+    },
+    {
+      "path": "evaluation/figures/fig02_ablation.png",
+      "bytes": 84504,
+      "sha256": "ab0d741574a3a9639165617a5ca67c4f7e34f7b72b631be66c43f03470325222"
+    },
+    {
+      "path": "evaluation/figures/fig03_bland_altman_hr.png",
+      "bytes": 67161,
+      "sha256": "971cc0fe5ecee9362e29c6a9f8053ce27bce746cb74c62c0ec71c8f4f0211dd5"
+    },
+    {
+      "path": "evaluation/figures/fig04_bland_altman_rmssd.png",
+      "bytes": 68467,
+      "sha256": "72870d56251981c34eedc366b5137d3ad6156558e66d67cb91e9e8e873246768"
+    },
+    {
+      "path": "evaluation/figures/fig05_distribution.png",
+      "bytes": 55858,
+      "sha256": "c94965aed21010f12a7caf44a97b8add0449535476769a8494c292762f3ecd05"
+    },
+    {
+      "path": "evaluation/figures/fig06_per_subject.png",
+      "bytes": 75450,
+      "sha256": "e1fa163076735872566fd4e71bc593186b5f56d46b16b1a26ef03ef2d03c16b0"
+    },
+    {
+      "path": "evaluation/figures/fig07_qualitative.png",
+      "bytes": 279683,
+      "sha256": "11cac6b335660c73a18b55342c4eac5894529e6e1b5233813a7eda27e46dc55e"
+    },
+    {
+      "path": "evaluation/figures/fig08_budget.png",
+      "bytes": 74393,
+      "sha256": "f3400f1a3ee8318e1d7316d7cc7f6dcbfb1a980b6ec23f2731b9f848964b7984"
+    },
+    {
+      "path": "evaluation/figures/fig09_robustness.png",
+      "bytes": 57801,
+      "sha256": "1a44540d9b10a0f9984899767ec04940cd9be5126ff0bc66ffa09bc7b3ca90ab"
+    },
+    {
+      "path": "evaluation/input_audit.json",
+      "bytes": 770,
+      "sha256": "134f1691c4f036505ba5573db10cdb4837b21b92edf5320b69fc8e0b2b83a032"
+    },
+    {
+      "path": "evaluation/last_push.json",
+      "bytes": 202,
+      "sha256": "dcbaa95fef18e9a43e500a897d960ac984d14b26b1a8758e6e3c75fc2ce8c5ca"
+    },
+    {
+      "path": "evaluation/RESULTS.md",
+      "bytes": 31589,
+      "sha256": "a10800bbee61ee78492b3c2fd561e5c1554e17d7cffe5360516408068cd91edd"
+    },
+    {
+      "path": "evaluation/results_generation.json",
+      "bytes": 9821,
+      "sha256": "0bdfdedcfe1e727752c1e9133a062c175f3ae4711f5cf321a2d4a0b069b26243"
+    },
+    {
+      "path": "evaluation/tables/all_runs.csv",
+      "bytes": 77135,
+      "sha256": "ce76613c5a562560d022895688ad39a3f878553cb13855cb47cccf7eb063c600"
+    },
+    {
+      "path": "evaluation/tables/table2_per_scenario.csv",
+      "bytes": 1536,
+      "sha256": "bf6abdb7f0ec1a6d41256e645681178c0cae31274276b19f463aad6c926d1257"
+    },
+    {
+      "path": "evaluation/tables/table3_rva_combined.csv",
+      "bytes": 1183,
+      "sha256": "81b27b55a9487af13eef2cebfe28d827ef36fcadb5605db51cc954b955f6a652"
+    },
+    {
+      "path": "evaluation/tables/table3b_all_five.csv",
+      "bytes": 168,
+      "sha256": "acf7d69f9a6ef3bfeeba169c05801a426a6bb96a6b6b59d139f0561e2919ed82"
+    },
+    {
+      "path": "evaluation/tables/table3c_loso.csv",
+      "bytes": 169,
+      "sha256": "e0c41fb6e25e9a587b01aac032abb373a50e2deca7ed3677dc0dd1de9dbfff7d"
+    },
+    {
+      "path": "evaluation/tables/table3d_cross_scenario.csv",
+      "bytes": 537,
+      "sha256": "53e59a931ab11cb9dda56beba52ab4a91d10c3e8068c8f552c36381b177f3a7d"
+    },
+    {
+      "path": "evaluation/tables/table4_peak_detection.csv",
+      "bytes": 1157,
+      "sha256": "570a6f8617b1cd4db9b7cae4ecc2ad71d705bc52cbd5dba8410054908d710eaa"
+    },
+    {
+      "path": "evaluation/tables/table5_hrv.csv",
+      "bytes": 2034,
+      "sha256": "c12e38ae2a1b33e8efac00c1cd1721dabb4f6df1cee3248fc35b6c5b17577736"
+    },
+    {
+      "path": "evaluation/tables/table6_ablation.csv",
+      "bytes": 2271,
+      "sha256": "4997b23f1b74eb9662dd35b4e60877a940918ecea6ad47f7fb9a9e4dd7f283c1"
+    },
+    {
+      "path": "evaluation/tables/table7_significance.csv",
+      "bytes": 1116,
+      "sha256": "9cd85b515a112b0a81bf31a39373c17b9fcc9df0ac7ea4cfcc9d88db7dfc3351"
+    },
+    {
+      "path": "evaluation/tables/table8_budget.csv",
+      "bytes": 1260,
+      "sha256": "51d9148b0d7a602f04e4ff693333f0bb6e910384ed442f1944abaa5ab0504d9b"
+    },
+    {
+      "path": "evaluation/tables/table9_robustness.csv",
+      "bytes": 7937,
+      "sha256": "5891b7c5c8db6ac01167e2f0a3f1e328cdf649053886a48c6bb5639255fd6424"
+    },
+    {
+      "path": "provenance/baselines/results/model_budget.csv",
+      "bytes": 332,
+      "sha256": "087e96a805ed82a694e264fe397c8c915e257a603f1990d32990d7f41957b6f8"
+    },
+    {
+      "path": "provenance/baselines/results/reproduction_gate.json",
+      "bytes": 393,
+      "sha256": "c2fac680d4dca201adc668d66c653bbc4fd5ac70b0eb18c6c0d10fb4ebb955d1"
+    },
+    {
+      "path": "provenance/baselines/results/runs_raw.csv",
+      "bytes": 26632,
+      "sha256": "7991182aff1a3807697f0577b19f8ba427de46219ca5009471c3c26d49cc4fbb"
+    },
+    {
+      "path": "provenance/baselines/results/runs_summary.csv",
+      "bytes": 1179,
+      "sha256": "acc303608c4f1aa2e6d833aaca48d10f8d8714620aa9b0f5ce2880cd57bfe574"
+    },
+    {
+      "path": "provenance/baselines/results/vs_paper.csv",
+      "bytes": 1056,
+      "sha256": "1324fb32411d8ae4bcfbb40cd300bd1db932751f7be6d09ed20aec13987f73e1"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f0/environment.json",
+      "bytes": 307,
+      "sha256": "ae70395be0a5dd46caccbc4c3f1e43c1f7fa1e2888af712e85806fef96c631d9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f0/run_config.json",
+      "bytes": 1381,
+      "sha256": "3b408ca5a81300a7bedf37790e6ff90d943f4b0bb3fef1f736f4828f123125a8"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f0/summary.json",
+      "bytes": 1742,
+      "sha256": "369332b0422a227393f846f9a9da9ba3912f02bcd32b7c42fa188925cd85e37a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f1/environment.json",
+      "bytes": 307,
+      "sha256": "f4872f2843c24d3759f8a581becbfd831c84b45ac8858e3555a6b00c25578055"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f1/run_config.json",
+      "bytes": 1381,
+      "sha256": "89c4cc2e71f9ead85d68f837fade0d46cb942f922b0ddc875d206ef8f1f048d8"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f1/summary.json",
+      "bytes": 1740,
+      "sha256": "960946ce1512826728640073b899267c929b48df6f78cf734425c956af2a1988"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f2/environment.json",
+      "bytes": 307,
+      "sha256": "f88081afef74cdac4c871ead061f7d616d282be0bd4c662e6275a8f5856e18c0"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f2/run_config.json",
+      "bytes": 1381,
+      "sha256": "c7dabd6a35c2307d7b0cbffeced9c01b72c84f41a23cfee9303d1cbcd349d994"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f2/summary.json",
+      "bytes": 1743,
+      "sha256": "f8b24f91cc665efdfd10772383901c8c3b809c9914d6895176811ca90d99b6aa"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f3/environment.json",
+      "bytes": 307,
+      "sha256": "8e1bdaa249cbe232717608f2c7eae4ae871cd89f8ac9757673215ac46464cad0"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f3/run_config.json",
+      "bytes": 1381,
+      "sha256": "2fcaea09d12ed70fa7b649b00c92ebd4945e88cdac84c27b3be3ec272de02c46"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f3/summary.json",
+      "bytes": 1725,
+      "sha256": "313bb04ba4f7ba90e26dc625c815360455aed9a826219320e8803e23f7fa69a1"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f4/environment.json",
+      "bytes": 307,
+      "sha256": "d8c55b31a35943e90cabfbfa43e9dd441a2337c18e0001d4505c54fee9aa9b5d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f4/run_config.json",
+      "bytes": 1381,
+      "sha256": "131c0fa6fbf16064f7f8705e2ea94057c626f489f66c84da2c52a8830d973e11"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__fpn__f4/summary.json",
+      "bytes": 1737,
+      "sha256": "0b1256413bdb23c886432e82210c24cb4fd00d6a2137829550564791adfe4ed1"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "624d9b2930b0a6fa75409e208121e3499dd30248282fe2cc472aec3b1be375ab"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f0/run_config.json",
+      "bytes": 1385,
+      "sha256": "0962c11e2673dfaa68e2e307bfaff4af428f494b3c4216b59d96217b9a14155a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f0/summary.json",
+      "bytes": 1738,
+      "sha256": "7d64a7657a966a38ba38b4b5dc210d21bf177407e5527e9d12058d32e14c3234"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "9cc7a2e7cbe307da607bc62c5fc447307b50e53501eff6e714b4e72de1f0a4c5"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f1/run_config.json",
+      "bytes": 1385,
+      "sha256": "81f05604bc8426df8142476730365ba5e857f9da00d88b831854a63ce54112ad"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f1/summary.json",
+      "bytes": 1742,
+      "sha256": "31efcee8bce93ab65ad93c76854bc2926da8ae8d7737976b848872e93f09b7ac"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "8604f4b2c7618c2043925772e68d5b0f386f3669ef5ff3041192e63762622f15"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f2/run_config.json",
+      "bytes": 1385,
+      "sha256": "06ba3fa99e47e5824d39d87911097212ec2565ccb8fe95a1438cb64fe7b4db84"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f2/summary.json",
+      "bytes": 1754,
+      "sha256": "f6eb98683bc8e9b7965ec73c9ffdaa0726f04fb2b179c18617eba198fadbebe9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "1c3adcd8e5d80dd4bce8428f60efe6a2daddef871820549792264be25fc9763e"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f3/run_config.json",
+      "bytes": 1385,
+      "sha256": "cbabe86601f329c395371be73a2075f642f9a0d4ef727aa68688fdd1baf4e1b7"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f3/summary.json",
+      "bytes": 1731,
+      "sha256": "d8eddd817eaa2e0da7902553ef3a183d240e27326e2f41c75d5237e064fd48d7"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "b77a30134a90cc56b6f00fda72a057c85717fd7e3b91e1fcd5e6bbc9de20b5e4"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f4/run_config.json",
+      "bytes": 1385,
+      "sha256": "d7a5bc6dc1257f40bc62607a8e73fe8f2876f44d8e0abec0c9e6de053c8d0712"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__linknet__f4/summary.json",
+      "bytes": 1740,
+      "sha256": "f4aca9b60f6756fb4aa7036e82c85c039928264e548a14147e8f0e1fb7942689"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "39da7b2d12f9074ecc85e5aebaed3f728613bceff6d3afb3f9103a18ddde718f"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f0/run_config.json",
+      "bytes": 1393,
+      "sha256": "a1899069a7a0514e03e573a54aca2de3e9535c31deaea85b06d90abbdb547b98"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f0/summary.json",
+      "bytes": 1757,
+      "sha256": "2532601f29130a27ed0356370d4c4cb19d9431055af3745531e5648cff2dc9ed"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "3375cc0ee9dc370bb9651011cd8cff46048995d7294bd684f4b2e9d1c08dd3ce"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f1/run_config.json",
+      "bytes": 1393,
+      "sha256": "825c08cb847bcb6cb3bd09b4b0d0eb25457d537729b985ec3e69ccb67b391691"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f1/summary.json",
+      "bytes": 1762,
+      "sha256": "c58f994ec002c7de7e1f53ef14c285a074e45f566b9de091c478c9edf023ddfd"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "b87af57bf25aa296de4487ac36267df43aec9bb8a04a34fd4241bb7e245d45de"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f2/run_config.json",
+      "bytes": 1393,
+      "sha256": "f1c453eba59469e00a04f7a1e20bd92e99dd4ead9e8c273ab3f4be8d220049a3"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f2/summary.json",
+      "bytes": 1762,
+      "sha256": "d42a366900c0952d54fceb16414dd3551a7c5b3aa42c1f3bef9a4f549ab0c0c9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "3c293a5464ad427151948cb9701c62ce81b97b38c2909324a834efd7857ddab7"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f3/run_config.json",
+      "bytes": 1393,
+      "sha256": "6ce11ac3d0a4524844059ebe7abd2439fde986c10db2927a05a99aa2ce583792"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f3/summary.json",
+      "bytes": 1751,
+      "sha256": "33cccc5069dcc21a5f5ebc5c5fdae630139bf4ced47305e844ceab5bb659511f"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "6a778c5ff2baba0903e19317591af9caa23e214293200d86d2040b9b32a34b59"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f4/run_config.json",
+      "bytes": 1393,
+      "sha256": "753ce020778c525ff95cbbb8d7da2d251f1201cd3c13493081f0c3817a69a34e"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__multireslinknet__f4/summary.json",
+      "bytes": 1756,
+      "sha256": "45fb948f8466e12aaa40c6f95dcf2b322f6ad4994044794eef709315f6d84ffd"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "48a623e4b7b52b07e2f7e939fdf858c1b515949bd3d07e0d0fbe59e27c83acb2"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f0/run_config.json",
+      "bytes": 1382,
+      "sha256": "c41025af99a7215554dbe40d44423a76e4f283bba85cdb945554b66a670aa572"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f0/summary.json",
+      "bytes": 1721,
+      "sha256": "565ee2603612d225abdb9d8a4ee5700bf5b62f616b0ae08f043a905f497aa998"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "1d2c2060688af3a8ca17136a77ef07355ec875f21dede245bbed826e79dbcf2c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f1/run_config.json",
+      "bytes": 1382,
+      "sha256": "7a97958bad5572003b8c8f8780fd9895db1ba33839bf4c581d9f1089d50261f3"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f1/summary.json",
+      "bytes": 1738,
+      "sha256": "e11266c083b7336b570866bb129c99f2a37b6e3658e1c21227de730a88b4e278"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "c21eeff70bd2188e9cd21cfccbb3c16589170966c24375886aeda7c7e174544a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f2/run_config.json",
+      "bytes": 1382,
+      "sha256": "814841bf8806bed63a6dabc9747dac5e7df6c5a01062e014239629cbbf8c71fd"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f2/summary.json",
+      "bytes": 1750,
+      "sha256": "cb7373d50ea40252e1d81fa543e1f71b7e71553ef34e8e17e703343ca00b3935"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "9106801d7c2a4466d879bec06d5499342575aeb88d459e3955d787ce6fa8fc8d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f3/run_config.json",
+      "bytes": 1382,
+      "sha256": "2227e2630f44c1af5439d0308abf8ff8955b6789fae3aaf43afe7d663115732a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f3/summary.json",
+      "bytes": 1704,
+      "sha256": "d04277307a0db4af3fc5d563f7b63f04140fdf99e041ed1ba77e0ba09cbe89d4"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "50ec9c5e94f85bd590bdbb2b4f9cc2f9bd44818ba4adb46df3df6e0e2cc874d2"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f4/run_config.json",
+      "bytes": 1382,
+      "sha256": "914c4d1950edfc8bd5cc596451aa0177a2dced30ccf1b92d1982a3dd633ab170"
+    },
+    {
+      "path": "provenance/baselines/runs/A_apnea__unet__f4/summary.json",
+      "bytes": 1743,
+      "sha256": "b1b1d032c6ed0273a2b7fb3e5f88bc3ec0da8104bd743462d3fff02ed96ede88"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f0/environment.json",
+      "bytes": 307,
+      "sha256": "f59e549357370208f1f5728a2280923d431aae60fed25b593d77af6d2a5484e7"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f0/run_config.json",
+      "bytes": 1473,
+      "sha256": "4b92e052a8ddbecba8c58fa58b7095baba39ac64e05456bca31330d8f7575e5b"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f0/summary.json",
+      "bytes": 1692,
+      "sha256": "2e2f8a64702910502c0882feb866d97fc5ed6a16cd914b2d86c8fee4943164a6"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f1/environment.json",
+      "bytes": 307,
+      "sha256": "0d72e0e40a09db850ec35e745e4a4b7cbc3529aa5bebd071b28427f00371e939"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f1/run_config.json",
+      "bytes": 1473,
+      "sha256": "cb36372186199900915f0b15b5f6616032715828e7b24cdb18cb7461b189b148"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f1/summary.json",
+      "bytes": 1700,
+      "sha256": "b8418ed3d37f9f5eb8e297e84f3e6f5d3e35d18a5e53be1931a99ed96c0e85d2"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f2/environment.json",
+      "bytes": 307,
+      "sha256": "c45d07fb81a3e0a5447ba07e3409ad9479818fe1a06b8e21ce693f7d7e993f46"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f2/run_config.json",
+      "bytes": 1473,
+      "sha256": "24df7e674431fc5e93588153513858bf61f97ae947fb12eade403ec5757e2852"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f2/summary.json",
+      "bytes": 1712,
+      "sha256": "7a5ff10a517d8011f07c2023c0002d443250935be0ee186e19976547134a0a12"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f3/environment.json",
+      "bytes": 307,
+      "sha256": "c3009c0a2e9ba5b4522dfcbcbab89f534c2d6c47f25bc2a4e3677f7fb5ff0a1d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f3/run_config.json",
+      "bytes": 1473,
+      "sha256": "8c52ff20a2e5316425e9d6fc5099a22b173a25cadc5e2f4add28e58438a707eb"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f3/summary.json",
+      "bytes": 1712,
+      "sha256": "498334b83920bf5e4e22aa436035a87ec1bb9a4d3354c5348fb3946068792903"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f4/environment.json",
+      "bytes": 307,
+      "sha256": "e6de2d5c198396d05d102292aafab98371f81e663768795c6133479b8557b08c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f4/run_config.json",
+      "bytes": 1473,
+      "sha256": "d285f4724cc2021dddbe485392e53a558ad3b45b2a2ee62848520484b7c88566"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__fpn__f4/summary.json",
+      "bytes": 1695,
+      "sha256": "e3ebcebd72fcd30e0db40ad9fb3faa2a14f93f317b609c65bcf3d0c08fabca88"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "39e937a70ffa602aa7a1626f93a290f6de3c79158f1a1cf02cb94cf77c186fe2"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f0/run_config.json",
+      "bytes": 1477,
+      "sha256": "2fa175c9619ac94a436b5c3a75fe4355acbfbf5dcff53b026788e7c9ea9b3748"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f0/summary.json",
+      "bytes": 1765,
+      "sha256": "441e65921ed248acc8ee8c712034e637f55d608ff64830eb6b8301fedbf5d980"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "8663f6e708535865a12d6b411b77257c747b0187225674e49dca08d7753431aa"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f1/run_config.json",
+      "bytes": 1477,
+      "sha256": "7214337fe33133f495affa930a6ea3e4b7ee90a5a6b217b06d1d4cb1c809b36d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f1/summary.json",
+      "bytes": 1773,
+      "sha256": "756851f760e3df8f3eae99940d91a0425bac18e60291ea86adb907db322727a5"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "d95805d70da496fd09261895d4643f7a301496d52f6173d3475112b19e3ba88d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f2/run_config.json",
+      "bytes": 1477,
+      "sha256": "71685678dc49dce8fb8f9908f558a9942f8ecdcf552d6c43b9d04e224241d483"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f2/summary.json",
+      "bytes": 1781,
+      "sha256": "f013a9e74c02797036b22c8392691eb689fc2e95116eacbaeea5aafdd015901b"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "a1c5b4b8d434abbeec349d747eacbc49060b81842f07941795851000fe645568"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f3/run_config.json",
+      "bytes": 1477,
+      "sha256": "09f8fb8b5bf154093f1b92318385cee347de6a2ccb4af287b432e8987c6b5f92"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f3/summary.json",
+      "bytes": 1778,
+      "sha256": "e67b5196210bab37b18a2213e9bb6af4be25bc40b217afd1c8f67f4b06b15332"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "fd60825a141e2588d19a37d7e66420902c90ba0a6169830fceacca041f42e574"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f4/run_config.json",
+      "bytes": 1477,
+      "sha256": "a8890c13732eca3a57cf312ee033f6dcde7c11aa3f3c6c17baed58880d9b05ab"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__linknet__f4/summary.json",
+      "bytes": 1762,
+      "sha256": "b718bbed5f6cb57d6c1755eb2dd15835306027c8edf59f0b956982b4180e9528"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "18a30cbf26a8558dfad6dd686329068093cb0612b484d2b39ae67d6fb3bb2add"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f0/run_config.json",
+      "bytes": 1485,
+      "sha256": "0ed802cae875afbfc59df5b2b38c41ca3f7d266dcea0bc17846beab4b270779f"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f0/summary.json",
+      "bytes": 1793,
+      "sha256": "cadd8a80f230c51a6de3c532e7c9c9b45c03a9a38d32b6d81e9a4f7184f1ffa9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "01b5003164e58f75f25e5f15141a2293fba5cf81d183c8745d6b84e20df2bee2"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f1/run_config.json",
+      "bytes": 1485,
+      "sha256": "8ea51f03a9943d4b10ebf6a66b310a4b40f92b77a7999620c5e2e173d69bc6c8"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f1/summary.json",
+      "bytes": 1789,
+      "sha256": "7267a4fce99148a8a4e2b80376e15186a7c1d685c8ede25d4d480d755d2d0be6"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "7d9b1c6b0de4b9a02730b1c08e541f5abe2ba0506ead1247a2b9cd094bac84e5"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f2/run_config.json",
+      "bytes": 1485,
+      "sha256": "ec2c7cfe7ac5c3ce00e79873c2b58f4398a1be5d0f8f59deb662df79c02f080d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f2/summary.json",
+      "bytes": 1801,
+      "sha256": "1c919fd91eb513991d510f91c16f949051af427bd5929c028141019a5ecc4f78"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "d30eb7e9faac36f27983bea1a8848544e1dc950e3fd8c5babda24ba2ef6206a8"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f3/run_config.json",
+      "bytes": 1485,
+      "sha256": "b4caca6a06612df9adac4a7f425592a69e71cc740dc4bcb714487b1a4efc97ba"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f3/summary.json",
+      "bytes": 1791,
+      "sha256": "8be4c484d2a5428dbce3cc99d043739b488c47350704706cd4ec825f6f52ecb7"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "2ad4f01767ed4acc30c10d42eebde16b572a3342d6e24b78f6c52fee78bf080d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f4/run_config.json",
+      "bytes": 1485,
+      "sha256": "fe9dca3d6ef880c0148cae67f7effa4e0ad5900a7285e07f800f52145baa34f9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__multireslinknet__f4/summary.json",
+      "bytes": 1792,
+      "sha256": "49547adc7f45ad4a7eb5eb61df31173ac453640d3f092b461cb031fffb64cd20"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "5631e663cd2035e12452c2b6c56b36aa5a7abbcec47cb30fe2d11e46488917c2"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f0/run_config.json",
+      "bytes": 1474,
+      "sha256": "d888e1d1f778d8eaf9077128d28cf3a4b6a87f93b0afa88f4511a9b540afb935"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f0/summary.json",
+      "bytes": 1690,
+      "sha256": "47a23e8640e1a31fb2db3aa8e30aaf834248d7b48eeacc01dd9252cf2faf871c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "afbbcaadd2f58793dafaca696f1aca2c22f195c965687f6f4a473275a2c4472d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f1/run_config.json",
+      "bytes": 1474,
+      "sha256": "4df2bca96487b1d65506adc4540d178b0b14c71d2de431fbf7a928206ae26050"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f1/summary.json",
+      "bytes": 1679,
+      "sha256": "5f6161b0914163e236a7765611c711b953210c56f7579e6dc5e69bf89a0b0b2b"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "0fde6d5d9865f112430ac167d3f53462676e3e6a6a808d986b7b28c52c02abcf"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f2/run_config.json",
+      "bytes": 1474,
+      "sha256": "c5a30fcc2c053547f4de158525531e2fb35b5c262f247f3e59dc9db861faa9d3"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f2/summary.json",
+      "bytes": 1695,
+      "sha256": "1aa2be0e05627f717c29ad7156db8bf5ef8d820c851c1a78769b145eeb5a5e4c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "73113dabca9a5afadf85170f5c5ee8ce731a5630decebb9a650d76b4c7c61b37"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f3/run_config.json",
+      "bytes": 1474,
+      "sha256": "c24ccb0b0be006389b290bde7d206019610677c734ba772e5e376de6645cb7b9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f3/summary.json",
+      "bytes": 1702,
+      "sha256": "be023e05b77ee2ca10d68937705011de780341e2885632ac8676ba0e010e1b6a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "fac6d3ad9a3219788831cd99df70bb22d16595475f229a55876d95c540f4b574"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f4/run_config.json",
+      "bytes": 1474,
+      "sha256": "c74003755738a2c7e1e7bff0fd1f42632c414e4260ccccc019bbc94646057f9d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_resting__unet__f4/summary.json",
+      "bytes": 1706,
+      "sha256": "bca22f158ad2803fa02373e3dfdc52aab4070d169b0113a170eedb8544bfcdbb"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f0/environment.json",
+      "bytes": 307,
+      "sha256": "f80b8c3ba2f6c5bc8acc95cd58fbba5fb93c77a53d2028b766d1e81ec2c08c11"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f0/run_config.json",
+      "bytes": 1429,
+      "sha256": "e1109e4bfeecded7ad184e0c44a3f6948b3c10130273ad5c0519a84ff880ff58"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f0/summary.json",
+      "bytes": 1770,
+      "sha256": "4ac83c38d41d22d850a8c6a93054f416deb2e9efc22505c497ff7e21e4a3989a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f1/environment.json",
+      "bytes": 307,
+      "sha256": "81d0123510af5f2e68674145d9cf25932e3965439c2349507065a0b5a761d48a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f1/run_config.json",
+      "bytes": 1429,
+      "sha256": "9421423048b91b96c6561c43b12159586b57352c709d0ab3164fc818fbcefcc6"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f1/summary.json",
+      "bytes": 1742,
+      "sha256": "ae352d056b22d58419b93f300c75ebb48dd0b21afaef0e4753b7a43893026b25"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f2/environment.json",
+      "bytes": 307,
+      "sha256": "ceefa0af118aa34d923b9f9ec6324b22fdec3d79c21dfd1eb48e1126d857ac8c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f2/run_config.json",
+      "bytes": 1429,
+      "sha256": "219b3bfc1cee13c3e1fd6f9e3121661bbb9826602089ef6b13e9d177e05e29aa"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f2/summary.json",
+      "bytes": 1776,
+      "sha256": "3402bb3d6a8d6cf1c9f5e87444ba551c7eda964a0071c36e36192815f384c3ec"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f3/environment.json",
+      "bytes": 307,
+      "sha256": "b6846b185079e6c824b6d58f355afb1650a3ee6e67dece93770d25fbf1ec8122"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f3/run_config.json",
+      "bytes": 1429,
+      "sha256": "b8dd06fc7bd09ffb0182995eaeaf1cf0ba651f03307b18da11e592d171954ba3"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f3/summary.json",
+      "bytes": 1746,
+      "sha256": "d35ce2dde9f7b9b35526dbdc21ae0618ff5d9d38fa7e0d5b44127989b47cf4e9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f4/environment.json",
+      "bytes": 307,
+      "sha256": "1454349cb35bb3c3aa75e25b549ec0a06f75df785797cb1c716f9160b73dc47e"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f4/run_config.json",
+      "bytes": 1429,
+      "sha256": "0a61f5159f05d329251b976c5894dcd8969f1a411046c9602531bd5db5275ced"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__fpn__f4/summary.json",
+      "bytes": 1740,
+      "sha256": "724f02371cc275c66e1ae1c1d52377e68a62f9ded1170fddebaa62a9802789e7"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "4023cdf099886af77b4f313e6d94cc6099eded18611883e53de77135163d8630"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f0/run_config.json",
+      "bytes": 1433,
+      "sha256": "70c78379ab6a4d5097dec73f0b680e312f62509612ff9f8364fc11d87d17aed0"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f0/summary.json",
+      "bytes": 1775,
+      "sha256": "2abb1cae3aa9356138f1a86f59b72382ad0ce0b4d41dfdb6a4766c370b2cc27d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "277f4f03e4a4349dd5dc66a62f8a5a0d90af90fb0048be42d3e8c7872e01998c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f1/run_config.json",
+      "bytes": 1433,
+      "sha256": "1122c7224903d15175074ad66cedecb81199b5adb4d11f1805fa2029d5098141"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f1/summary.json",
+      "bytes": 1748,
+      "sha256": "7ef8ec753a438d349a6c08e39a40dcc946e85edf71b22b996385cb6343968182"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "755c62dca1329c2a24fc571e19b355a727132720e5fee5f62f395f7920e835fb"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f2/run_config.json",
+      "bytes": 1433,
+      "sha256": "b1a671e0939b6930ff1f62699a50ff35511f1af805679c05b4c4e75175746797"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f2/summary.json",
+      "bytes": 1782,
+      "sha256": "30b4e54334661ff01e4aef0fc0d733a197a2b161e7b3a161c9c5c44fae123e76"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "1947800e106be9e7f864b23dcac5a0087ffbe9726ab759dc1128b144fd7206e9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f3/run_config.json",
+      "bytes": 1433,
+      "sha256": "f05dd622d661e12777a85a602b6bbae130ed76c1c359a0c6d0c6636b9d91f30d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f3/summary.json",
+      "bytes": 1757,
+      "sha256": "b7e033b0daace41e3c6ccc7192dc076b04d34269529110bbd248bc3cca59a4c3"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "23a3ea824b3fa6119b2d725e696ed0101bd980ef1a008a455e5e8648326de0d5"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f4/run_config.json",
+      "bytes": 1433,
+      "sha256": "034525cc58e2956e3fa4a9cd7e29fc8693c478d1c763cefe9dfa22aa8b7a76dd"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__linknet__f4/summary.json",
+      "bytes": 1745,
+      "sha256": "359f4b7844f1609866ea74f1f586a81e27fce309b494c1f75cc3464064c977e4"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "37b3385f05ba1375a9e163e0df3531e3cf7d989f872eedab78b8dc83ad117cf5"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f0/run_config.json",
+      "bytes": 1441,
+      "sha256": "cb29d4b9f20eec5e047c425529af3e0b3caee438a154a710e1d85419ad0a7f04"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f0/summary.json",
+      "bytes": 1781,
+      "sha256": "96a94c269a5899f63a3cacf1331c7fc2e512ec7b57c03bd628f02b0f8349aedd"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "e6cbb476d1f3d4a41540e27703e5fa6de45a254f4d63dcedf1b032c2100eda68"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f1/run_config.json",
+      "bytes": 1441,
+      "sha256": "9d239a4d5e6d596a53670428f7c6b91859cfa065021842ff11b11e75d668c7cb"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f1/summary.json",
+      "bytes": 1764,
+      "sha256": "417220f58d62aa0659cb0344a26444fa4557384c0ef19f049dc2987942d81c1a"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "7723957c606fd2c7316cdf58079915379b39ed99819ea7d10b3875f2c79b8fda"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f2/run_config.json",
+      "bytes": 1441,
+      "sha256": "f8eb973280264c578a145b2bdfd730dbce42c4ff9f904aa914ed85df42413740"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f2/summary.json",
+      "bytes": 1796,
+      "sha256": "0916279be22a9ad24594192e2264f3e0cccd8a19eb96be6b58445f45b5450a8b"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "6eac3995e04a36eb116a871fb534af67c963b1fca6cf8b2624b6bc0fbc13ded5"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f3/run_config.json",
+      "bytes": 1441,
+      "sha256": "514bc3f72df1416861239ce159bed17770925c275cc2fad4ba9285225e87f4fa"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f3/summary.json",
+      "bytes": 1773,
+      "sha256": "eea43d832e9c48df93b9b71daa47be4bc334f4fc136b6cc763deeda563a06e8e"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "b4e22fb45e43be810b53cb86228612e810d2859c92333e9cf98afd3b2f270e5f"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f4/run_config.json",
+      "bytes": 1441,
+      "sha256": "a8ddb1414f17b28e01f0c1e44f7ea2b01289887538ceb2693fe996aaa4897410"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__multireslinknet__f4/summary.json",
+      "bytes": 1771,
+      "sha256": "2eb7851a3060a77793d6b281bede8846415403413d4959211cbd1e72aa41b72c"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "8d853e3e7c990fd9ed11ef6f988066fc42b958cf4277af188ec757b929236c38"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f0/run_config.json",
+      "bytes": 1430,
+      "sha256": "bd57d2b104ea09a68264e6c7d18490103f49133fcddc6c2c184d072dd6e59712"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f0/summary.json",
+      "bytes": 1773,
+      "sha256": "80f5e21ad9bb50a8e657b8dd0dfabe16993671f98331482d9d7e1a3ea8c44a4e"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "1f02e33f0a6daf213ac9a35607f29ec5a5e5c8039561cf68562ae87122efaa0d"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f1/run_config.json",
+      "bytes": 1430,
+      "sha256": "c7771bbcfc290ae960ec80e6133eca853ce1028d06aede9719391d650a8f21d9"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f1/summary.json",
+      "bytes": 1741,
+      "sha256": "cf1d0a3ecc1ff6487708d64372ea3b4f68db4b1797cfb15b63a995ffea0c2b57"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "c548cc7a7b13c80e5134e16be5b6bec1dc35e26caaaaff0a671624fa7668da08"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f2/run_config.json",
+      "bytes": 1430,
+      "sha256": "4c18cf324b17503a5c4afbd8a2c84bce9236ce2f50be4b8af8f2230321ad65f6"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f2/summary.json",
+      "bytes": 1778,
+      "sha256": "7c5dee59190bddfb2a65c77e99cea5d557bf368fddd5b0af128289d721ddbc42"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "5862cfc3f9a52306e40e98e3c5fa45034fd331aab37a3f374a50997caf44ff60"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f3/run_config.json",
+      "bytes": 1430,
+      "sha256": "3e6894edd9983d95c25f2c59993dd8a323a26c0b87543d8dcbf7eba6ea9ebc25"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f3/summary.json",
+      "bytes": 1751,
+      "sha256": "93c7b31353d9b07a13b8939f15b9637a69026099017f67b342c6bbccaa7f22ae"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "016dd077276da8c09d4004bed1307c208f898e0924cbff24340621b59d35c1ea"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f4/run_config.json",
+      "bytes": 1430,
+      "sha256": "505eed7e5a6a7df5c0d539d18f61175779f32f5fb53307e759893044237e9164"
+    },
+    {
+      "path": "provenance/baselines/runs/A_valsalva__unet__f4/summary.json",
+      "bytes": 1742,
+      "sha256": "374ec74c11a0a9409bb2abcd1408eafd10c5d5cdfa5a535dd1e98eb271f2a53e"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f0/environment.json",
+      "bytes": 307,
+      "sha256": "a116e7e8ebbcb66b23beef9eb2ea34ff5621cfdcfbbcd589be4a05b565d2ea15"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f0/run_config.json",
+      "bytes": 1469,
+      "sha256": "4274ae98f9211d7fdaed6101f2f3fa38a80adb178c99b567b045ceb36c71eba2"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f0/summary.json",
+      "bytes": 1597,
+      "sha256": "3dd1b5fb8160d94cd9630de1aeac2cb4ad17f5e5c2834ff259f8e5aff04a52d9"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f1/environment.json",
+      "bytes": 307,
+      "sha256": "d6072b2453b647917ccf600fe54db7e7992cf116f2b8c6452dd1adb27c213ccb"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f1/run_config.json",
+      "bytes": 1469,
+      "sha256": "235da24f6874aa2374532bbe40851b2222ba9ad20c65b65561d4ac5380217d93"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f1/summary.json",
+      "bytes": 1591,
+      "sha256": "3169e23e1747af7bd566b52e86d9c5b4a33c705ce2447c912944efcffcf96eaa"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f2/environment.json",
+      "bytes": 307,
+      "sha256": "f291c93f788f36995bed5066a124fac5d22769002b92307e1889c45c6aad9576"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f2/run_config.json",
+      "bytes": 1469,
+      "sha256": "228f3a6dc5dfdb9c76d0f78153678a9da8096f28f7e49d601b24267214d81a7c"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f2/summary.json",
+      "bytes": 1604,
+      "sha256": "7bc6b80168217be00af76d779faab1274ae919b7fa52cc5051356b680e158053"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f3/environment.json",
+      "bytes": 307,
+      "sha256": "542d7e7846e0ff886cade7d8e83cf46b793b0c33377e7ad5e534dd042bd1dc89"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f3/run_config.json",
+      "bytes": 1469,
+      "sha256": "4840407b3429995e3cd4549d2fe060a0562a714e096b92704dcbd909fb6c7b19"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f3/summary.json",
+      "bytes": 1605,
+      "sha256": "46ce656fa573a0ea6cf6ca3924506546e5e8a96cba6fb03743b950301cd9bab8"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f4/environment.json",
+      "bytes": 307,
+      "sha256": "25b414e032776a2a57f6ce457dd9c1cf6536fd6e554832020621234d8698e619"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f4/run_config.json",
+      "bytes": 1469,
+      "sha256": "4fda17c1e4cbde189fbcefd2ca5237015cb85cdcd9e84a89a61f409cea83cc32"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__fpn__f4/summary.json",
+      "bytes": 1589,
+      "sha256": "aeebe8d4c231085c63349bb5d7e40fefb5b0237496f8592fda384bd950e00bdb"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "55e4c8ab946c48fdcb9139a38e26922f47195a4bcfd61396d5fd11fc196b4c79"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f0/run_config.json",
+      "bytes": 1473,
+      "sha256": "f666d4da08e3ce72541d6aa71b4dc46910ef5f9c4e396dc67d1ece6fb27b865b"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f0/summary.json",
+      "bytes": 1701,
+      "sha256": "07182bbf37eb04eb86ddae69b796358504f1f13e20380e93e5d5a98f1bc671a7"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "91f302efb3d7c2fb8aa651d7708b9f3817e0cf124f3fa041f497ebbe50ea6ca3"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f1/run_config.json",
+      "bytes": 1473,
+      "sha256": "25bdb73e5b6c7e34c22ae0ddeabd9b051c6d33a76e479be3be1c4ba374e3470d"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f1/summary.json",
+      "bytes": 1701,
+      "sha256": "a0607e021282ec80226c537341552cb3a2f189e70092fe80191cb7bf010cf6b2"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "7fbbf8765e6b6a7a38bdd6e329aab9d7263dd073a0dacf7bdfdb7fb3367642e6"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f2/run_config.json",
+      "bytes": 1473,
+      "sha256": "591aa9d46b563f33399bba6cb6b14e8be0f08ad7802973751eb80f8d87a23492"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f2/summary.json",
+      "bytes": 1716,
+      "sha256": "54a3c42c01db4c4672ee04682f56abdb05903c76d5286b3f0c0918b34c2ed318"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "5636a3074fc0df133d3c6640abfcf016314b3a4015abe89aceba1ea6a61083eb"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f3/run_config.json",
+      "bytes": 1473,
+      "sha256": "b56491d517ee25ec999f61c16c49852f28f0c99f7704e393d2ea432a2ef9e34e"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f3/summary.json",
+      "bytes": 1712,
+      "sha256": "60a6db4c3a051e7f38a0f477bfb08fe4d50cde59f758185723c24636f4e029a7"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "3ab271eff466f686a54464ab2c401134dcb5c205704b8f0c1e6decf2d2b94499"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f4/run_config.json",
+      "bytes": 1473,
+      "sha256": "fdc8b4a06391d763d3503f851310a26ee205405023b48b2b146035fd62a535ca"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__linknet__f4/summary.json",
+      "bytes": 1696,
+      "sha256": "ba450486dff6f1c8dd7f0883aad4262e93312c82e8a147c163cae6ba4f845aa2"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "d7070f41ac7b980c6ee4173fd4b61b1590ef9ae546093d111d47b66c62866202"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f0/run_config.json",
+      "bytes": 1481,
+      "sha256": "e3def50919443954a781c0ee5af12c2f8fbbdf5152b2110f0a7d562b2453127e"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f0/summary.json",
+      "bytes": 1719,
+      "sha256": "74c313f313cc37a569c5d65a19aecfd5ec3dfbf18b04554e2c641ed4b62ca865"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "78edb0400b09709e49a923da3c53e2242ba02f837e455bd9994b85b5b9249d63"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f1/run_config.json",
+      "bytes": 1481,
+      "sha256": "1e64fb0cdd69a1317d54d9b8d87e2546f853c258b1707879ba89c4e8e919b0a4"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f1/summary.json",
+      "bytes": 1719,
+      "sha256": "7a7e55bf5c183bbfb88c4d1bbb091aa7ee5d376f357bbfc07b1a1a0df9dbcb6b"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "3793276adcec8599456b28d93f973408635519e6840e30372b28e97ad03b86f6"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f2/run_config.json",
+      "bytes": 1481,
+      "sha256": "f0d485b38e4c8f149765b65ffd11b187dd8eaa282b07035af8ba8ca1dcc0d736"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f2/summary.json",
+      "bytes": 1733,
+      "sha256": "7b27c3b2521c17d56d976a255b71b2388b7479b07f9f96e61c2481f02ebcbdca"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "d1c51df4d8314dd2febfe3024275e7f252d4ad4c282cd67d5506210fd8573589"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f3/run_config.json",
+      "bytes": 1481,
+      "sha256": "3cf4db034b5ca1200ff19977a4a3232db49e9c1eff06773949e485312dc9566b"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f3/summary.json",
+      "bytes": 1712,
+      "sha256": "e5dce606c2ec6fbfb7b7cd32f37552ff089c1233b393bf82ecdec29b73e26675"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "b5a72b9cca8d6a1eabbc113b5cd7a85f73f63eda395b32c1fa829ff1b599c6ed"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f4/run_config.json",
+      "bytes": 1481,
+      "sha256": "708c517d59391af185a46ce6d5c2be260af29ffe6e6f809fea91901ceee4e3fc"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__multireslinknet__f4/summary.json",
+      "bytes": 1709,
+      "sha256": "7dba7e94f475470ca4044838be2c49c0764d98f203b26066bec6ff354599b709"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "a4518fd2f13dac0ef4a8ff8e8418cf066db753eca2b80615fed288e0d6ea4ed8"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f0/run_config.json",
+      "bytes": 1470,
+      "sha256": "2f827a489cab4cc27775ae77dea19203b4c0cb80122c78a7d1eace128da59d52"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f0/summary.json",
+      "bytes": 1597,
+      "sha256": "5d0628fca2bf47b61a4c80467637585ff8a761665b5bd2281cc232f5a4ebd478"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f1/environment.json",
+      "bytes": 307,
+      "sha256": "c3af7f4049a01ea93f185da9f4b354858caf075875fda5c8b199b8b82d4f4368"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f1/run_config.json",
+      "bytes": 1470,
+      "sha256": "d4d30f1ec850f96dbe7908d2f7be70395b168b8b02f559dc17120270e91bd650"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f1/summary.json",
+      "bytes": 1594,
+      "sha256": "47a87c60d6c3212cff492954905ab9510c58d9c6fd467b32f3b518a69d277ce6"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "220dce83cf365f48d540c8dd9d9ef80077b09a671a6e0cf128a50742be9b2109"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f2/run_config.json",
+      "bytes": 1470,
+      "sha256": "d557234850cea5504aa25abfbc3a74c349e2f44274a6e3a55d3dd1134b67d763"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f2/summary.json",
+      "bytes": 1682,
+      "sha256": "17ce31ae12fb848a3cc10f5863f1f0afae4ee848b33a993ad9114de897dafff2"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "470738c54250712ec093f017d661193a62fb525db5aec5ce17b5b9c3193f0864"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f3/run_config.json",
+      "bytes": 1470,
+      "sha256": "1f6fdd547c010d786469c2f81296a5a3c2979f11fea25e8a4aa996d362e2d34b"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f3/summary.json",
+      "bytes": 1699,
+      "sha256": "dbfd561bebde0bbfc05a1f0a93c607148a2d3618cd7cdba6158fb1fd8c316e9e"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "adedc7313ad4714b04d0aabdaf71b0a1b28a419190b38f9148121d00be796509"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f4/run_config.json",
+      "bytes": 1470,
+      "sha256": "cad28af44a5235fe3ed6cb0c69033cb2d1257eb6377d3c0da4ec7eb55c11f897"
+    },
+    {
+      "path": "provenance/baselines/runs/B_rva__unet__f4/summary.json",
+      "bytes": 1693,
+      "sha256": "c8b4263663883e2f32a5a88413e2c4d50251ecbbb9f9db47acb70635a12a3d95"
+    },
+    {
+      "path": "provenance/cardiomamba/results/ablation.csv",
+      "bytes": 572,
+      "sha256": "17841f12c31a0b5831d2a42c03770eae5e83d6835d2595264ba1b2845b2ff991"
+    },
+    {
+      "path": "provenance/cardiomamba/results/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/runs_raw.csv",
+      "bytes": 2081,
+      "sha256": "e08f6e4b5233ed13e7d8c0a74ef6bcc90e144f5804485c9aea193e39034f8f02"
+    },
+    {
+      "path": "provenance/cardiomamba/results/variant_budget.csv",
+      "bytes": 740,
+      "sha256": "ca815b4960bd8596c0274d11581da5f964700aa6c0fcc9353d6d4596d815837e"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_1/ablation.csv",
+      "bytes": 2300,
+      "sha256": "495fd3de9a0c06ff53963ed5781148972d770b6ee48d7f91b517b3c8fc428516"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_1/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_1/runs_raw.csv",
+      "bytes": 14612,
+      "sha256": "9d563d991637696c6c9ac0fe3b6d99564cb1db8176fe7efdf086b73877813cc5"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_1/variant_budget.csv",
+      "bytes": 739,
+      "sha256": "6c9f1ed3d480d06d5c9e41b7942e02a47716e8e74b6107086468c55a7f8e5ab6"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_2/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_2/variant_budget.csv",
+      "bytes": 738,
+      "sha256": "6b63339f62e7d5ec0bea1f42a02db1b41379736d3fc6c6c691504bddaf916dcc"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_4/ablation.csv",
+      "bytes": 2296,
+      "sha256": "32ed48abab8d8e80d3e969b1f585e0bedf8c896b676752f5f24ecb30ba9adc83"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_4/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_4/runs_raw.csv",
+      "bytes": 26166,
+      "sha256": "2faee333daa8440a7d6f78872f199c8ee3997dfdce8487f4505dffd2673e1802"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_0_of_4/variant_budget.csv",
+      "bytes": 739,
+      "sha256": "62454854bdc07b4696b631cccd4b5468d58b1b2f5345d82dddcbab0465013dfa"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_1_of_4/ablation.csv",
+      "bytes": 2301,
+      "sha256": "a2e296b3a6cfaa4542e310f7c5e71842eb2e1b9ff6a767aa7a54036979590229"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_1_of_4/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_1_of_4/runs_raw.csv",
+      "bytes": 27360,
+      "sha256": "617e8089dbe3fd1adb32c5a6b929452eccd63ebb74c4646d59eaee4155d125cb"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_1_of_4/variant_budget.csv",
+      "bytes": 738,
+      "sha256": "5749037d95ec705b1cdd2263a5d2cc97c89de75f912ecc58155ee28a6b67143e"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_2_of_4/ablation.csv",
+      "bytes": 1408,
+      "sha256": "25b96ba36d398834943cdbcf5941c8d5902155b07a2af1e9272d009fc1dfd191"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_2_of_4/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_2_of_4/runs_raw.csv",
+      "bytes": 4799,
+      "sha256": "104ba37ed75ab72450033aec6f6cad988d2532450f9e06b6e9f9e3ee1c310899"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_2_of_4/variant_budget.csv",
+      "bytes": 739,
+      "sha256": "f36513ca4acea73117021baba8dd4310c5e6c7dbf06f7110d09358a7f2754287"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_3_of_4/ablation.csv",
+      "bytes": 2300,
+      "sha256": "495fd3de9a0c06ff53963ed5781148972d770b6ee48d7f91b517b3c8fc428516"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_3_of_4/loss_probe.csv",
+      "bytes": 413,
+      "sha256": "075e134ffb8f1b1e5f2483d123ddcfd63ebc362add8eaec7e1185ec6a0b05b55"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_3_of_4/runs_raw.csv",
+      "bytes": 13372,
+      "sha256": "bb3923b455bd0039529551dd0539a41a7d535ef949948664800e7467cdcad66a"
+    },
+    {
+      "path": "provenance/cardiomamba/results/workers/worker_3_of_4/variant_budget.csv",
+      "bytes": 739,
+      "sha256": "4584eeb61efc54c39f13928ff379bb5124a42643d329a1e305d34b28cbbf6203"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f0/environment.json",
+      "bytes": 307,
+      "sha256": "09975e4356d5e5f8d187fa486693b3a8a450651261e78ea769c571ebcf959bf3"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f0/run_config.json",
+      "bytes": 1816,
+      "sha256": "bc614a75c5f2738348898a548ee1cb37e2a0023eace14c0440982fdd2a4ec7a4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f0/summary.json",
+      "bytes": 1901,
+      "sha256": "f4305b806a5a6ce71ce98448bd730e3ed05e079cd5139d9b3328fdff713aaf3d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f1/environment.json",
+      "bytes": 307,
+      "sha256": "acb74dd3c0780fa431f142cabd352af7681871b6526ed01b41e2b6ce54d95620"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f1/run_config.json",
+      "bytes": 1816,
+      "sha256": "f68ab4a51cdb452759f298acf31ce4a3dfc3b7129e413b324bb37860a4597884"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f1/summary.json",
+      "bytes": 1905,
+      "sha256": "c9917985727b49282855f2cacb0fc1258329a86e046f47206b3cbe3bd0a5462b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f2/environment.json",
+      "bytes": 307,
+      "sha256": "6d4d6659b00d24e806979f6fac9717a79760ee344e832c948a1830deb19f0166"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f2/run_config.json",
+      "bytes": 1816,
+      "sha256": "8600f946367b98c825da28c1c4a6457ca0e933361d42d7112375995e4a4b52f7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f2/summary.json",
+      "bytes": 1904,
+      "sha256": "f5145fd75ea4f63b43add0431328c43d116edee417819b263324ccf34e8aeac3"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f3/environment.json",
+      "bytes": 307,
+      "sha256": "801ad0cc1c898f4b6273a49892748cc8e61bb7d3d1eb41f0fbacb0217828564b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f3/run_config.json",
+      "bytes": 1816,
+      "sha256": "267f7d32d420235ba0cf229022e01885550a5caa5b62f9988fca1eb3526eb8f5"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f3/summary.json",
+      "bytes": 1891,
+      "sha256": "28742b64e05023b73ff28f613b6dab5ea66ff8fff13044bbc9a09da5db879e6e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f4/environment.json",
+      "bytes": 307,
+      "sha256": "e9b23f130e7d70c852c42e7296158dd097c264a21b4bd4ebccd9351eb3089ff0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f4/run_config.json",
+      "bytes": 1816,
+      "sha256": "29a2cbdff0cb9378685262d8176774416bc62ef568c0526bea63e914667b1c54"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_apnea__L9_full__f4/summary.json",
+      "bytes": 1901,
+      "sha256": "247fd508a45f03b4314bb049fc85abb90974dfc12a2e255064ac44da8983b93f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f0/environment.json",
+      "bytes": 307,
+      "sha256": "e6fcbeccc6b23de1b4fa024affb496852a74e6b90320cc667a65114f59c7afe6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f0/run_config.json",
+      "bytes": 1908,
+      "sha256": "93bf6bb676ed3a364fe58650aa62d049d76a68e7cff7ee6aebffb8d2b5b4b93c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f0/summary.json",
+      "bytes": 1930,
+      "sha256": "d2b3ece9d9e9ac3302a7a898d7c181fb8a2d93165b59889edd993e6ed7a2ee73"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f1/environment.json",
+      "bytes": 307,
+      "sha256": "82ebc64a6fa56ce3feca37bcd744868bed7a68a79b72d0b49d9719579672250d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f1/run_config.json",
+      "bytes": 1908,
+      "sha256": "bf9c5ba7ea8e376a36e27b3daa2b9a586c63708802bb1db84d43ad793431356e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f1/summary.json",
+      "bytes": 1934,
+      "sha256": "95271774ca0e367078a368dca86a89d2ed8f73c630e82c8900cdebd5c59b0c5d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f2/environment.json",
+      "bytes": 307,
+      "sha256": "cb06cb6e278119f6201bf026460d936aaaa9d7eb10f5ff1b491ed9517bd8cd70"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f2/run_config.json",
+      "bytes": 1908,
+      "sha256": "49c74bf0f57247bc2fe1ee170eb953e60e9d058184fd84806660c10cdfc8ac6f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f2/summary.json",
+      "bytes": 1939,
+      "sha256": "c4af0de05ad00f4c9c42829d427e12c5d67bae073c06baaba1ae993177d6fbf1"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f3/environment.json",
+      "bytes": 307,
+      "sha256": "55627158f2a6876a1ddfbdf6fd506190608ba520d2cdf075d43354ce13ce68c3"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f3/run_config.json",
+      "bytes": 1908,
+      "sha256": "a742edb376472e8de721cda1467a1c77d3b2412e1ca7aecf0a7abf959a3a269b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f3/summary.json",
+      "bytes": 1935,
+      "sha256": "23cb94816008fbb21318f0f437f10728f3802e1e9da4d42a7631787069828eca"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f4/environment.json",
+      "bytes": 307,
+      "sha256": "4dc263ac9bad65e231713a8d6f68134381cbf8610a3233bce639f0f3181bce70"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f4/run_config.json",
+      "bytes": 1908,
+      "sha256": "262c90133cc6bc7c2d4f4bf9b22103d7bc0aca17bb82f56b8fcc71dcb36d0640"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_resting__L9_full__f4/summary.json",
+      "bytes": 1917,
+      "sha256": "0ac3288e38daf44b07ce93f2b2712ea32e4514fcf387ed9a5cb518fc775248e6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f0/environment.json",
+      "bytes": 307,
+      "sha256": "d450cb87974fa25ec54cfbf685d909c0a0cf91345dac6d5f324757e5a29d79ae"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f0/run_config.json",
+      "bytes": 1864,
+      "sha256": "b2500390e562b3244415ce8db2354ea63c7068508518c12790f41673a70772b1"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f0/summary.json",
+      "bytes": 1922,
+      "sha256": "0121594dea0d14580f33f4fb01d0f679f83da3d859b3151897c4139c38d1d92d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f1/environment.json",
+      "bytes": 307,
+      "sha256": "fbee86e46cabb03b0dcb27cfba7e5379bc6446c4ae1fc627ec4dd364e5ca5f9b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f1/run_config.json",
+      "bytes": 1864,
+      "sha256": "1dab41e91984d9aa568579de5505556816e09a11959ec0a090d6c1d0e1cfc5b7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f1/summary.json",
+      "bytes": 1910,
+      "sha256": "8934714ace8a8a22b770901783f6d40086afe48b07f003752d84d1c1aedc4d2a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f2/environment.json",
+      "bytes": 307,
+      "sha256": "0f3b36b8d1acbed5c3f2390ed9ac79d0d16da3f4745eb9c60648a5e8248595e6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f2/run_config.json",
+      "bytes": 1864,
+      "sha256": "79e3b52bf41d29ad65dffbdc98d824679a8796c694a14f0a6eae8e5908807f6e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f2/summary.json",
+      "bytes": 2506,
+      "sha256": "2a788925648e5a5b9c8b0a2d68cfc87b50265949715a17a127a1d7b7ee2d59ed"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f3/environment.json",
+      "bytes": 307,
+      "sha256": "04f8e9feb795b760e49813ce812302748703c8d6660e29750466d164bcd7a412"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f3/run_config.json",
+      "bytes": 1864,
+      "sha256": "d6156f5557e68d23c183397b0e35b4775023517b866ff6183aef3cedc5b79984"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f3/summary.json",
+      "bytes": 1908,
+      "sha256": "aec9d33a1d9e10d5f8a853435285468f1522eae1f87b4b3a6ab523c6adb5f157"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f4/environment.json",
+      "bytes": 307,
+      "sha256": "20e234aadee8df1bfe293e82964c56df74dae56ee28a127d96f71b7a3e05e4f0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f4/run_config.json",
+      "bytes": 1864,
+      "sha256": "7f6142dfeb0ab86dd7520a8c055190188fb9653010509c9245915d3664a77073"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/A_valsalva__L9_full__f4/summary.json",
+      "bytes": 1908,
+      "sha256": "87df4ad7b0202d3b902acf49dd373ded43932de98404cd12f64b077dc24eee84"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f0/environment.json",
+      "bytes": 307,
+      "sha256": "b8ba8ac2eb38f24171d219f009f5a771f0bddfed802da518b92e168d9bf076a2"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f0/run_config.json",
+      "bytes": 1945,
+      "sha256": "013fb8e49dd9e4e007ffae1d8b84e544f1dcbc4cd5e6a3088b95d9d56ae1ec04"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f0/summary.json",
+      "bytes": 2544,
+      "sha256": "b473d3e781e93d77c4666acbfea09a9babc7ad2429552ae4977fcbcfb53395c7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f1/environment.json",
+      "bytes": 442,
+      "sha256": "1489506d141ee1d1ff3da78b9c3b2af49f35c8e5913635a0e9f4f20583d0a263"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f1/run_config.json",
+      "bytes": 2085,
+      "sha256": "0515f6e9e8c052bf72e4b9e2eadb48a03b20e353b4414f46a01d71aea9a92941"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f1/summary.json",
+      "bytes": 2536,
+      "sha256": "bcde2ffe9937745be58540d17fbd90dc7c55ea76176f789a5002b956eb2b834a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f2/environment.json",
+      "bytes": 307,
+      "sha256": "48aaf290daf50d95d31f6ce7f41e64d9c74e18c9626917ea0783ee590228e257"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f2/run_config.json",
+      "bytes": 1945,
+      "sha256": "71748a406878da7afd5f1aeb834d95b05d84a82b9a72c075df6556030dfcf744"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f2/summary.json",
+      "bytes": 2936,
+      "sha256": "9e96b9e3ccd1f98defc6574a2aebde8fa1f979841ffc7bb1d2e66e3f30b1ee8c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f3/environment.json",
+      "bytes": 307,
+      "sha256": "cdf36d50936b29b68706cefd8f78eb567a6f41a71c98ad7e69a615eaf5bbc3a0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f3/run_config.json",
+      "bytes": 1945,
+      "sha256": "b4d347821811ea7ed553767acfbc73ac959a6e9aa5d76a2901383b99c009b24f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f3/summary.json",
+      "bytes": 1966,
+      "sha256": "0fd07d96364d64a253a12c31f26fed3c67d8c9ace1462231b6dd7d3d9ec7794f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f4/environment.json",
+      "bytes": 307,
+      "sha256": "fa6858419b44353202f4101d79058435c5ba61cc067a2932ad596d87768651da"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f4/run_config.json",
+      "bytes": 1945,
+      "sha256": "ac85fcce8aff029e1331210409b5f23ba09e75a47ddb5b1aea32880c5c48943e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L10_transformer__f4/summary.json",
+      "bytes": 2559,
+      "sha256": "f969ec2bc88648bf68af7a9b210f549764459de20c82806ae553da92bb111a00"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f0/environment.json",
+      "bytes": 307,
+      "sha256": "46546f432196a1d15740934bf1faaca7560e441f6dc0776dadfe662981617e5d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f0/run_config.json",
+      "bytes": 1853,
+      "sha256": "775b517fa9c69dc3230edb9ce6cc7190f2b468c1079dfc22a52ad84cd04718c8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f0/summary.json",
+      "bytes": 1882,
+      "sha256": "349537e065073ebb54918b41560d17745434d7a8c48a35ccaa4a335de449d4c8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f1/environment.json",
+      "bytes": 307,
+      "sha256": "21855b6798e54ad1b3e167a535136f1ecc22e8021e044718d2838aaa720eb338"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f1/run_config.json",
+      "bytes": 1853,
+      "sha256": "e3107071bb49ab05fbaf73f92c0dc75552de1998b38c2dc2fc384afee4ea4a00"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f1/summary.json",
+      "bytes": 1872,
+      "sha256": "28f1a8c7f82e5f343ca29fc825937ce1b0d595153d99e1e10ff5e7d1348ec644"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f2/environment.json",
+      "bytes": 307,
+      "sha256": "d6c2466e2bd85d365f1b4cbf6b2c6badede361b834095c579f9ed8cd0a185a8e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f2/run_config.json",
+      "bytes": 1853,
+      "sha256": "88431a474206988c6299771337da3fe24c0c1c3c90105e6caaab9fa5895a325d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f2/summary.json",
+      "bytes": 1886,
+      "sha256": "2b78ac792071bce34173792a27089525d5401014580e49d98272dd5b6aaa720d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f3/environment.json",
+      "bytes": 307,
+      "sha256": "7b9f6f9e381f5533436ebc94daa617235d3ceb3d37febcc32429f8670f37f849"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f3/run_config.json",
+      "bytes": 1853,
+      "sha256": "3f55abc7c4be85cbc3152ecb9d1d7130cda6aac09bf54e3bc7115c77363d2477"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f3/summary.json",
+      "bytes": 1885,
+      "sha256": "5351274805bfbc7ee5f6a1c27280d79110fe39423608e48a3382e079e2df0161"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f4/environment.json",
+      "bytes": 307,
+      "sha256": "60bf460bea739fd64da8a40d8fe5d6f2891e3b9e3db3100f269c74b505d90000"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f4/run_config.json",
+      "bytes": 1853,
+      "sha256": "1ef5ae7a90752e5f13dade0b9233ab6c55c1425ad7568143f56c8b668791bd25"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L2_loss_only__f4/summary.json",
+      "bytes": 1871,
+      "sha256": "4b6ffc5882a66f40d5d415a2b4723d2fff41ee8e6416a54677332430af4c7bf1"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f0/environment.json",
+      "bytes": 307,
+      "sha256": "3de165cd20e24f5cba07483ccf27afbfbe0600c313ec1a00945a501d8b940f01"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f0/run_config.json",
+      "bytes": 1936,
+      "sha256": "dd0800bddf7a818889b0e2f4b05d664da310881c92b7818c28559453d7a28266"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f0/summary.json",
+      "bytes": 1960,
+      "sha256": "6084e47637b326e79d181122afe0c6f3adfad0df172d81e7f5427ac3a10e68f7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f1/environment.json",
+      "bytes": 307,
+      "sha256": "c6d3972842b5ab278866bcc47761b58485c44fb1ba2b47128143b55ea580d482"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f1/run_config.json",
+      "bytes": 1936,
+      "sha256": "14c893b739639d4d0e1238331f73b722e72d1c442d4f849737e795a228c7989c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f1/summary.json",
+      "bytes": 1958,
+      "sha256": "d7ea9d100eab963612e4eba887eb655e8c193f1dea68cebe6a92d84e39823a9e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f2/environment.json",
+      "bytes": 307,
+      "sha256": "d5a855bfd3bcda9bbf24579be726550d4ac4bda32e07b20d4a3a05c07064b656"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f2/run_config.json",
+      "bytes": 1936,
+      "sha256": "c71e1e34cab9c41e58e216dfe4446424fff4265d85fe46ca118768d3044de136"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f2/summary.json",
+      "bytes": 1960,
+      "sha256": "7e199ccda88644c9480a069ab3f8388149aa4f2358c1d5677895f67ac96cdfc0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f3/environment.json",
+      "bytes": 307,
+      "sha256": "fb9939d3497f98686b67872e4456491baf779858805f866bfa55bf15a6d19272"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f3/run_config.json",
+      "bytes": 1936,
+      "sha256": "6c140724cdfc08ad1719004b85b88c797e6d9bfd669c6b3b68c570c48273977e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f3/summary.json",
+      "bytes": 1963,
+      "sha256": "19a48e09cb4a747c5d5d84e996c386cc086ac328358e298a55937d48408dbab2"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f4/environment.json",
+      "bytes": 307,
+      "sha256": "46d755f7237562e229666cb4f45feaf0db580d26ef130a5c89793151d5ff090e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f4/run_config.json",
+      "bytes": 1936,
+      "sha256": "d43712bfae2e67739c1f47cb87241f1a8a688410eec46e2f504d0decda2a5372"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L3_c1_only__f4/summary.json",
+      "bytes": 1951,
+      "sha256": "76bb1b2b5f2ca1f669d6a9d0d5269210fafa89bb05819111428f0bceefac6f33"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f0/environment.json",
+      "bytes": 307,
+      "sha256": "d2535269bac8b30cea6bf43871a0d45036142c01633120c6b3d1b39d3e3e4cc1"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f0/run_config.json",
+      "bytes": 1940,
+      "sha256": "17f87ae96c3f8b4d98ef10959c1dd83c9d940b1314e034f4c419e34aed880282"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f0/summary.json",
+      "bytes": 1966,
+      "sha256": "0343aeb243bf440118866f314fd2d14eaadfc838a6703333ced6ffce2fb4d499"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f1/environment.json",
+      "bytes": 307,
+      "sha256": "b0c40feda83f39805fa15bbaf80879e0b404ac362e50bcdf71b7063df1de79f0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f1/run_config.json",
+      "bytes": 1940,
+      "sha256": "52a82171cae35252a70e05a3071be21eca00688efe34f369411f6fb05194fa4e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f1/summary.json",
+      "bytes": 1956,
+      "sha256": "259a3902521a6b7e38412f667fa3e77d8a269754ad401deb0bcd1bd06735f55d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f2/environment.json",
+      "bytes": 307,
+      "sha256": "2a5126e0eb7b3d68081ddc3c72b53d3c0eebad3b625e76ab698d2fc1f6ff4f46"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f2/run_config.json",
+      "bytes": 1940,
+      "sha256": "51fba15c331f342c2427a0235b87da6da8ad11d8d30555be935024d03e9c66b0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f2/summary.json",
+      "bytes": 1970,
+      "sha256": "34e06643b6a9a2fef15d6f75de2b6f9554d62ca3b97dfc05f265c98b6d814e22"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f3/environment.json",
+      "bytes": 307,
+      "sha256": "1e0eb0f71f4e367e7f1401e1ce4604329aa137e35c0ddc2a076e1edfa955e9dc"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f3/run_config.json",
+      "bytes": 1940,
+      "sha256": "76244c36ef6bbec1058147c1aad01f2c2cafde3f90710710ee2b88d377b8129d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f3/summary.json",
+      "bytes": 1957,
+      "sha256": "41b6ce901236c6c891b4c519f7fb758434e5f9d6b68bab7d355e567456fce2d5"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f4/environment.json",
+      "bytes": 307,
+      "sha256": "848cb5f6da39207bc12471b5dffa361dff4652ab43433f6ac460c08f059d3c94"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f4/run_config.json",
+      "bytes": 1940,
+      "sha256": "bb5d601480ea2d746276a83fe4d5f2c253128af79d2c0bf504ce4bf4b73e8437"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L4_c1_c5__f4/summary.json",
+      "bytes": 1952,
+      "sha256": "42b5d2e84e6db23145287a34d1f5e4eff126b89c7d81db0b5c29da91c66af915"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f0/environment.json",
+      "bytes": 307,
+      "sha256": "c77e47f28f48f7c963d695b45560956a23540df80cdf3f9096d4c4e7a7a63dab"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f0/run_config.json",
+      "bytes": 1932,
+      "sha256": "4178ad25accdc510540be6eae5b87d4807d4b4d21fc3ce2a151267a4b2989c8d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f0/summary.json",
+      "bytes": 1964,
+      "sha256": "5160835af8f154d1132bf62b519658cb00862ea97fcbc2cc350795a7d3a8cbd4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f1/environment.json",
+      "bytes": 442,
+      "sha256": "0cb43fb0b9d38438da35137e6060335ee2ebca7754bf9fd5b73218640e575565"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f1/run_config.json",
+      "bytes": 2072,
+      "sha256": "ec3a4c374b5b05927ca5fdd820a7000dcc3e90b2d96991df57c14c8e5ca0c14a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f1/summary.json",
+      "bytes": 2519,
+      "sha256": "c43c2320d2c9754ee986fff85b3a62267883f35b88d4312ed531c4bd4abc68bd"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f2/environment.json",
+      "bytes": 307,
+      "sha256": "294c55229ded864fb4f099c1c62527fe958d1afc3ea7f59dd10c9c38163ccdf2"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f2/run_config.json",
+      "bytes": 1932,
+      "sha256": "b5ec4a2177a19eb65cae7b518605649344d36324ea661a5e09f8797fed1f6d12"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f2/summary.json",
+      "bytes": 2900,
+      "sha256": "5067e0e31a1b2e58d19dd35ab62f59331cef904a467836176d7ebcfea748776c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f3/environment.json",
+      "bytes": 307,
+      "sha256": "8f79188fa434f04d17db3391c8ca0a789a6f166d9af694b8bdedddf4c7557b47"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f3/run_config.json",
+      "bytes": 1932,
+      "sha256": "9a0997c72c1f1f8088e5af1f6e7734a3c8f1aa2fad5b0b6b6c6f56372b4d021a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f3/summary.json",
+      "bytes": 1959,
+      "sha256": "42069031f812f91ddd474bfde71d93b7c98fc25344ab6cf51aacf7be7e575b15"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f4/environment.json",
+      "bytes": 307,
+      "sha256": "344751052246da7df74c0d0a24ef1b788cc86926c32de5055f5eaa759986512c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f4/run_config.json",
+      "bytes": 1932,
+      "sha256": "341e683cf218fa70e672667e20ec3609db4352a3523080e7e491054bb2c19a40"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L5_no_wavelet__f4/summary.json",
+      "bytes": 1951,
+      "sha256": "2d684d0b24b2b0cbe48b37e3f1271fe8f92fbc6d1f01919340482880c921a38a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f0/environment.json",
+      "bytes": 442,
+      "sha256": "7df93d4aaf6092ee3079e65fefde3006e7d8cb59896df046ac0f5cae5ab75dba"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f0/run_config.json",
+      "bytes": 2072,
+      "sha256": "0b4d30bb789c5bd45c3364c335e754af06c451fa578bf58efce83f7562a3f745"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f0/summary.json",
+      "bytes": 2527,
+      "sha256": "4c4ac5be535d5bdec90ff4d8c8dc1ce9e1acfc0613bb1aad61f3aa6ad4e2dc8b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f1/environment.json",
+      "bytes": 307,
+      "sha256": "8e956c7ead32a972d625b25ec2ed0eaf8215f319692fec679b709a0b72472575"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f1/run_config.json",
+      "bytes": 1932,
+      "sha256": "f4e8146ebf835442109ee0bc002380055ba025f0e2a20cda340dcca6a5e3c6ea"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f1/summary.json",
+      "bytes": 1947,
+      "sha256": "213c5f36522581bebc5f55e69cd312df1654eae441dd9fb3d49df6965bbd913a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f2/environment.json",
+      "bytes": 307,
+      "sha256": "3661b1e9a719d720428937390ffb3f8e4c196a6c5bcf4359fa84fceacfa61401"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f2/run_config.json",
+      "bytes": 1932,
+      "sha256": "e069c0ec47a25c0ac9ba18b1ba0014ed05d755f62dee8461be03c12818f0391b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f2/summary.json",
+      "bytes": 2890,
+      "sha256": "1f7aea74e1e336f51cacbe871fff365bbd7721fedd7b6cc06061179bb2d31c64"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f3/environment.json",
+      "bytes": 307,
+      "sha256": "ba164714a81e35c0d6d30f3dd5ea4e10a265d34fb43467e65072dac0034f7e6e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f3/run_config.json",
+      "bytes": 1932,
+      "sha256": "b820d4a022287ee163e5b6714c4f3ea38a19571f6b0a47ddc5f0da0ade181e71"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f3/summary.json",
+      "bytes": 1956,
+      "sha256": "2cfa679a658f8900ffe4ec767686e97e3988e71c6e35fd40f8b8e461dde0f828"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f4/environment.json",
+      "bytes": 307,
+      "sha256": "0b3ac93ad69e056b679a6467b68c950ecb61d5ad61b6ca9a37df07bd10f9b238"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f4/run_config.json",
+      "bytes": 1932,
+      "sha256": "4dad985e7dbc488f1af3974c3ab3d0ff72cfeadb16bdffab5d7317d0d950e1ab"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L6_no_ssm__f4/summary.json",
+      "bytes": 1945,
+      "sha256": "eec0bf33d5c49212f2be5c007f896d66cf44a240ed17d79c5d5c2a5c558d41ee"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f0/environment.json",
+      "bytes": 307,
+      "sha256": "36eefa53ed5a3e2d58fe8d474b16e97ffae932d90fe1cb35e98653b537492234"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f0/run_config.json",
+      "bytes": 1934,
+      "sha256": "472ef5859b630da7eb75360f4917816d4dd6cf04f2c21b260bb9ee57168f21a4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f0/summary.json",
+      "bytes": 2564,
+      "sha256": "d273388cb18468a03c34d4107b0aa02abd291d08d307d6dddd9406011237fae0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f1/environment.json",
+      "bytes": 307,
+      "sha256": "f1e45da83e59ad650610aff1dd551c4b09c74f1ee7bb7154269311b7838c4940"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f1/run_config.json",
+      "bytes": 1934,
+      "sha256": "770253ee88413509271b0c0cebc4fbd43db7c7ae74d203493ed64353c3f629c7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f1/summary.json",
+      "bytes": 2888,
+      "sha256": "8363d43e0671b1c56bf617d7ff91fad26fdb2d904627d489b45714c96f3b08a6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f2/environment.json",
+      "bytes": 307,
+      "sha256": "669826d530324a6d5b8785f42e2dd19fb92de21abc8d2fddc137c6f33504a852"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f2/run_config.json",
+      "bytes": 1934,
+      "sha256": "b5a99d99388dc4b871471c8a235f280045fb0e5f308553d16e1e07dd32d6950a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f2/summary.json",
+      "bytes": 2540,
+      "sha256": "1a56452d616ec99f3f372f636d90040767a9cc56bd497ed5bf4964ad9fef13ad"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f3/environment.json",
+      "bytes": 307,
+      "sha256": "cdd1ecb9bcaf2b583cf5332a31eadd7640b8ca5ef0e39e56df3c01ee6e6a8bff"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f3/run_config.json",
+      "bytes": 1934,
+      "sha256": "26aa33d50a615c6969dc3f2ece15265e60d82db546de6d476b56c8e16b132636"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f3/summary.json",
+      "bytes": 1962,
+      "sha256": "693e371b7451ac899ab72cba6d6a17c71f7bc534a207477136ee96c86a771919"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f4/environment.json",
+      "bytes": 307,
+      "sha256": "010b615ec61f1c74d6191586ee7a23ac1bb5cec62a27dd0d0fdf81d7f983048e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f4/run_config.json",
+      "bytes": 1934,
+      "sha256": "e264b4c5d461170bbc8cbc4c6508d8cb38acc86de22314252a7ca9048d133ed9"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L7_singletask__f4/summary.json",
+      "bytes": 2520,
+      "sha256": "e4a4bcea7f5165707f1c349870c4b644dd1bdb666b836ab4082e71dd5bff404c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f0/environment.json",
+      "bytes": 307,
+      "sha256": "daabb7ebbfb367ce91e5d0b999aa32c3ced16334b10ccb9f0296cd1b9cec07da"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f0/run_config.json",
+      "bytes": 1926,
+      "sha256": "cbd778664159cadb4e310875142eb44dccabf2851fd604ff658b45d651a625af"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f0/summary.json",
+      "bytes": 2525,
+      "sha256": "88c2ec2ece39763f07fc606d9b8e8d92443cd6f5a424b51386e8c9129c3b249d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f1/environment.json",
+      "bytes": 307,
+      "sha256": "9575a8fdd463d622a314f19729ee752dca5f4fe7a989756f8c7a3ff2468b2c3a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f1/run_config.json",
+      "bytes": 1926,
+      "sha256": "cfa0ac8b5160cc1c13ecd075a29ac28ceb039ad2cc5fa7a0f69bc52d99d51528"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f1/summary.json",
+      "bytes": 1945,
+      "sha256": "b6a3749474d0e00cff691429f6686e53379eb8ece0ce6e3bca7c902adf8e317a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f2/environment.json",
+      "bytes": 442,
+      "sha256": "4fea4d9dd3f5dade62f57796cb90ac35c1158bde581dcd5c884627799c6db8fd"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f2/run_config.json",
+      "bytes": 2066,
+      "sha256": "0e52538ba6c9ace35616819f69572da34f01bc36ddb79a2475e190bc8b8839fd"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f2/summary.json",
+      "bytes": 2516,
+      "sha256": "78ded31adc1e4bd60badf46b39ba3ceaaf7b13bb1a2c876f445440229966116c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f3/environment.json",
+      "bytes": 307,
+      "sha256": "ba3352ba928498c8616a77f9a655322843f866748c1138ea8e941c85ef710f26"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f3/run_config.json",
+      "bytes": 1926,
+      "sha256": "7633032f998c77cdbaaf82e13525ed35d13e4fbacc241e95d349e9d3f5dd3e0f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f3/summary.json",
+      "bytes": 2525,
+      "sha256": "7a08a30a5474870362bc49884af0f2b7be6298f31984d9c632613fd44c3a12b8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f4/environment.json",
+      "bytes": 307,
+      "sha256": "e214978c499a40a6707caa001efd8074264e336750b68d9866dc3d379416f90c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f4/run_config.json",
+      "bytes": 1926,
+      "sha256": "2b65a3304061689216347a3997071b072af062bc231c96064ac4c7791b1c0363"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L8_no_film__f4/summary.json",
+      "bytes": 1933,
+      "sha256": "8a007a4e7fdc67fbd95611ed43a823903c2d2db1c3e79fae20cd5dcff62c12f4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f0/environment.json",
+      "bytes": 442,
+      "sha256": "166fb73a039184830841c5c1a281442330d2c50521ba07370f7b8a2289bf76ac"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f0/run_config.json",
+      "bytes": 2044,
+      "sha256": "374440a67846a68297ac66c548abd70eea66d045f52457983bec458ab77481a7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f0/summary.json",
+      "bytes": 2906,
+      "sha256": "7d19b9b4b89b80bbad678e7a878ee4aef479acb21354dd7ce23f152a36f07b28"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f1/environment.json",
+      "bytes": 442,
+      "sha256": "6e2bbf158fdbde58f4dea2e6ef1f79ab6ba8c8dda78d24a3cfa097d6d3ceb2b2"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f1/run_config.json",
+      "bytes": 2044,
+      "sha256": "359a840fc81c35ee010a889fae8c611f90203c775a44418df1650b54953b8e03"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f1/summary.json",
+      "bytes": 2847,
+      "sha256": "f991bc03771557fa271285aefc0d035193d3020cf8bca585c9097de62c1b992e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f2/environment.json",
+      "bytes": 307,
+      "sha256": "cb8017c16c9b24633fb212183e8fb9d17e1bbeb1255c32f18956e5ebf0c717ea"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f2/run_config.json",
+      "bytes": 1904,
+      "sha256": "19450b960c9c197824c32a13659c3f7ac8ecd1f5d1913e048f260130b85cc1de"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f2/summary.json",
+      "bytes": 2501,
+      "sha256": "05f309d24e9412aadcfa389a548ba96387049c74ffaf88141872caab3ea9ffad"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f3/environment.json",
+      "bytes": 307,
+      "sha256": "c183551306f337982e717793eb92e554f64eec18707749e3bccbf2f99680c842"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f3/run_config.json",
+      "bytes": 1904,
+      "sha256": "bded7ab326561b30de2e8c94eed3c22660459f65ab0950e06296767ad13ad941"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f3/summary.json",
+      "bytes": 1916,
+      "sha256": "ae0b83c3663062515aac025b785b390ac14e0100d3b0c2755d2f4376748bd87f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f4/environment.json",
+      "bytes": 442,
+      "sha256": "fba760ae585b0ddc7aee719f7736aeadc8a1019f8b4ea8234de28c2399c4f945"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f4/run_config.json",
+      "bytes": 2044,
+      "sha256": "be8243e9837b7b9866d02a5ce3b953db7e297fe5e2ce4284afee6c99034aae0d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/B_rva__L9_full__f4/summary.json",
+      "bytes": 2900,
+      "sha256": "4050374755734b25f15e50ee5ba8804de0f6ebe95c9540cb97503982714fb23e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f0/environment.json",
+      "bytes": 307,
+      "sha256": "070f3c7aa7584f84a4bcfdf1166d1fccdcbf1bf570b58c4a5e3a19d28a4c21b0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f0/run_config.json",
+      "bytes": 1905,
+      "sha256": "63a7b7897b1b91bace37a23d17cf427f0c644857e00499adfa8aae7771a22938"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f0/summary.json",
+      "bytes": 1930,
+      "sha256": "3084e3bb48c9cafdcd7cd874326cfb7227b06729540e9a4869da7dd73bb57959"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f1/environment.json",
+      "bytes": 442,
+      "sha256": "1598aed39773449b4f0fc8a65df6dd1a955b5f9457f543f8cee47ff75843969b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f1/run_config.json",
+      "bytes": 2045,
+      "sha256": "6cbe5ce305baf26ae9f6dd8654e4758324938e01c2a82474702ede353f38866a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f1/summary.json",
+      "bytes": 2499,
+      "sha256": "685c23033dd8f6ccbf7d1cf2365cd9971a492953ab31f51731431186b3f3c6de"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f2/environment.json",
+      "bytes": 307,
+      "sha256": "7c735b8be8c8adafe7dd1d735a11108f29afc45daba9ccc8e196b6f5bd577da6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f2/run_config.json",
+      "bytes": 1905,
+      "sha256": "76de092e2be9934a950074539f96fab357fa42acae44093ae3c95dcf638c1f88"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f2/summary.json",
+      "bytes": 2506,
+      "sha256": "61863e77dc7f278945162abd29cbdd7b75a562355786108bf7c53cb1b932a562"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f3/environment.json",
+      "bytes": 307,
+      "sha256": "b8bc99bb91a640d3c8456b305162fdef7a40a23224dfe7dc71264e59d2c18555"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f3/run_config.json",
+      "bytes": 1905,
+      "sha256": "e24ff96297518e22fb3794817c499103c08d3cc18442e73eb97ee24db9c629fe"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f3/summary.json",
+      "bytes": 2488,
+      "sha256": "ecd85661d4bc05af540fb88db8faab1bb2fa39bdcba30aa3ad4ee94ae943390d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f4/environment.json",
+      "bytes": 307,
+      "sha256": "7a52b0341ba4eccc5005a63cf49f40164621350e728ab90a75eef57f5d06d6b8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f4/run_config.json",
+      "bytes": 1905,
+      "sha256": "784bf124e264e4f112c097678978aa71b8500fa32bad390a5f9f21dba39fdd51"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/C_all5__L9_full__f4/summary.json",
+      "bytes": 2484,
+      "sha256": "e67c0385045315594ebb7afde958ab0cc4c30096c8ff456eaff3d1a5608b4b19"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s0/environment.json",
+      "bytes": 442,
+      "sha256": "9968edc4314a15a0c6f573d08282347bdbca8199be653c3778fdf95969607931"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s0/run_config.json",
+      "bytes": 2045,
+      "sha256": "824ce6e9045f5550fa2c192dfa59ed61a1f95b5859d0aa11330e1449f4253863"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s0/summary.json",
+      "bytes": 2408,
+      "sha256": "3e9f7d244f25df3c88bd2b226047c082e7fed6bd82135ca8ba5dbc4f407e1423"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s1/environment.json",
+      "bytes": 307,
+      "sha256": "2f68d8138bea3c7964fe97416e2a94388595e41e35c8a4095c4d9ba5d1993484"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s1/run_config.json",
+      "bytes": 1905,
+      "sha256": "8708bbc33e6660f45c63005ca925f06e659de619fc9e6529684546352bc629f0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s1/summary.json",
+      "bytes": 2416,
+      "sha256": "f360bbf37ebbe8dfac18ddcc6e7cd8ea609f4be44f090c2ba2e89d5f44e7620e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s10/environment.json",
+      "bytes": 307,
+      "sha256": "88f74789f0ca40ad79b9bfdb939074ae40514182692034e76b5dd21be581b00a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s10/run_config.json",
+      "bytes": 1906,
+      "sha256": "75ada9d0126fa2e24e18c28fd2ebad62ae6e3863950173d63f4fc27e411bca00"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s10/summary.json",
+      "bytes": 2780,
+      "sha256": "459a60cbe7d4ed959a3cf14a088301bbb8a629acda38f769794ff6865ff6c824"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s11/environment.json",
+      "bytes": 307,
+      "sha256": "245012a2124dfbbb1fc13a9b9394e98683cf3768fc8513d1c3bbc70fb7026b03"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s11/run_config.json",
+      "bytes": 1906,
+      "sha256": "d32f1a12e4872bf502c0422a313b3df0afb5e1b875d70233bdf99785f1cb8e2d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s11/summary.json",
+      "bytes": 2409,
+      "sha256": "dc49aa7ffe30a64681247632717a7bdb8313727ec12ac4b0de4dbab3813aa662"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s12/environment.json",
+      "bytes": 442,
+      "sha256": "6e8f7b082640d1da0e3259cb21ca58e9c9e6c2d323afc2a6bf30b1a9f085f7d3"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s12/run_config.json",
+      "bytes": 2046,
+      "sha256": "7b91d7108dad18a02efc5421e82f63c3a87c95af672ec6d1140065ef5aee9278"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s12/summary.json",
+      "bytes": 2777,
+      "sha256": "4d01eac01253d7d76613e7923a99190abb08c2c6e3f2ec50585aebb74447a779"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s13/environment.json",
+      "bytes": 307,
+      "sha256": "b90b19f26692ae3d68219ad5a202c9addf7bf501fe66d68e4e53bf484c1edeb2"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s13/run_config.json",
+      "bytes": 1906,
+      "sha256": "fc1bc595cad30f1ed88439de7d1360fa0f51667a86f23346382ec89b2676fa19"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s13/summary.json",
+      "bytes": 2414,
+      "sha256": "d1584af79985e91ff0ad1740093272bc85b080b9306107edc50b072642a627f5"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s14/environment.json",
+      "bytes": 307,
+      "sha256": "31c01f02eb78e956b28e4a2db68d2db3f7d63dad839cce9b6b904b2e83fbb1e4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s14/run_config.json",
+      "bytes": 1906,
+      "sha256": "75e097dfe292c48bc9828ebf201b3cab37c8e313c1a824b9379b3d0ee980e7bc"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s14/summary.json",
+      "bytes": 2415,
+      "sha256": "2f1b7fd9cb21757b59d24c34ead3c520e5f2affa3ed1274ad542c7dcc2a4f556"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s15/environment.json",
+      "bytes": 442,
+      "sha256": "2ca6750363e4a9d06da062dbe3d3d04e9ce59bf7d3f604f88622db3ba9cc53d0"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s15/run_config.json",
+      "bytes": 2046,
+      "sha256": "04689d2db5dc2ed65065d72da05ee2cb500890b52631b053a11322d3c5941458"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s15/summary.json",
+      "bytes": 2412,
+      "sha256": "04562854faa4310268b3827413a8d2322cea3992b947fa36caa4b38980dea4b8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s16/environment.json",
+      "bytes": 442,
+      "sha256": "7ef633db4106dee125f8a4c8e82c70973f1a8e3127266a51d604aa8b57cd7098"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s16/run_config.json",
+      "bytes": 2046,
+      "sha256": "143c21f531ad1bcfee007cbfa391aabf9f860b9bb90d3446e70b85cc66cef73c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s16/summary.json",
+      "bytes": 2422,
+      "sha256": "d554068239c48b4e794032721547f418947398bb6aed210d28c2ec36af8a7aca"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s17/environment.json",
+      "bytes": 307,
+      "sha256": "382af3a414dfc03ce12e3784315a8d9e47c8f76df76cfea24d56b1bd9ad61ffa"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s17/run_config.json",
+      "bytes": 1906,
+      "sha256": "26f81f899b41d7da82729492510f7c2fd5dbb1b27ff7ee5ef05605cb55e65faa"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s17/summary.json",
+      "bytes": 2776,
+      "sha256": "e78d0d0e962a4e1750fc9ea9e2dfc4349ddb91be4a8eb2bf36893de9222f440e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s18/environment.json",
+      "bytes": 307,
+      "sha256": "567bafddadda35f27f7f675aa82ba6566de54c902e4f28c006dcdeb1f5c2f8ea"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s18/run_config.json",
+      "bytes": 1906,
+      "sha256": "158f3f1fadd10a2b8dc19850339def542b528a221d72100acf40a8a584ffebb7"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s18/summary.json",
+      "bytes": 2442,
+      "sha256": "e839820e62ef599322a81394fb6f0cdba860349ce185e36629306581c5099ee2"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s19/environment.json",
+      "bytes": 442,
+      "sha256": "8198c7f5a1b16e0b1c0bbe67fc4856ce8037b637ca07f42edab186dc20513850"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s19/run_config.json",
+      "bytes": 2046,
+      "sha256": "d53f73b48ec196f227c0f2156f8dacb30da8b77a46e7bc3a821ad4ffe4f7a9fe"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s19/summary.json",
+      "bytes": 2404,
+      "sha256": "e661eab55e165db7d2add8fe5a92cd2f3531d5990cb2ede3465e3eb5b1561d26"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s2/environment.json",
+      "bytes": 307,
+      "sha256": "48986aa3c5e39e4485cc95d8a01ee5446e528e45c9e60f2343e8639deef7049a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s2/run_config.json",
+      "bytes": 1905,
+      "sha256": "b9b2d5e3918008c15ac3f9edad28497c2485735532a94aba81efe908a50902e5"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s2/summary.json",
+      "bytes": 2786,
+      "sha256": "43393b80c43200e576070f77ad7ca35b64f1c0296d58a7456e707c08bdae09ef"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s20/environment.json",
+      "bytes": 307,
+      "sha256": "abc9b644e4806f77389aa3977fb888335f93ad981fb2e1535a67688033e54407"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s20/run_config.json",
+      "bytes": 1906,
+      "sha256": "85c87d1fbafbda4985cf44f5ff75cd4fc03c9c9e2927b804478bf6b209f8c6b8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s20/summary.json",
+      "bytes": 2412,
+      "sha256": "3b3d4ac7c2f435ca72a0942d26b0822c67bb747449536d5839cbf1b97f48945d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s21/environment.json",
+      "bytes": 307,
+      "sha256": "db47f2cdf5868ad810b1c036231be473277db3b4e41d19f3b9b2c00f177be500"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s21/run_config.json",
+      "bytes": 1906,
+      "sha256": "cb8e7282acb71c1fc87a2bee0a52963a8c417fe6f462ecaff0446b3a84f83009"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s21/summary.json",
+      "bytes": 2771,
+      "sha256": "66f4421d64d3f737308302d3d54eed13e48abaaaa7ac7444c031b99411593766"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s22/environment.json",
+      "bytes": 307,
+      "sha256": "850e9d249d2b2a084807d0e5d3edf4d3cc2d16abac12e220c41df1a57d2bb444"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s22/run_config.json",
+      "bytes": 1906,
+      "sha256": "a53a600f985da608090c695b7e6f980419dc41b495b3a66c5efcdfe0ce6ca538"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s22/summary.json",
+      "bytes": 2778,
+      "sha256": "c6276926f41f280cd1c9dc2b495288e355f756b58a4093b76bf2a1565e11c180"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s23/environment.json",
+      "bytes": 442,
+      "sha256": "f2c748f202188f382dd0e1f2e21a9175cafeb6a023829982ec0039608b171bf6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s23/run_config.json",
+      "bytes": 2046,
+      "sha256": "72c383d14b542f9e1e6ee9e4e0ff9a7eed49958274a30a3495f574877a04629e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s23/summary.json",
+      "bytes": 2418,
+      "sha256": "f1be634d5e67e957e5d014e4ebb25525ac3ad647c8dbe111553d5caaa1bf0206"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s24/environment.json",
+      "bytes": 307,
+      "sha256": "77f788c612176340e45244f00ae0b0aa2b0f1d25e978cdc69450836083fd93cb"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s24/run_config.json",
+      "bytes": 1906,
+      "sha256": "b39bdffe205b0f57468d9fb9b59ee4c31f963c1dff54708fcc59992a1cecb61c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s24/summary.json",
+      "bytes": 2418,
+      "sha256": "853ac5fbad7cce2c4adb70126242271ca74305e11e143a885f0ce3923515a4c1"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s25/environment.json",
+      "bytes": 307,
+      "sha256": "dbbd101296e6e5e6918a6a8a474a97a4b6e3ec5c4f84c3f4728bb5feb4b25d25"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s25/run_config.json",
+      "bytes": 1906,
+      "sha256": "9d6c6fdf12bc18e547dcc6c92595d3ae8cdda72395611f752c219a1eaf995d4e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s25/summary.json",
+      "bytes": 2408,
+      "sha256": "db6775f4671ffa807503ee80f71eaac4eacae386ba50ce322fb16ef64fd9665c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s26/environment.json",
+      "bytes": 307,
+      "sha256": "5d2e26917a12cdcac28816771cd3c4673ccd3da6c7d64b1d354f9300328a3c2a"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s26/run_config.json",
+      "bytes": 1906,
+      "sha256": "9e0acde2f981aaa86d9e29ef269586a89f3876ecba20733c5600e10e07052bfb"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s26/summary.json",
+      "bytes": 2780,
+      "sha256": "b0b9fd506092892346926f5ff8ef6a5e6cdf2e7f14657d2acdb7285c7e10a672"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s27/environment.json",
+      "bytes": 442,
+      "sha256": "c947bb6bdaf0514406e735390a9d890df317f23ff6d4b4bc02841aa04f32fcf4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s27/run_config.json",
+      "bytes": 2046,
+      "sha256": "d9e6850f4e558bf9f7244f1038d90385b19086cad9c244adbc53f8e8d38906e1"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s27/summary.json",
+      "bytes": 2398,
+      "sha256": "32b9b4025ffc64b64a9c40bd2b402ba8c38fac2c01d48936de488ed982f7b05d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s28/environment.json",
+      "bytes": 442,
+      "sha256": "9fc69a8dba498c844499b003505fba68df78644196f02636660955ea7f671822"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s28/run_config.json",
+      "bytes": 2046,
+      "sha256": "4e0099fcc150b4e1a455613fee32a91fb47a009b6c89f43266221812cd3f8b3c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s28/summary.json",
+      "bytes": 2782,
+      "sha256": "de8768eac9be8f309484758b74950804b03eea8d105592ac10dcb7a1914d4362"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s29/environment.json",
+      "bytes": 307,
+      "sha256": "7e48e442fec157ed514bc2188fc4d5abf7cfad694e115412c911cb6ddf3a6537"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s29/run_config.json",
+      "bytes": 1906,
+      "sha256": "727f8f180497705633b639a6c3508c68e1a97032817ef8c6579cfc633cf1ad41"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s29/summary.json",
+      "bytes": 2779,
+      "sha256": "4dba8f7709a8734f2e929d5afe238253cc5955548df5baa1df13b15282e4e7fe"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s3/environment.json",
+      "bytes": 307,
+      "sha256": "c99d0726f59f1642d29a8eee8d75a289db4b8a8a93a9c9b3faf2ff2b560df193"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s3/run_config.json",
+      "bytes": 1905,
+      "sha256": "5b70af5de3674cc9ad7d250a044175eb25442d0a2fa0fd86d4bee383f88e6bdd"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s3/summary.json",
+      "bytes": 2407,
+      "sha256": "f715e5dfdeb2723695a83362e398adb8cfcbddffde90e57548f4d6ff84fe199d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s4/environment.json",
+      "bytes": 442,
+      "sha256": "1d791aa4cc02a5cdaa478712023b92eed7471d8ec5d8ce438ac06a280f273a73"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s4/run_config.json",
+      "bytes": 2045,
+      "sha256": "4b7d0f4d93c82601df19258253584f86c5a93ade0fb21e326423b8db282cbff6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s4/summary.json",
+      "bytes": 2414,
+      "sha256": "96c5d81981613911ea79c9580c8d023cc9b6afce4d2496367fcc6ada58221118"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s5/environment.json",
+      "bytes": 307,
+      "sha256": "83ee535e86a3657f91de2a394abe3cd15498b5bb0a9f6999e4a773c2ca3dbeda"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s5/run_config.json",
+      "bytes": 1905,
+      "sha256": "6a73d3ff1b731c229574051bdf876a6bf89efbc48e1836fc07f37a9efb121650"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s5/summary.json",
+      "bytes": 2771,
+      "sha256": "21a85a4ba0bf88bc0fd31a309cdb6c20a22b3a4baf2da0204beb6e2b53c0ee05"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s6/environment.json",
+      "bytes": 307,
+      "sha256": "80af0e425ca1154cbe6f643e291a699a661e90312a1045f55f4a00ae30621a2f"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s6/run_config.json",
+      "bytes": 1905,
+      "sha256": "4874088768da0222c6683567a82f8dde681927cfeb63a4bebc6f1fe83f149dae"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s6/summary.json",
+      "bytes": 2410,
+      "sha256": "0ad886c937ea0e0e35bd1076bb6652172533a1b09e0d15ed8349197498d1e63d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s7/environment.json",
+      "bytes": 442,
+      "sha256": "b8ab3607a988271ef608034e837c0b8872fad7f5e21d95b84a71e70109df63b9"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s7/run_config.json",
+      "bytes": 2045,
+      "sha256": "43bd68ac60f9e07bf3ea976f2b1e0437a0962a1f9efe29d6cdc0600c50288074"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s7/summary.json",
+      "bytes": 2773,
+      "sha256": "06ff4391bc7f9f80f1a75793675800ea77b4886eb383cdfc8d70c914074d9731"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s8/environment.json",
+      "bytes": 442,
+      "sha256": "1c4271db22692ad6b5237b18d8aa31f5f36728272de8a6b6238c97151a5c8fad"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s8/run_config.json",
+      "bytes": 2045,
+      "sha256": "af3f8886a0a7405088f2a290079728ad926e00235ca401cf776646a029a3ae2d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s8/summary.json",
+      "bytes": 2770,
+      "sha256": "a50b5ea9424a5d844f629ab4b4658c7f133edcef159b1a58908d1d41252c0b29"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s9/environment.json",
+      "bytes": 307,
+      "sha256": "86f09aae21ca1c7dc90de8ad67a03dc105cf4dd94f13f1559dba639d0bf6c5f8"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s9/run_config.json",
+      "bytes": 1905,
+      "sha256": "32156b307292f31bb8f13e4b9b0b20e9a3c1a7c8e314d06500f1e510df5b1175"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/D_loso__L9_full__s9/summary.json",
+      "bytes": 2404,
+      "sha256": "7306ab75c3164a9937a70aa28013da7f55dcc481908af5002ad2d7d17c889785"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_apnea__L9_full/environment.json",
+      "bytes": 307,
+      "sha256": "b83ec7d08530cf1a3c560e419fcd5fde814f026ca901089e968c2b960cb3e6ec"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_apnea__L9_full/run_config.json",
+      "bytes": 2672,
+      "sha256": "95db0d31308049f83854ca26b8ec66f8a8fc9ab37dc648f538aaf7ee9e914d97"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_apnea__L9_full/summary.json",
+      "bytes": 2776,
+      "sha256": "666045a644d0ae6f4946ff8c9c6a9b696938c0bf6fdc1a0ee29fbab87058ec8d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_resting__L9_full/environment.json",
+      "bytes": 307,
+      "sha256": "028ed5f52a1b39850f4f99d33a5025a447a1b673235f227f3f056151bbab9a5b"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_resting__L9_full/run_config.json",
+      "bytes": 2749,
+      "sha256": "64ec7c2905e16ef811872db1af26793881f0fe9ac142ab4b0773877bed7b1bec"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_resting__L9_full/summary.json",
+      "bytes": 3240,
+      "sha256": "02851860574fcf05b37f00869bb91a756cd370941231faaff8e7b87d88708e25"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_tilt_down__L9_full/environment.json",
+      "bytes": 307,
+      "sha256": "dc0c2c1864c5b0d1bd92a775077a6ac621d866939978ef1ec1f995aa307203b5"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_tilt_down__L9_full/run_config.json",
+      "bytes": 2751,
+      "sha256": "dd2cc25cff26415eaa2f30dd5b3f65febccc818cc06d43ce23988bf9be7f861d"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_tilt_down__L9_full/summary.json",
+      "bytes": 2263,
+      "sha256": "541d1b3b1a7ef265d009b33545902b0e7e7e25d05a2de2b85a5e8346bab1cd18"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_tilt_up__L9_full/environment.json",
+      "bytes": 307,
+      "sha256": "2a03cdef7bd7666ae373ca6a0f68964698acdb97f81993904cbc3667971005a4"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_tilt_up__L9_full/run_config.json",
+      "bytes": 2719,
+      "sha256": "76456aca6149136bf9a36f595b0bf7e2562735f10e82d638ab2e0aba4789ad24"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_tilt_up__L9_full/summary.json",
+      "bytes": 2812,
+      "sha256": "2db77d72668d5f776f74e7733f8d671bb47c6a4a99b14d591ff12cbd9c0d0e48"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_valsalva__L9_full/environment.json",
+      "bytes": 442,
+      "sha256": "ad782b18afa9e57342a17f0e7b9b55f4d02f6655f15c74b24d6727f05f357a97"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_valsalva__L9_full/run_config.json",
+      "bytes": 2830,
+      "sha256": "15fbe2f638b5453f760e20deb436edf100251f263ea294010f79bccbfa22da4c"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/F_cross_valsalva__L9_full/summary.json",
+      "bytes": 2831,
+      "sha256": "4b645a9fec69b2c6037611cd2516973249af9acd2400d4f807112ae60baa0245"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/quick__B_rva__L9_full__f0/environment.json",
+      "bytes": 307,
+      "sha256": "72247161092f08a5be1faa285193321075ea34a74fdecc671e00b94b6d8c7eb6"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/quick__B_rva__L9_full__f0/run_config.json",
+      "bytes": 1814,
+      "sha256": "390195b838647c5245e7365b9e896b4040949038b03343def72131bebc66992e"
+    },
+    {
+      "path": "provenance/cardiomamba/runs/quick__B_rva__L9_full__f0/summary.json",
+      "bytes": 1823,
+      "sha256": "eca740689d77f344af76930b7b2b75f81a289000c860b743f399f35f30a57d90"
+    },
+    {
+      "path": "provenance/data/experiments.json",
+      "bytes": 2011,
+      "sha256": "c97ad249c3db25cb200a614ed2b4f1cfd49cdb6ab7ba617d96a6afce130918f7"
+    },
+    {
+      "path": "provenance/data/inventory_gated.csv",
+      "bytes": 339688,
+      "sha256": "1d6a2cc4cd700b1675d1f184d3955d640bb4e84d5282038dd69fac0e8b467e34"
+    },
+    {
+      "path": "provenance/data/library_hashes.json",
+      "bytes": 263,
+      "sha256": "cf6ab2f71e2b6465677f1278e4d374eaa9c7e7f2886d655efa75dd38d6a492fb"
+    },
+    {
+      "path": "provenance/data/norm_stats.json",
+      "bytes": 37969,
+      "sha256": "7b4490b23667ac615e3445ac5f10256c9836f77781475bb82d7c16b03c1479f9"
+    },
+    {
+      "path": "provenance/data/README.md",
+      "bytes": 2859,
+      "sha256": "df1d85e9d65154c01954d7737c3318575c8e5e1aa67cbe9cbd55c59bfbf50c26"
+    },
+    {
+      "path": "provenance/data/recordings.csv",
+      "bytes": 24833,
+      "sha256": "19fbb78683fadc444a2d7ff61a1368c2b918bf69cbd66988c78e2a9691378ab8"
+    },
+    {
+      "path": "provenance/data/report.md",
+      "bytes": 1281,
+      "sha256": "c3ce010f23c11c41b61046a010ef0cbb6eea308802b6ba340fc02e5f18694c7b"
+    },
+    {
+      "path": "provenance/data/windows.parquet",
+      "bytes": 13925,
+      "sha256": "6b587be3775ef07a9369631b1b3bc7082e95f927b3b448b5b24486de467e05fa"
+    }
+  ]
+}

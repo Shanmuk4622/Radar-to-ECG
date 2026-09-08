@@ -1,0 +1,21 @@
+{
+  "key": "attention",
+  "doi": "10.48550/arXiv.1706.03762",
+  "title": "Attention Is All You Need",
+  "authors": [
+    "Vaswani, Ashish",
+    "Shazeer, Noam",
+    "Parmar, Niki",
+    "Uszkoreit, Jakob",
+    "Jones, Llion",
+    "Gomez, Aidan N.",
+    "Kaiser, Lukasz",
+    "Polosukhin, Illia"
+  ],
+  "year": 2017,
+  "venue": "arXiv preprint arXiv:1706.03762",
+  "volume": "",
+  "pages": "",
+  "source": "https://arxiv.org/abs/1706.03762",
+  "type": "preprint"
+}

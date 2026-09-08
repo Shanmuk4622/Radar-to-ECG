@@ -1,0 +1,6 @@
+experiment,variant,MAE,MSE,CC_temporal,CC_spectral,RRMSE_temporal,RRMSE_spectral,folds
+F_cross:Apnea,CardioMamba-Net (ours),0.12597,0.0291,67.98948,91.06903,0.73954,0.88357,1
+F_cross:Resting,CardioMamba-Net (ours),0.10812,0.02539,75.19151,94.0593,0.60228,0.41955,1
+F_cross:Tilt-down,CardioMamba-Net (ours),0.10618,0.02503,73.34906,93.10065,0.63465,0.51592,1
+F_cross:Tilt-up,CardioMamba-Net (ours),0.2092,0.0692,28.70189,81.68728,1.22774,0.65816,1
+F_cross:Valsalva,CardioMamba-Net (ours),0.0842,0.01596,77.57609,94.5892,0.53389,0.39662,1

@@ -2,7 +2,12 @@
 ### Beating MultiResLinkNet (Chowdhury et al., Comput Biol Med 2024) with a new architecture
 
 Author: Shanmukesh (SCOPE, VIT-AP)
-Status: **plan / pre-implementation**. Last updated: 2026-09-01.
+Status: **v2 experiment and NB05 evaluation complete**. Last updated: 2026-09-07.
+
+> Final outcome: 80/80 baseline runs and 100/100 canonical CardioMamba runs completed. Full L9
+> improves over the strict MultiResLinkNet rerun but misses the preregistered waveform and
+> physiological targets. No-FiLM and single-task variants lead the correlation results. See
+> `../06_results/RESULTS_AND_INSIGHTS.md` and `../07_paper/PAPER_DIRECTION.md`.
 
 ---
 
@@ -333,11 +338,14 @@ plot; robustness curve vs SNR; parameters-vs-CC scatter.
 
 ---
 
-## 11. Immediate next actions (waiting on your go-ahead)
+## 11. Completed execution and next research actions
 
-1. ~~Decide the architecture tier~~ — **LOCKED: full CardioMamba-Net (C1–C5)**, C6 parked as a stretch. Baselines: **all four reimplemented by us.** See `DECISIONS.md`.
-2. **Step 0**: verify what the Kaggle mirror actually contains.
-3. Then I build the notebooks in `03_notebooks/` in this order:
-   `01_verify_and_download.ipynb` -> `02_preprocess_to_hf.ipynb` -> `03_baselines.ipynb` ->
-   `04_cardiomamba_train.ipynb` -> `05_evaluate_and_figures.ipynb`,
-   all Kaggle-ready with the resumable HF checkpointing contract from §7.
+1. [x] Verify the raw Kaggle mirror and build the v2 processed corpus.
+2. [x] Complete all four baseline queues and the reproduction gate (80/80 runs).
+3. [x] Complete all CardioMamba experiments, ablations, LOSO and cross-scenario queues
+   (100/100 canonical runs).
+4. [x] Run NB05 and generate all tables, statistics, figures and robustness outputs.
+5. [ ] Prospectively confirm no-FiLM and single-task with fresh seeds.
+6. [ ] Audit peak/HRV units and aggregation, repeat robustness over all folds, and rebenchmark
+   latency after warmup.
+7. [ ] Draft the strict-validation/ablation paper using `../07_paper/PAPER_DIRECTION.md`.

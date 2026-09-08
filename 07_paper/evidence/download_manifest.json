@@ -1,0 +1,596 @@
+[
+  {
+    "path": "cardiomamba/runs/B_rva__L10_transformer__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L10_transformer__f0/metrics_windows.parquet",
+    "bytes": 92623,
+    "sha256": "679a4bad37901e8d036831a264653f6599c5135003061be2e0dfbbd5ea90fac9"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L10_transformer__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L10_transformer__f1/metrics_windows.parquet",
+    "bytes": 84884,
+    "sha256": "76e871efd227037ddeaf662f6667d17127c9cb33c0cc3f065a635d7c23fcf21d"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L10_transformer__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L10_transformer__f2/metrics_windows.parquet",
+    "bytes": 94114,
+    "sha256": "514aa92382f6152451fa9f9660c7959d67f4b3e1b321ec723506d281c3e50f26"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L10_transformer__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L10_transformer__f3/metrics_windows.parquet",
+    "bytes": 82110,
+    "sha256": "68de200aa437840fec1cffe654ed0abd5a792797b4e917c99c807530e77a7aee"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L10_transformer__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L10_transformer__f4/metrics_windows.parquet",
+    "bytes": 82581,
+    "sha256": "4e4bb03edd0056b529fc48230644b1b95adb0656c07747b718afe1f41de9f97f"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L2_loss_only__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L2_loss_only__f0/metrics_windows.parquet",
+    "bytes": 92644,
+    "sha256": "fbf379cb356b28ac09e8999eae872a138cfe856baabd94ad4c531c876af119d7"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L2_loss_only__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L2_loss_only__f1/metrics_windows.parquet",
+    "bytes": 84798,
+    "sha256": "8dcd43c7253709322398e0b256c793e36c9964a3288ee420fed7614644611155"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L2_loss_only__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L2_loss_only__f2/metrics_windows.parquet",
+    "bytes": 92596,
+    "sha256": "47c4899c773c0910a4c9e1977f2daa0b255909973eae49a9ca1a99d1bee2d263"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L2_loss_only__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L2_loss_only__f3/metrics_windows.parquet",
+    "bytes": 82063,
+    "sha256": "6676873101ca750fd17c854d37eb5a0cad9656875da9d3bd919edddd13c0fe0e"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L2_loss_only__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L2_loss_only__f4/metrics_windows.parquet",
+    "bytes": 82562,
+    "sha256": "69e859b1249363522c0c37e193ea52d0998611701dca49869173eccac4bfa1f0"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L3_c1_only__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L3_c1_only__f0/metrics_windows.parquet",
+    "bytes": 92681,
+    "sha256": "35048b85276601daa9de971394eb4c3359fcbfc57ebebc9cb0b6b7ddb1f4d0ed"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L3_c1_only__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L3_c1_only__f1/metrics_windows.parquet",
+    "bytes": 84852,
+    "sha256": "709b9176015731267465c48a834a848d11424bf7de6b45e2b313e50fc257fed8"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L3_c1_only__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L3_c1_only__f2/metrics_windows.parquet",
+    "bytes": 92719,
+    "sha256": "a49dd016582e939f93127a1913c72b8a7862f01d49b17894c49c677fbc15af51"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L3_c1_only__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L3_c1_only__f3/metrics_windows.parquet",
+    "bytes": 82071,
+    "sha256": "2ca00ca20bcc8e8205901d7189ac67f9a407f1a884fda546f2d37aa06deeedb5"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L3_c1_only__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L3_c1_only__f4/metrics_windows.parquet",
+    "bytes": 82583,
+    "sha256": "9c5a109baf5e84636ff3c14fe05e9e7c4fa0b7638aacb858a4b1e3d0eb18621c"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L4_c1_c5__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L4_c1_c5__f0/metrics_windows.parquet",
+    "bytes": 92595,
+    "sha256": "46c3895580984dde6d75e77fc8c438e4468fb93eee80b94510989ec5d69bd328"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L4_c1_c5__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L4_c1_c5__f1/metrics_windows.parquet",
+    "bytes": 84811,
+    "sha256": "9a90167cf48667abc7ee995fe7848aa1a9a5a789538850e2606c3d351cf5390d"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L4_c1_c5__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L4_c1_c5__f2/metrics_windows.parquet",
+    "bytes": 92686,
+    "sha256": "3ce87dd2b70dd5bbed2a9e1a0bff265fab601e51302b3802e80be5498e3989a5"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L4_c1_c5__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L4_c1_c5__f3/metrics_windows.parquet",
+    "bytes": 82065,
+    "sha256": "9efe21540ce860434b4f1ab709ba137126ec175c52723efb7125ba1466cbcaec"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L4_c1_c5__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L4_c1_c5__f4/metrics_windows.parquet",
+    "bytes": 82581,
+    "sha256": "e79f9241831a8fccecdb5b764dce981e540adea01af0dee4ef5deba38fef87dd"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L5_no_wavelet__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L5_no_wavelet__f0/metrics_windows.parquet",
+    "bytes": 92662,
+    "sha256": "ea2788b00b9d6edcffa5f6a92598673d5b79f1270bb31d3857e9813ec5989ef0"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L5_no_wavelet__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L5_no_wavelet__f1/metrics_windows.parquet",
+    "bytes": 84841,
+    "sha256": "2b5d11d298508867eb51cc4ecaea246864887ede6f8e3d68454e6f3e12d3f12e"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L5_no_wavelet__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L5_no_wavelet__f2/metrics_windows.parquet",
+    "bytes": 94111,
+    "sha256": "c60189b0317688de38a827aabd4b226d047c27e6a163a774010428b1f5245cc1"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L5_no_wavelet__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L5_no_wavelet__f3/metrics_windows.parquet",
+    "bytes": 82077,
+    "sha256": "05e83c5b68fcbfe7343ff037ccf2543a6c15d4063d11f3f8a08867a5ba880caf"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L5_no_wavelet__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L5_no_wavelet__f4/metrics_windows.parquet",
+    "bytes": 82567,
+    "sha256": "62899f48c298e314e122ce36885e40d2f09f1ba842570f8e10cbe7708ae686cb"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L6_no_ssm__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L6_no_ssm__f0/metrics_windows.parquet",
+    "bytes": 92631,
+    "sha256": "8cb8574d51298e643c59427ba5d7c745bfad56514f1b36abcb0f14f35c9254ab"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L6_no_ssm__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L6_no_ssm__f1/metrics_windows.parquet",
+    "bytes": 84862,
+    "sha256": "f9ccab9c6ebd41c4ad2820998b7c7012e61ac1f755c721bcb174fbb76de8c758"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L6_no_ssm__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L6_no_ssm__f2/metrics_windows.parquet",
+    "bytes": 94111,
+    "sha256": "324e7785382cf7405fc44a0def8fbd1bbebba398c3d1e26305389e0fcb43138b"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L6_no_ssm__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L6_no_ssm__f3/metrics_windows.parquet",
+    "bytes": 82085,
+    "sha256": "fc02fee165eadbaafcc4597f7b656e27794bf52865a46b818a51cad266fa15fb"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L6_no_ssm__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L6_no_ssm__f4/metrics_windows.parquet",
+    "bytes": 82572,
+    "sha256": "5240cdc1deb4eb9d6caeede90d96b7de79ccfc934b40875616d0ecf7655b0c14"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f0/metrics_windows.parquet",
+    "bytes": 92615,
+    "sha256": "2d1c048d1c8eb7cb60d40aa24d90f48f70b7ebeae9ec563c4c8a09f9b458a99a"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f0/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f0/metrics_subjects.parquet",
+    "bytes": 14856,
+    "sha256": "ecd5cbf13ac1769cc8ece699997074d410f03cc7102f32486e90cfb587d3c882"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f0/preds_sample.npz",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f0/preds_sample.npz",
+    "bytes": 1126551,
+    "sha256": "2fb60c79020f9d0ce776ad38edb46906386ea16370e4b9ed475f3722240e9462"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f1/metrics_windows.parquet",
+    "bytes": 86162,
+    "sha256": "6107e986187835b90706c378a8a7085d27cad14f0a66715481e9460650595405"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f1/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f1/metrics_subjects.parquet",
+    "bytes": 14848,
+    "sha256": "067cd146492cd69f31b499ad1472f028f411ce581e4ddce1109a6b2d5ce92650"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f2/metrics_windows.parquet",
+    "bytes": 92682,
+    "sha256": "6dfb40ebf31fcfb22883b38c832af5c9df015d7b0a4df3a314cf802a0cfb62c9"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f2/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f2/metrics_subjects.parquet",
+    "bytes": 14894,
+    "sha256": "3ade5866b072ea422760a374e7de4a406d380b70d0aca6951ec5227e82a705c5"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f3/metrics_windows.parquet",
+    "bytes": 82084,
+    "sha256": "ba1da3165b7a94ace89d0992bc62f0e6841196d9a18896c994624103a90f3e8f"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f3/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f3/metrics_subjects.parquet",
+    "bytes": 14847,
+    "sha256": "42ced81df30b179d110c7042c2eb90448e5594dc0fb7a57882d49595efcd54f7"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f4/metrics_windows.parquet",
+    "bytes": 82593,
+    "sha256": "2e9f651354d7277d140242a42db343250281805b32aa765ff2781523512a37a7"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L7_singletask__f4/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L7_singletask__f4/metrics_subjects.parquet",
+    "bytes": 14838,
+    "sha256": "cbdbbb54ee3840b1c6ad052581f371a3892729fa3780c096587c08736d3ed7bc"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f0/metrics_windows.parquet",
+    "bytes": 92665,
+    "sha256": "6cdcf7dd7f8e70b781b4e7e8ac53f8ef4f19ce0ee368840fdd17e1d4f69922ec"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f0/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f0/metrics_subjects.parquet",
+    "bytes": 14855,
+    "sha256": "0568d5fb6334b26d4072c0b040e71ef6f2ae4df222c0a95a8fb3d7878e6fcd84"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f0/preds_sample.npz",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f0/preds_sample.npz",
+    "bytes": 1122662,
+    "sha256": "d6689fcbfca281c049a0d4625fb5696d01967a20f6b6650f62b2633c8e04bcb2"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f1/metrics_windows.parquet",
+    "bytes": 84830,
+    "sha256": "92c2995b67ba3ae24acd6c115c28828c83e98383896a2b0f2e028529d63d1acd"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f1/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f1/metrics_subjects.parquet",
+    "bytes": 14845,
+    "sha256": "897b05239c5582300a49e2534d2ede2a9f356fc6188402af63be3da175cfef53"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f2/metrics_windows.parquet",
+    "bytes": 92712,
+    "sha256": "4552752c39b11accc17e62ca76161f25caea0bf15b7ba6595dbc32652625e819"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f2/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f2/metrics_subjects.parquet",
+    "bytes": 14893,
+    "sha256": "73334f84fea685c752ace2793041f16158f986e519ba160a9d5b85a593ee2ae9"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f3/metrics_windows.parquet",
+    "bytes": 82112,
+    "sha256": "c99b53c58e018c1d051cf49d4d7845504bdee92cdea5106fa5d4585077063ff8"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f3/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f3/metrics_subjects.parquet",
+    "bytes": 14838,
+    "sha256": "88c980ffae6221504ecfd83b396a62a32e86e74fb054d4dc58db958999a89bd5"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f4/metrics_windows.parquet",
+    "bytes": 82614,
+    "sha256": "1fc0469d45b702a23dea27c1f449f3414900b01552d4fe904a3be44745fea9d8"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L8_no_film__f4/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L8_no_film__f4/metrics_subjects.parquet",
+    "bytes": 14837,
+    "sha256": "9f3dfa6ba049643a27171870a3b1afb9257af068d7051f62d1b025314db80222"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f0/metrics_windows.parquet",
+    "bytes": 94098,
+    "sha256": "b49daebddbbad82fbb81bec2be6ae1d0d8ac2295a2106977bf9388a8819834d9"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f0/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f0/metrics_subjects.parquet",
+    "bytes": 14845,
+    "sha256": "d7e9c414b18763022eb663ffcbc79ba2c508436b0ba46819f84fae5556a28b0e"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f0/preds_sample.npz",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f0/preds_sample.npz",
+    "bytes": 1449530,
+    "sha256": "e5e2df4eb6c540f3d840da2017e840b86a17185a536d5d45dde97c396208e0d8"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f1/metrics_windows.parquet",
+    "bytes": 86159,
+    "sha256": "9dc40087318c92bd8cc1c88cbd2a532e7b4df5a8378ea9f8be39d7ddf1363c22"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f1/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f1/metrics_subjects.parquet",
+    "bytes": 14851,
+    "sha256": "0f25d1235ee89ff1abd4b586dc1894b86b2a8fde8813094b3fff100850332964"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f2/metrics_windows.parquet",
+    "bytes": 92747,
+    "sha256": "af326676bfb29752cbff63fb0e9520544e65ab5e9e69455b4078ca5674801a90"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f2/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f2/metrics_subjects.parquet",
+    "bytes": 14892,
+    "sha256": "56dd6f81e4dff661e7c52fb877bb42d10cdd10b7be64417d9465235f93778dd7"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f3/metrics_windows.parquet",
+    "bytes": 82090,
+    "sha256": "95cb2e8ac78ac9e8219b92894d2d1719328a17064571b97b2bb55b77994189fb"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f3/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f3/metrics_subjects.parquet",
+    "bytes": 14847,
+    "sha256": "b9272fb6246be2242fad95c1025dbe63fded9c38e76a0a47c3f567d00c70cd37"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f4/metrics_windows.parquet",
+    "bytes": 83835,
+    "sha256": "193875aba3723cb6fce6944e3b59ab9443983cb0ff7bf99ab42966dc898be2db"
+  },
+  {
+    "path": "cardiomamba/runs/B_rva__L9_full__f4/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/runs/B_rva__L9_full__f4/metrics_subjects.parquet",
+    "bytes": 14868,
+    "sha256": "04165aebe6100562aedc1cf8148e63b9631ab5483caecba017e99a0b6daafcd6"
+  },
+  {
+    "path": "cardiomamba/crvs_models.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/crvs_models.py",
+    "bytes": 10854,
+    "sha256": "609d214f7b0ab6dc909ca0532501d07f9003d295d936b5fbfd266d8dcbce33ba"
+  },
+  {
+    "path": "cardiomamba/crvs_engine.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/crvs_engine.py",
+    "bytes": 37734,
+    "sha256": "be08192e7a35b36d18a8b54466d7acf6616665df4b41da44fce58d990a6ef4ed"
+  },
+  {
+    "path": "baselines/runs/B_rva__fpn__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__fpn__f0/metrics_windows.parquet",
+    "bytes": 92683,
+    "sha256": "b4a4d61f24041ae1ec5bb8bbeae2beb1d7da7c1c5924a81a6a3665a9cb2c58f6"
+  },
+  {
+    "path": "baselines/runs/B_rva__fpn__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__fpn__f1/metrics_windows.parquet",
+    "bytes": 84813,
+    "sha256": "7bbafb560a50e0bccc43d355b3db24d617c0a09937014cf574c582f6222cdd14"
+  },
+  {
+    "path": "baselines/runs/B_rva__fpn__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__fpn__f2/metrics_windows.parquet",
+    "bytes": 92688,
+    "sha256": "5df9f44c6d25a876f4e029924964119745471252fa7bc2d96c2d50f3b2649dde"
+  },
+  {
+    "path": "baselines/runs/B_rva__fpn__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__fpn__f3/metrics_windows.parquet",
+    "bytes": 82065,
+    "sha256": "23d0659bd841b2c2aa9d1af6c9bdcafd69a8fde9d4d084e6189f72fdc6985b85"
+  },
+  {
+    "path": "baselines/runs/B_rva__fpn__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__fpn__f4/metrics_windows.parquet",
+    "bytes": 82558,
+    "sha256": "6503088fe52e57052a26378d21061f778bf3526d2aad661f88d8f78c7f76dd26"
+  },
+  {
+    "path": "baselines/runs/B_rva__linknet__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__linknet__f0/metrics_windows.parquet",
+    "bytes": 92639,
+    "sha256": "103321f9637046785bbbc575e226cd54cf03efbb1a4bf6411315e35edc27025c"
+  },
+  {
+    "path": "baselines/runs/B_rva__linknet__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__linknet__f1/metrics_windows.parquet",
+    "bytes": 84819,
+    "sha256": "f0ebde1224a08be4fb37834d49e0a8e455920748f1d1482abaef6038bba07b69"
+  },
+  {
+    "path": "baselines/runs/B_rva__linknet__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__linknet__f2/metrics_windows.parquet",
+    "bytes": 92678,
+    "sha256": "ecd67db6d78f360532c36d18261a2ae77dc7d8cfea776127ebf710e8ca924b68"
+  },
+  {
+    "path": "baselines/runs/B_rva__linknet__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__linknet__f3/metrics_windows.parquet",
+    "bytes": 82082,
+    "sha256": "d56f4ed13260988eb619f5299a7adf47be1f0b44af3c725418ba151fe1bf7688"
+  },
+  {
+    "path": "baselines/runs/B_rva__linknet__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__linknet__f4/metrics_windows.parquet",
+    "bytes": 82547,
+    "sha256": "b0837742003468ffc10e7d7682e7ce54fbfe49ea5d74986a706c0739b3cdd7f2"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f0/metrics_windows.parquet",
+    "bytes": 92675,
+    "sha256": "b6529e8d2c80660b4f17aace43fad937465e38f4e9ab42921795c3a43605d9b8"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f0/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f0/metrics_subjects.parquet",
+    "bytes": 14858,
+    "sha256": "b2a85b97d68ac552ec5b78681793c027c72ca25689f2354a07570861bffe0ed4"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f0/preds_sample.npz",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f0/preds_sample.npz",
+    "bytes": 1062624,
+    "sha256": "2bda1635dbd0c9c40d712cdd3e51f3e6e4b3794bd2917edf2d4152f777b4890b"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f1/metrics_windows.parquet",
+    "bytes": 84862,
+    "sha256": "8a1052d596f87096b84313aa6a5aba13fcd84b0c180df4a45cf487fee50d06f6"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f1/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f1/metrics_subjects.parquet",
+    "bytes": 14867,
+    "sha256": "654d0780ef49ba8a232b326437d2b1a66c7514d5165ff13100c3c8037a31634f"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f2/metrics_windows.parquet",
+    "bytes": 92689,
+    "sha256": "1e13d01e2bc9963a35b9087d35d7c7763b9d809a04c3bcaf4e6d1c6c42b2efda"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f2/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f2/metrics_subjects.parquet",
+    "bytes": 14898,
+    "sha256": "f99f24e870039ec2e0ab724e008a203794af4b3bf496889c74eb2887819acf38"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f3/metrics_windows.parquet",
+    "bytes": 82052,
+    "sha256": "fe4bbd5eea8560ba5bd5946691c1e61b2a3a470688f49daa82c2d730252c8621"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f3/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f3/metrics_subjects.parquet",
+    "bytes": 14857,
+    "sha256": "2bf0f6925f25991769f5c27a2f24ccbe33f6266a01907cd3c3a1bd0b14d91d5e"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f4/metrics_windows.parquet",
+    "bytes": 82581,
+    "sha256": "9f0d59a1e21b209803188fc115659db7aa39289e8a070eaa3218b8108d11120c"
+  },
+  {
+    "path": "baselines/runs/B_rva__multireslinknet__f4/metrics_subjects.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__multireslinknet__f4/metrics_subjects.parquet",
+    "bytes": 14866,
+    "sha256": "618e9c3a3c7301348f5fd2dd310d3fb932a5867c5509c05927c443f190d1140c"
+  },
+  {
+    "path": "baselines/runs/B_rva__unet__f0/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__unet__f0/metrics_windows.parquet",
+    "bytes": 92654,
+    "sha256": "09d4aa9b7feaa29371cd0cc498e3f9ed6ba59f1f2e7db989105efde4209467cc"
+  },
+  {
+    "path": "baselines/runs/B_rva__unet__f1/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__unet__f1/metrics_windows.parquet",
+    "bytes": 84853,
+    "sha256": "0cc4bff7a4f070b638b38084ca77bd0a14fa212ddfcb540009fa01c474c7220c"
+  },
+  {
+    "path": "baselines/runs/B_rva__unet__f2/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__unet__f2/metrics_windows.parquet",
+    "bytes": 91146,
+    "sha256": "e49c8a39068d089cd429734e7640e6fcf0b514e410bb5c27d5c80cd64db394f6"
+  },
+  {
+    "path": "baselines/runs/B_rva__unet__f3/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__unet__f3/metrics_windows.parquet",
+    "bytes": 81995,
+    "sha256": "d1a090e2bc5e892135956a51d0592d539b70fe4e9c33eff170dba58659c43508"
+  },
+  {
+    "path": "baselines/runs/B_rva__unet__f4/metrics_windows.parquet",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/runs/B_rva__unet__f4/metrics_windows.parquet",
+    "bytes": 82524,
+    "sha256": "f18b652183200e556ff81580645aa9edca9a055d7b2bac20cca0eac7344900da"
+  },
+  {
+    "path": "baselines/crvs_models.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/crvs_models.py",
+    "bytes": 10854,
+    "sha256": "609d214f7b0ab6dc909ca0532501d07f9003d295d936b5fbfd266d8dcbce33ba"
+  },
+  {
+    "path": "baselines/crvs_engine.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-baselines-v2/resolve/84bf3e7992a33aecacfb30ab860872c620ca7699/crvs_engine.py",
+    "bytes": 26563,
+    "sha256": "c3141f88a429cc90967f193ef445087877f989c6aa4811f4a5dc0044e1160d7e"
+  },
+  {
+    "path": "cardiomamba/crvs_cmnet.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/crvs_cmnet.py",
+    "bytes": 10969,
+    "sha256": "e08c78b3dc6e52337bb3e79913999f0b27a5a4096b8c62658d0065f1c7570c21"
+  },
+  {
+    "path": "cardiomamba/crvs_data.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/crvs_data.py",
+    "bytes": 8843,
+    "sha256": "7a5f62721c54219bd0a4dc69458534d9f1d3b2257f242ef5ec9a1a0b5832ccf4"
+  },
+  {
+    "path": "cardiomamba/crvs_losses.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/crvs_losses.py",
+    "bytes": 3783,
+    "sha256": "eee632a2fee0f10e5e90a3bd5cdad41f33e804e7e57a6f7784047983748b1b16"
+  },
+  {
+    "path": "cardiomamba/crvs_metrics.py",
+    "url": "https://huggingface.co/Shanmuk4622/cardiomamba-net-v2/resolve/dd5764c51031f5d9415ecddbe64ff10ab0d02348/crvs_metrics.py",
+    "bytes": 5224,
+    "sha256": "8d095b7f31c0844e18148e297f787a901b24e43cfcea2b224bcbd4a8d1b61758"
+  },
+  {
+    "path": "inventory/inventory.csv",
+    "url": "https://huggingface.co/datasets/Shanmuk4622/cr-rvs-radar-ecg-inventory-v2/resolve/ef9d72a2dbe5e185644be0c8cd44bb13ab2f3727/inventory.csv",
+    "bytes": 349170,
+    "sha256": "b8424c4029f9c9825026dd155973e2d9b270e8ee78547697468673e16b11a4b0"
+  },
+  {
+    "path": "inventory/run_manifest.json",
+    "url": "https://huggingface.co/datasets/Shanmuk4622/cr-rvs-radar-ecg-inventory-v2/resolve/ef9d72a2dbe5e185644be0c8cd44bb13ab2f3727/run_manifest.json",
+    "bytes": 1321,
+    "sha256": "b57a7b0d2388f4e2bc31217190d4a3a835c7ea932e6851470846b633dd437ae0"
+  }
+]
